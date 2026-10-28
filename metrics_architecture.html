@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<!--
+  DEPLOYMENT VIEW SWITCH
+  data-deployment="off"  ->  Deployment tab is crossed out and cannot be opened
+  data-deployment="on"   ->  Deployment tab works normally
+
+  TECH STACK VIEW SWITCH
+  data-stack="off"  ->  Tech stack tab is crossed out and cannot be opened
+  data-stack="on"   ->  Tech stack tab works normally
+-->
+<html lang="en" data-deployment="off" data-stack="off"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Metrics pipeline architecture</title>
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #ffffff; --panel: #f6f8fa; --ink: #18212b; --muted: #5a6573; --rule: #dde2e8;
+  --edge: #7d8895; --support: #a3acb7;
+  --in: #6b7280;  --in-f: #f3f4f6;
+  --z1: #1f6fd1;  --z1-f: #e9f1fc;
+  --z2: #0f7f68;  --z2-f: #e4f4ef;
+  --z3: #b06d00;  --z3-f: #fcf1dc;
+  --z4: #6d45c9;  --z4-f: #efe9fb;
+  --ai: #c93a55;  --ai-f: #fcebee;
+  --pf: #475260;  --pf-f: #eceff3;
+  --wb: #0b7a91;  --wb-f: #e0f3f7;
+  --k8: #2f62d6;  --k8-f: #e7eefc;
+  --flag: #e0a100;
+  --font: system-ui, -apple-system, "Segoe UI", Arial, "Liberation Sans", sans-serif;
+  --svgfont: Arial, "Liberation Sans", Helvetica, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --panel: #182029; --ink: #e6ebf1; --muted: #9aa6b4; --rule: #2a3440;
+    --edge: #7f8b99; --support: #5c6876;
+    --in: #9ca3af;  --in-f: #1d232b;
+    --z1: #5ea1f2;  --z1-f: #15263b;
+    --z2: #3cc3a3;  --z2-f: #11302a;
+    --z3: #f0aa3a;  --z3-f: #33270f;
+    --z4: #a98bf2;  --z4-f: #261d3d;
+    --ai: #f0738a;  --ai-f: #3a1a22;
+    --pf: #aab4c0;  --pf-f: #1f2730;
+    --wb: #4cc3dc;  --wb-f: #0f2f36;
+    --k8: #7ea2f5;  --k8-f: #172447;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #182029; --ink: #e6ebf1; --muted: #9aa6b4; --rule: #2a3440;
+  --edge: #7f8b99; --support: #5c6876;
+  --in: #9ca3af;  --in-f: #1d232b;
+  --z1: #5ea1f2;  --z1-f: #15263b;
+  --z2: #3cc3a3;  --z2-f: #11302a;
+  --z3: #f0aa3a;  --z3-f: #33270f;
+  --z4: #a98bf2;  --z4-f: #261d3d;
+  --ai: #f0738a;  --ai-f: #3a1a22;
+  --pf: #aab4c0;  --pf-f: #1f2730;
+  --wb: #4cc3dc;  --wb-f: #0f2f36;
+  --k8: #7ea2f5;  --k8-f: #172447;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+.wrap { max-width: 1560px; margin: 0 auto; padding: 28px 24px 40px; }
+header h1 { font-weight: 650; font-size: clamp(1.6rem, 2.6vw, 2.2rem); margin: 0 0 6px; letter-spacing: -0.01em; }
+header p { margin: 0; color: var(--muted); max-width: 76ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 14px; align-items: center; }
+button { font: inherit; font-size: 0.92rem; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+button:hover { border-color: var(--edge); }
+button:focus-visible, .modes input:focus-visible + label { outline: 2px solid var(--z1); outline-offset: 2px; }
+button.primary { background: var(--z1); border-color: var(--z1); color: #fff; font-weight: 500; }
+.js-only { display: none; }
+.has-js .js-only { display: inline-block; }
+.modes { display: inline-flex; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden; }
+.modes input { position: absolute; opacity: 0; pointer-events: none; }
+.modes label { padding: 7px 14px; font-size: 0.92rem; cursor: pointer; background: var(--panel); color: var(--muted); border-right: 1px solid var(--rule); }
+.modes label:last-of-type { border-right: none; }
+.modes input:checked + label { background: var(--ink); color: var(--bg); }
+label.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; color: var(--muted); margin-left: 6px; cursor: pointer; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 20px; align-items: start; }
+.diagram { overflow-x: auto; border: 1px solid var(--rule); border-radius: 14px; background: var(--bg); }
+.diagram svg { display: block; width: 100%; min-width: 980px; height: auto; }
+aside { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 18px 14px; position: sticky; top: env(safe-area-inset-top, 0px); max-height: calc(100vh - 20px); overflow-y: auto; }
+aside h2 { font-size: 1.2rem; margin: 0 0 4px; font-weight: 650; }
+aside h3 { font-size: 1rem; margin: 14px 0 6px; padding-top: 12px; border-top: 1px solid var(--rule); font-weight: 650; }
+aside .kind { font-size: 0.82rem; color: var(--muted); margin: 0 0 10px; }
+aside p { margin: 0 0 10px; font-size: 0.93rem; }
+aside ul { margin: 0 0 10px; padding-left: 18px; font-size: 0.9rem; }
+aside li { margin-bottom: 4px; }
+.status { display: inline-block; font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; margin-bottom: 8px; }
+.status.known, .status.selected { background: var(--z2-f); color: var(--z2); }
+.status.proposed { background: var(--z1-f); color: var(--z1); }
+.status.tbd, .status.open { background: var(--z3-f); color: var(--z3); }
+.status.existing { background: var(--in-f); color: var(--in); }
+.status.k8 { background: var(--k8-f); color: var(--k8); }
+ol.steps { list-style: none; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid var(--rule); }
+ol.steps button { width: 100%; text-align: left; background: transparent; border: none; padding: 5px 6px; border-radius: 6px; font-size: 0.88rem; color: var(--muted); display: flex; gap: 8px; }
+ol.steps button .n { font-weight: 650; min-width: 1.4em; color: var(--ink); }
+ol.steps button[aria-current="step"] { background: var(--bg); color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 0.84rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 34px; height: 12px; }
+.legend .lg-stack { display: none; }
+body:has(#m-stack:checked) .legend .lg-stack { display: inline-flex; }
+
+/* SVG */
+svg text { font-family: var(--svgfont); }
+.zone-label { font-weight: 700; font-size: 14px; }
+.node { cursor: pointer; transition: opacity .25s; }
+.node rect.box { stroke-width: 2; }
+.node:hover rect.box, .node.sel rect.box { stroke-width: 3.5; }
+.node:focus, .node:focus-visible { outline: none; }
+.node:focus-visible rect.box { stroke-width: 4; }
+.node .t { font-weight: 700; font-size: 14px; fill: var(--ink); }
+.node .s { font-size: 11px; fill: var(--muted); }
+.node.pulse rect.box { animation: pulse .7s ease-out; }
+@keyframes pulse { 0% { stroke-width: 6; } 100% { stroke-width: 2; } }
+.edge { fill: none; stroke-width: 2; transition: opacity .25s; }
+.edge.main { stroke: var(--edge); }
+.edge.input { stroke: var(--in); stroke-dasharray: 5 5; }
+.edge.loop { stroke: var(--ai); stroke-dasharray: 8 5; }
+.edge.support { stroke: var(--support); stroke-dasharray: 2 4; }
+body:has(#motion:checked) .edge.main { stroke-dasharray: 7 6; animation: flow 1.1s linear infinite; }
+body:has(#motion:checked) .edge.loop { animation: flow 1.4s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -13; } }
+.dim { opacity: 0.18; }
+.edge-label { font-size: 11px; fill: var(--muted); }
+.pill-t { font-size: 10.5px; font-weight: 700; }
+.stackpill, .pstack, .k8pill, .pk8 { display: none; }
+body:has(#m-stack:checked) .stackpill, body:has(#m-stack:checked) .pstack { display: inline; }
+
+body:has(#m-stack:checked) .haspill .s { display: none; }
+body:has(#m-stack:checked) .ptitle { transform: translateY(-8px); }
+#topo { display: none; }
+body:has(#m-deploy:checked) #svg { display: none; }
+body:has(#m-deploy:checked) #topo { display: block; }
+body:has(#m-deploy:checked) .legend, body:has(#m-deploy:checked) .js-only, body:has(#m-deploy:checked) ol.steps { display: none; }
+.pool-label { font-size: 13px; font-weight: 700; fill: var(--muted); }
+.srv-t { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.pod-t { font-size: 11.5px; font-weight: 700; }
+.flow-label { font-size: 11px; font-weight: 700; fill: var(--muted); }
+.tflow { fill: none; stroke: var(--edge); stroke-width: 2; }
+body:has(#motion:checked) .tflow { stroke-dasharray: 7 6; animation: flow 1.1s linear infinite; }
+.tnode { cursor: pointer; }
+.halo { paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+.tnode:focus { outline: none; }
+.tnode:hover .box, .tnode.sel .box, .tnode:focus-visible .box { stroke-width: 3; }
+.job { opacity: 0; animation: jobcycle 12s ease-in-out infinite; }
+@keyframes jobcycle { 0% { opacity: 0; } 6% { opacity: 1; } 40% { opacity: 1; } 48% { opacity: 0; } 100% { opacity: 0; } }
+body:not(:has(#motion:checked)) .job { animation: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  body:has(#motion:checked) .edge.main, body:has(#motion:checked) .edge.loop { animation: none; }
+  .node.pulse rect.box { animation: none; }
+  .tflow { animation: none !important; }
+  .job { animation: none; opacity: 1; }
+}
+@media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } aside { position: static; max-height: none; } }
+@media print { .controls, aside { display: none; } .layout { display: block; } }
+
+/* Deployment view switch (see data-deployment on the <html> tag) */
+html[data-deployment="off"] label[for="m-deploy"] { text-decoration: line-through; opacity: 0.55; pointer-events: none; cursor: not-allowed; }
+html[data-deployment="off"] label[for="m-deploy"]::after { content: " (TODO)"; text-decoration: none; display: inline-block; margin-left: 4px; font-size: 0.8em; }
+html[data-deployment="off"] #topo { display: none !important; }
+html[data-deployment="off"] body:has(#m-deploy:checked) #svg { display: block !important; }
+/* Tech stack view switch (see data-stack on the <html> tag) */
+html[data-stack="off"] label[for="m-stack"] { text-decoration: line-through; opacity: 0.55; pointer-events: none; cursor: not-allowed; }
+html[data-stack="off"] label[for="m-stack"]::after { content: " (TODO)"; text-decoration: none; display: inline-block; margin-left: 4px; font-size: 0.8em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Metrics pipeline architecture</h1>
+    <p>Defines overview of how data is on-boarded, how data is evaluated, and how metrics are created, collected, and approved. Switch views to see the data flow, the proposed tech stack, or what the deployment looks like on a k8s cluster. Note: Additional information &amp; Lab visit/requirements may change Concept of Operations. </p>
+  </header>
+
+  <div class="controls">
+    <div class="modes" role="radiogroup" aria-label="View">
+      <input type="radio" name="mode" id="m-flow" checked><label for="m-flow">Data flow</label>
+      <input type="radio" name="mode" id="m-stack"><label for="m-stack">Tech stack</label>
+      <input type="radio" name="mode" id="m-deploy"><label for="m-deploy">Deployment</label>
+    </div>
+    <button class="primary js-only" id="play">Play walkthrough</button>
+    <button class="js-only" id="prev">Previous</button>
+    <button class="js-only" id="next">Next</button>
+    <button class="js-only" id="all">Show full architecture</button>
+    <label class="toggle"><input type="checkbox" id="motion"> Animate data flow</label>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="diagram"><svg id="svg" viewBox="0 0 1240 1135" role="img" aria-label="Architecture diagram of the metrics pipeline" style="--force: 1;"><defs><marker id="ar-main" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--edge)"></path></marker><marker id="ar-input" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--in)"></path></marker><marker id="ar-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ai)"></path></marker><marker id="ar-support" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--support)"></path></marker></defs><g><g><rect x="20" y="40" width="200" height="660" rx="16" fill="var(--in-f)" fill-opacity="0.6" stroke="var(--in)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="6 5"></rect><text x="36" y="65" class="zone-label" fill="var(--in)"><tspan x="36" dy="0">Inputs</tspan><tspan x="36" dy="1.2em">(CC process in progress)</tspan></text></g><g><rect x="250" y="40" width="220" height="660" rx="16" fill="var(--z1-f)" fill-opacity="0.6" stroke="var(--z1)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="266" y="65" class="zone-label" fill="var(--z1)"><tspan x="266" dy="0">1  Detect and register</tspan></text></g><g><rect x="500" y="40" width="220" height="660" rx="16" fill="var(--z2-f)" fill-opacity="0.6" stroke="var(--z2)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="516" y="65" class="zone-label" fill="var(--z2)"><tspan x="516" dy="0">2  Identify and standardize</tspan></text></g><g><rect x="750" y="40" width="220" height="660" rx="16" fill="var(--z3-f)" fill-opacity="0.6" stroke="var(--z3)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="766" y="65" class="zone-label" fill="var(--z3)"><tspan x="766" dy="0">3  Score</tspan></text></g><g><rect x="1000" y="40" width="220" height="660" rx="16" fill="var(--z4-f)" fill-opacity="0.6" stroke="var(--z4)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="1016" y="65" class="zone-label" fill="var(--z4)"><tspan x="1016" dy="0">4  Analyze and present</tspan></text></g><g><rect x="250" y="720" width="970" height="120" rx="16" fill="var(--ai-f)" fill-opacity="0.6" stroke="var(--ai)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="266" y="745" class="zone-label" fill="var(--ai)"><tspan x="266" dy="0">AI maintenance loop, every change human-approved</tspan></text></g><g><rect x="250" y="943" width="970" height="177" rx="16" fill="var(--wb-f)" fill-opacity="0.6" stroke="var(--wb)" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="none"></rect><text x="266" y="968" class="zone-label" fill="var(--wb)"><tspan x="266" dy="0">Analyst workbench: explore in notebooks, turn findings into tested metric plugins</tspan></text></g><text x="40" y="560" class="edge-label"><tspan x="40" dy="0"></tspan><tspan x="40" dy="15"></tspan><tspan x="40" dy="15"></tspan></text><rect x="52" y="390" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="408" text-anchor="middle" class="edge-label">Proprietary binaries</text><rect x="52" y="428" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="446" text-anchor="middle" class="edge-label">DIS (IEEE 1278)</text><rect x="52" y="466" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="484" text-anchor="middle" class="edge-label">Packet Captures</text><rect x="52" y="504" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="522" text-anchor="middle" class="edge-label">Audio Recordings</text><rect x="52" y="542" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="560" text-anchor="middle" class="edge-label">Operator Notes</text><rect x="52" y="580" width="136" height="28" rx="14" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="4 3"></rect><text x="120" y="598" text-anchor="middle" class="edge-label">Other formats</text></g><g id="edges"><path d="M120,144 V200" class="edge input" marker-end="url(#ar-input)" data-id="in1"></path><path d="M120,254 V310" class="edge input" marker-end="url(#ar-input)" data-id="in2"></path><path d="M200,337 H235 V117 H270" class="edge main" marker-end="url(#ar-main)" data-id="repo_watch"></path><path d="M360,144 V200" class="edge main" marker-end="url(#ar-main)" data-id="watch_orch"></path><path d="M360,254 V310" class="edge main" marker-end="url(#ar-main)" data-id="orch_reg"></path><path d="M360,364 V420" class="edge main" marker-end="url(#ar-main)" data-id="reg_runlog"></path><path d="M450,227 H478 V117 H520" class="edge main" marker-end="url(#ar-main)" data-id="orch_fp"></path><path d="M610,144 V200" class="edge main" marker-end="url(#ar-main)" data-id="fp_areg"></path><path d="M610,254 V310" class="edge main" marker-end="url(#ar-main)" data-id="areg_adapt"></path><path d="M610,364 V420" class="edge main" marker-end="url(#ar-main)" data-id="adapt_std"></path><path d="M700,460 H770" class="edge main" marker-end="url(#ar-main)" data-id="std_score"></path><path d="M950,117 H976 V452 H950" class="edge main" marker-end="url(#ar-main)" data-id="metlib_score"></path><path d="M950,227 H967 V467 H950" class="edge main" marker-end="url(#ar-main)" data-id="evals_score"></path><path d="M950,337 H958 V482 H950" class="edge main" marker-end="url(#ar-main)" data-id="thr_score"></path><path d="M860,494 V580" class="edge main" marker-end="url(#ar-main)" data-id="score_mstore"></path><path d="M450,460 H478 V672 H860 V634" class="edge main" marker-end="url(#ar-main)" data-id="runlog_mstore"></path><text x="600" y="666" class="edge-label" data-edge="runlog_mstore">run metadata</text><path d="M188,518 H232 V572 H270" class="edge input" marker-end="url(#ar-input)" data-id="audio_voice"></path><path d="M360,545 V474" class="edge main" marker-end="url(#ar-main)" data-id="voice_runlog"></path><path d="M700,100 H735 V422 H800 V440" class="edge main" marker-end="url(#ar-main)" data-id="fp_score"></path><path d="M950,607 H990 V117 H1020" class="edge main" marker-end="url(#ar-main)" data-id="mstore_anom"></path><path d="M1110,144 V200" class="edge main" marker-end="url(#ar-main)" data-id="anom_sum"></path><path d="M1110,254 V310" class="edge main" marker-end="url(#ar-main)" data-id="sum_dash"></path><path d="M1110,364 V440" class="edge main" marker-end="url(#ar-main)" data-id="dash_exec"></path><path d="M1020,337 H1008 V535 H1020" class="edge main" marker-end="url(#ar-main)" data-id="dash_mid"></path><path d="M1020,337 H1008 V605 H1020" class="edge main" marker-end="url(#ar-main)" data-id="dash_snap"></path><path d="M520,130 H490 V792 H450" class="edge loop" marker-end="url(#ar-loop)" data-id="fp_drift"></path><path d="M450,792 H520" class="edge loop" marker-end="url(#ar-loop)" data-id="drift_llm"></path><path d="M700,792 H770" class="edge loop" marker-end="url(#ar-loop)" data-id="llm_golden"></path><path d="M950,792 H1020" class="edge loop" marker-end="url(#ar-loop)" data-id="golden_review"></path><path d="M1110,819 V875" class="edge loop" marker-end="url(#ar-loop)" data-id="review_git"></path><path d="M1200,897 H1228 V24 H860 V90" class="edge loop" marker-end="url(#ar-loop)" data-id="git_metlib"></path><text x="960" y="18" class="edge-label" data-edge="git_metlib">approved changes deploy via Argo CD</text><path d="M1200,897 H1228 V24 H742 V214 H700" class="edge loop" marker-end="url(#ar-loop)" data-id="git_areg"></path><path d="M610,819 V875" class="edge support" marker-end="url(#ar-support)" data-id="llm_srv"></path><path d="M860,819 V875" class="edge support" marker-end="url(#ar-support)" data-id="golden_sets"></path><path d="M200,1017 H270" class="edge main" marker-end="url(#ar-main)" data-id="an_jhub"></path><path d="M360,1044 V1057" class="edge support" marker-end="url(#ar-support)" data-id="jhub_libm"></path><path d="M450,1076 H712 V500 H610 V474" class="edge support" marker-end="url(#ar-support)" data-id="libm_std"></path><path d="M450,1094 H745 V610 H770" class="edge support" marker-end="url(#ar-support)" data-id="libm_mstore"></path><path d="M270,1100 H242 V352 H200" class="edge support" marker-end="url(#ar-support)" data-id="libm_repo"></path><path d="M450,1017 H520" class="edge main" marker-end="url(#ar-main)" data-id="jhub_jai"></path><path d="M610,990 V919" class="edge support" marker-end="url(#ar-support)" data-id="jai_srv"></path><path d="M700,1017 H770" class="edge main" marker-end="url(#ar-main)" data-id="jai_plugin"></path><path d="M950,1017 H1020" class="edge main" marker-end="url(#ar-main)" data-id="plugin_ab"></path><path d="M1200,1017 H1215 V792 H1200" class="edge loop" marker-end="url(#ar-loop)" data-id="ab_review"></path><path d="M1020,337 H1008 V665 H1020" class="edge main" marker-end="url(#ar-main)" data-id="dash_catalog"></path></g><g id="nodes"><g class="node haspill" tabindex="0" role="button" aria-label="Test events: Simulation and live runs" data-id="test"><rect class="box" x="40" y="90" width="160" height="54" rx="10" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="6 4"></rect><text x="54" y="113" class="t" text-anchor="start">Test events</text><text x="54" y="131" class="s">Simulation and live runs</text><g class="stackpill" data-max="144" style=""><rect x="48" y="120" width="119.75967407226562" height="18" rx="9" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="none"></rect><text x="56" y="132.5" class="pill-t" fill="var(--in)">Existing lab systems</text></g></g><g class="node haspill" tabindex="0" role="button" aria-label="Custom ETL: Post Processing like WSMRs" data-id="etl"><rect class="box" x="40" y="200" width="160" height="54" rx="10" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="6 4"></rect><text x="54" y="223" class="t" text-anchor="start">Custom ETL</text><text x="54" y="241" class="s" style="font-size: 10.5px;">Post Processing like WSMRs</text><g class="stackpill" data-max="144" style=""><rect x="48" y="230" width="119.7256851196289" height="18" rx="9" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="none"></rect><text x="56" y="242.5" class="pill-t" fill="var(--in)">Existing custom ETL</text></g></g><g class="node haspill" tabindex="0" role="button" aria-label="Post-processed data: Storage TBD (NFS?)" data-id="repo"><rect class="box" x="40" y="310" width="160" height="54" rx="10" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="6 4"></rect><text x="54" y="333" class="t" text-anchor="start">Post-processed data</text><text x="54" y="351" class="s">Storage TBD (NFS?)</text><g class="stackpill" data-max="144" style=""><rect x="48" y="340" width="132.5235595703125" height="18" rx="9" fill="var(--z3-f)" stroke="var(--flag)" stroke-dasharray="3 2"></rect><text x="56" y="352.5" class="pill-t" fill="var(--z3)">NFS share (to confirm):</text></g></g><g class="node haspill" tabindex="0" role="button" aria-label="Directory watcher: Polls until files settle" data-id="watch"><rect class="box" x="270" y="90" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="284" y="113" class="t" text-anchor="start">Directory watcher</text><text x="284" y="131" class="s">Polls until files settle</text><g class="stackpill" data-max="164" style=""><rect x="278" y="120" width="92.36235809326172" height="18" rx="9" fill="var(--z1-f)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="286" y="132.5" class="pill-t" fill="var(--z1)">Dagster sensor</text></g><circle cx="438" cy="102" r="5" fill="var(--flag)"></circle><circle cx="270" cy="90" r="11" fill="var(--z1)"></circle><text x="270" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Orchestrator: Queues jobs, retries, history" data-id="orch"><rect class="box" x="270" y="200" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="284" y="223" class="t" text-anchor="start">Orchestrator</text><text x="284" y="241" class="s">Queues jobs, retries, history</text><g class="stackpill" data-max="164" style=""><rect x="278" y="230" width="55.05646896362305" height="18" rx="9" fill="var(--z1-f)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="286" y="242.5" class="pill-t" fill="var(--z1)">Dagster</text></g><circle cx="270" cy="200" r="11" fill="var(--z1)"></circle><text x="270" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Dataset registry: ID, path, checksum, status" data-id="reg"><rect class="box" x="270" y="310" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="284" y="333" class="t" text-anchor="start">Dataset registry</text><text x="284" y="351" class="s">ID, path, checksum, status</text><g class="stackpill" data-max="164" style=""><rect x="278" y="340" width="76.60720825195312" height="18" rx="9" fill="var(--z1-f)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="286" y="352.5" class="pill-t" fill="var(--z1)">PostgreSQL</text></g><circle cx="438" cy="322" r="5" fill="var(--flag)"></circle><circle cx="270" cy="310" r="11" fill="var(--z1)"></circle><text x="270" y="314" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Run log: Config, versions, run status" data-id="runlog"><rect class="box" x="270" y="420" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="284" y="443" class="t" text-anchor="start">Run log</text><text x="284" y="461" class="s">Config, versions, run status</text><g class="stackpill" data-max="164" style=""><rect x="278" y="450" width="152.08578491210938" height="18" rx="9" fill="var(--z1-f)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="286" y="462.5" class="pill-t" fill="var(--z1)">Postgres + typed decisions</text></g><circle cx="270" cy="420" r="11" fill="var(--z1)"></circle><text x="270" y="424" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Fingerprinter: Format, vendor, version" data-id="fp"><rect class="box" x="520" y="90" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="534" y="113" class="t" text-anchor="start">Fingerprinter</text><text x="534" y="131" class="s">Format, vendor, version</text><g class="stackpill" data-max="164" style=""><rect x="528" y="120" width="135.76976776123047" height="18" rx="9" fill="var(--z2-f)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="536" y="132.5" class="pill-t" fill="var(--z2)">Rules + typed decisions</text></g><circle cx="688" cy="102" r="5" fill="var(--flag)"></circle><circle cx="520" cy="90" r="11" fill="var(--z2)"></circle><text x="520" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Adapter registry: Versions per vendor schema" data-id="areg"><rect class="box" x="520" y="200" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="534" y="223" class="t" text-anchor="start">Adapter registry</text><text x="534" y="241" class="s">Versions per vendor schema</text><g class="stackpill" data-max="164" style=""><rect x="528" y="230" width="115.64667510986328" height="18" rx="9" fill="var(--z2-f)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="536" y="242.5" class="pill-t" fill="var(--z2)">YAML registry in Git</text></g><circle cx="520" cy="200" r="11" fill="var(--z2)"></circle><text x="520" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Shared readers: Readers for common data" data-id="adapt"><rect class="box" x="520" y="310" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="534" y="333" class="t" text-anchor="start">Shared readers</text><text x="534" y="351" class="s">Readers for common data</text><g class="stackpill" data-max="164" style=""><rect x="528" y="340" width="106.62187957763672" height="18" rx="9" fill="var(--z2-f)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="536" y="352.5" class="pill-t" fill="var(--z2)">Python + PyArrow</text></g><circle cx="688" cy="322" r="5" fill="var(--flag)"></circle><circle cx="520" cy="310" r="11" fill="var(--z2)"></circle><text x="520" y="314" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Common data model: Shared tables" data-id="std"><rect class="box" x="520" y="420" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="534" y="443" class="t" text-anchor="start">Common data model</text><text x="534" y="461" class="s">Shared tables</text><g class="stackpill" data-max="164" style=""><rect x="528" y="450" width="115.05182647705078" height="18" rx="9" fill="var(--z2-f)" stroke="var(--z2)" stroke-dasharray="none"></rect><text x="536" y="462.5" class="pill-t" fill="var(--z2)">Parquet, partitioned</text></g><circle cx="520" cy="420" r="11" fill="var(--z2)"></circle><text x="520" y="424" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Metric library: Every metric is a plugin" data-id="metlib"><rect class="box" x="770" y="90" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="784" y="113" class="t" text-anchor="start">Metric library</text><text x="784" y="131" class="s">Every metric is a plugin</text><g class="stackpill" data-max="164" style=""><rect x="778" y="120" width="126.8469467163086" height="18" rx="9" fill="var(--z3-f)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="786" y="132.5" class="pill-t" fill="var(--z3)">Plugins + YAML specs</text></g><circle cx="770" cy="90" r="11" fill="var(--z3)"></circle><text x="770" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">6</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Eval suites: Tests for metric plugins" data-id="evals"><rect class="box" x="770" y="200" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="784" y="223" class="t" text-anchor="start">Eval suites</text><text x="784" y="241" class="s">Tests for metric plugins</text><g class="stackpill" data-max="164" style=""><rect x="778" y="230" width="117.99210357666016" height="18" rx="9" fill="var(--z3-f)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="786" y="242.5" class="pill-t" fill="var(--z3)">Python eval harness</text></g><circle cx="938" cy="212" r="5" fill="var(--flag)"></circle><circle cx="770" cy="200" r="11" fill="var(--z3)"></circle><text x="770" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">6</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Threshold registry: Pass/fail values, baselines" data-id="thr"><rect class="box" x="770" y="310" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="784" y="333" class="t" text-anchor="start">Threshold registry</text><text x="784" y="351" class="s">Pass/fail values, baselines</text><g class="stackpill" data-max="164" style=""><rect x="778" y="340" width="74.27877426147461" height="18" rx="9" fill="var(--z3-f)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="786" y="352.5" class="pill-t" fill="var(--z3)">YAML in Git</text></g><circle cx="938" cy="322" r="5" fill="var(--flag)"></circle><circle cx="770" cy="310" r="11" fill="var(--z3)"></circle><text x="770" y="314" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">6</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Scoring engine: Runs plugins as job steps" data-id="score"><rect class="box" x="770" y="440" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="784" y="463" class="t" text-anchor="start">Scoring engine</text><text x="784" y="481" class="s">Runs plugins as job steps</text><g class="stackpill" data-max="164" style=""><rect x="778" y="470" width="100.8093032836914" height="18" rx="9" fill="var(--z3-f)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="786" y="482.5" class="pill-t" fill="var(--z3)">DuckDB + Polars</text></g><circle cx="770" cy="440" r="11" fill="var(--z3)"></circle><text x="770" y="444" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Results store: Per-event and per-run results" data-id="mstore"><rect class="box" x="770" y="580" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="784" y="603" class="t" text-anchor="start">Results store</text><text x="784" y="621" class="s">Per-event and per-run results</text><g class="stackpill" data-max="164" style=""><rect x="778" y="610" width="111.87359619140625" height="18" rx="9" fill="var(--z3-f)" stroke="var(--z3)" stroke-dasharray="none"></rect><text x="786" y="622.5" class="pill-t" fill="var(--z3)">Postgres + Parquet</text></g><circle cx="770" cy="580" r="11" fill="var(--z3)"></circle><text x="770" y="584" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">7</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Version comparison: Statistical tests" data-id="anom"><rect class="box" x="1020" y="90" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="113" class="t" text-anchor="start">Version comparison</text><text x="1034" y="131" class="s">Statistical tests</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="120" width="119.45375061035156" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="132.5" class="pill-t" fill="var(--z4)">Python + SciPy stats</text></g><circle cx="1020" cy="90" r="11" fill="var(--z4)"></circle><text x="1020" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">8</text></g><g class="node haspill" tabindex="0" role="button" aria-label="AI answers: Questions and summaries" data-id="sum"><rect class="box" x="1020" y="200" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="223" class="t" text-anchor="start">AI answers</text><text x="1034" y="241" class="s">Questions and summaries</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="230" width="99.61959075927734" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="242.5" class="pill-t" fill="var(--z4)">vLLM + pgvector</text></g><circle cx="1020" cy="200" r="11" fill="var(--z4)"></circle><text x="1020" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">8</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Dashboard generator: Builds the web views" data-id="dash"><rect class="box" x="1020" y="310" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="333" class="t" text-anchor="start">Dashboard generator</text><text x="1034" y="351" class="s">Builds the web views</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="340" width="62.05875778198242" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="352.5" class="pill-t" fill="var(--z4)">Evidence</text></g><circle cx="1020" cy="310" r="11" fill="var(--z4)"></circle><text x="1020" y="314" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">9</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Metric explorer: View the results" data-id="exec"><rect class="box" x="1020" y="440" width="180" height="50" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="463" class="t" text-anchor="start">Metric explorer</text><text x="1034" y="481" class="s">View the results</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="470" width="95.2686538696289" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="482.5" class="pill-t" fill="var(--z4)">Evidence pages</text></g><circle cx="1020" cy="440" r="11" fill="var(--z4)"></circle><text x="1020" y="444" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">9</text></g><g class="node haspill" tabindex="0" role="button" aria-label="High-level Summary: Curated KPPs and KPIs" data-id="mid"><rect class="box" x="1020" y="510" width="180" height="50" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="533" class="t" text-anchor="start">High-level Summary</text><text x="1034" y="551" class="s">Curated KPPs and KPIs</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="540" width="76.5902099609375" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="552.5" class="pill-t" fill="var(--z4)">Static HTML</text></g><circle cx="1020" cy="510" r="11" fill="var(--z4)"></circle><text x="1020" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">9</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Snapshot export: HTML and PDF exports" data-id="snap"><rect class="box" x="1020" y="580" width="180" height="50" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="603" class="t" text-anchor="start">Snapshot export</text><text x="1034" y="621" class="s">HTML and PDF exports</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="610" width="112.82537078857422" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="622.5" class="pill-t" fill="var(--z4)">HTML + PDF export</text></g><circle cx="1020" cy="580" r="11" fill="var(--z4)"></circle><text x="1020" y="584" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">9</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Change alert: New format or schema" data-id="drift"><rect class="box" x="270" y="765" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="284" y="788" class="t" text-anchor="start">Change alert</text><text x="284" y="806" class="s">New format or schema</text><g class="stackpill" data-max="164" style=""><rect x="278" y="795" width="128.7844696044922" height="18" rx="9" fill="var(--ai-f)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="286" y="807.5" class="pill-t" fill="var(--ai)">Pandera + typed triage</text></g><circle cx="270" cy="765" r="11" fill="var(--ai)"></circle><text x="270" y="769" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">10</text></g><g class="node haspill" tabindex="0" role="button" aria-label="AI drafts the change: Reader, plugin, or threshold" data-id="llm"><rect class="box" x="520" y="765" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="534" y="788" class="t" text-anchor="start">AI drafts the change</text><text x="534" y="806" class="s">Reader, plugin, or threshold</text><g class="stackpill" data-max="164" style=""><rect x="528" y="795" width="143.6048583984375" height="18" rx="9" fill="var(--ai-f)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="536" y="807.5" class="pill-t" fill="var(--ai)">Open-weight coder, vLLM</text></g><circle cx="520" cy="765" r="11" fill="var(--ai)"></circle><text x="520" y="769" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">10</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Golden dataset tests: Re-run known-good data" data-id="golden"><rect class="box" x="770" y="765" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="784" y="788" class="t" text-anchor="start">Golden dataset tests</text><text x="784" y="806" class="s">Re-run known-good data</text><g class="stackpill" data-max="164" style=""><rect x="778" y="795" width="117.6861801147461" height="18" rx="9" fill="var(--ai-f)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="786" y="807.5" class="pill-t" fill="var(--ai)">pytest + golden data</text></g><circle cx="770" cy="765" r="11" fill="var(--ai)"></circle><text x="770" y="769" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">10</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Human review: Guarding against incorrect plugins" data-id="review"><rect class="box" x="1020" y="765" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="1034" y="788" class="t" text-anchor="start">Human review</text><text x="1034" y="806" class="s" style="font-size: 10.3px;">Guarding against incorrect plugins</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="795" width="135.76976776123047" height="18" rx="9" fill="var(--ai-f)" stroke="var(--ai)" stroke-dasharray="none"></rect><text x="1036" y="807.5" class="pill-t" fill="var(--ai)">GitLab MRs + risk score</text></g><circle cx="1020" cy="765" r="11" fill="var(--ai)"></circle><text x="1020" y="769" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">10</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Air-gap packaging: Platform" data-id="pack"><rect class="box" x="40" y="875" width="180" height="44" rx="22" fill="var(--pf-f)" stroke="var(--pf)" stroke-dasharray="none"></rect><text x="130" y="902" class="t ptitle" text-anchor="middle">Air-gap packaging</text><text x="130" y="909" class="pstack pill-t" text-anchor="middle" fill="var(--pf)">Zarf + Harbor</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Observability: Platform" data-id="obs"><rect class="box" x="270" y="875" width="180" height="44" rx="22" fill="var(--pf-f)" stroke="var(--pf)" stroke-dasharray="none"></rect><text x="360" y="902" class="t ptitle" text-anchor="middle">Observability</text><text x="360" y="909" class="pstack pill-t" text-anchor="middle" fill="var(--pf)">Prometheus + Grafana</text></g><g class="node haspill" tabindex="0" role="button" aria-label="AI gateway + model: Platform" data-id="llmsrv"><rect class="box" x="520" y="875" width="180" height="44" rx="22" fill="var(--pf-f)" stroke="var(--pf)" stroke-dasharray="none"></rect><text x="610" y="902" class="t ptitle" text-anchor="middle">AI gateway + model</text><text x="610" y="909" class="pstack pill-t" text-anchor="middle" fill="var(--pf)">LiteLLM + vLLM</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Golden datasets: Platform" data-id="goldsets"><rect class="box" x="770" y="875" width="180" height="44" rx="22" fill="var(--pf-f)" stroke="var(--pf)" stroke-dasharray="none"></rect><text x="860" y="902" class="t ptitle" text-anchor="middle">Golden datasets</text><text x="860" y="909" class="pstack pill-t" text-anchor="middle" fill="var(--pf)">Versioned on NFS</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Git repository: Platform" data-id="git"><rect class="box" x="1020" y="875" width="180" height="44" rx="22" fill="var(--pf-f)" stroke="var(--pf)" stroke-dasharray="none"></rect><text x="1110" y="902" class="t ptitle" text-anchor="middle">Git repository</text><text x="1110" y="909" class="pstack pill-t" text-anchor="middle" fill="var(--pf)">GitLab (self-hosted)</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Voice notes to text: New approach to TC notes" data-id="voice"><rect class="box" x="270" y="545" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="284" y="568" class="t" text-anchor="start">Voice notes to text</text><text x="284" y="586" class="s">New approach to TC notes</text><g class="stackpill" data-max="164" style=""><rect x="278" y="575" width="138.94799041748047" height="18" rx="9" fill="var(--z1-f)" stroke="var(--z1)" stroke-dasharray="none"></rect><text x="286" y="587.5" class="pill-t" fill="var(--z1)">Whisper (faster-whisper)</text></g><circle cx="270" cy="545" r="11" fill="var(--z1)"></circle><text x="270" y="549" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Metric catalog: Browse existing metrics" data-id="catalog"><rect class="box" x="1020" y="640" width="180" height="50" rx="10" fill="var(--bg)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1034" y="663" class="t" text-anchor="start">Metric catalog</text><text x="1034" y="681" class="s">Browse existing metrics</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="670" width="133.13540649414062" height="18" rx="9" fill="var(--z4-f)" stroke="var(--z4)" stroke-dasharray="none"></rect><text x="1036" y="682.5" class="pill-t" fill="var(--z4)">Evidence page from Git</text></g><circle cx="1020" cy="640" r="11" fill="var(--z4)"></circle><text x="1020" y="644" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">14</text></g><g class="node" tabindex="0" role="button" aria-label="Joint analysis team: People" data-id="analysts"><rect class="box" x="40" y="990" width="160" height="54" rx="10" fill="var(--bg)" stroke="var(--in)" stroke-dasharray="6 4"></rect><text x="54" y="1013" class="t" text-anchor="start">Joint analysis team</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Analyst tools: Jupyter, MATLAB, IDEs" data-id="jhub"><rect class="box" x="270" y="990" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="284" y="1013" class="t" text-anchor="start">Analyst tools</text><text x="284" y="1031" class="s">Jupyter, MATLAB, IDEs</text><g class="stackpill" data-max="164" style=""><rect x="278" y="1020" width="126.42205047607422" height="18" rx="9" fill="var(--wb-f)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="286" y="1032.5" class="pill-t" fill="var(--wb)">JupyterHub + desktop</text></g><circle cx="270" cy="990" r="11" fill="var(--wb)"></circle><text x="270" y="994" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">11</text></g><g class="node haspill" tabindex="0" role="button" aria-label="labmetrics libraries: Python, MATLAB, Java, C++" data-id="libm"><rect class="box" x="270" y="1057" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="284" y="1080" class="t" text-anchor="start">labmetrics libraries</text><text x="284" y="1098" class="s">Python, MATLAB, Java, C++</text><g class="stackpill" data-max="164" style=""><rect x="278" y="1087" width="131.38483428955078" height="18" rx="9" fill="var(--wb-f)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="286" y="1099.5" class="pill-t" fill="var(--wb)">Starting in 4 languages</text></g><circle cx="270" cy="1057" r="11" fill="var(--wb)"></circle><text x="270" y="1061" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">11</text></g><g class="node haspill" tabindex="0" role="button" aria-label="AI in your tools: Notebooks, IDEs, chat" data-id="jai"><rect class="box" x="520" y="990" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="534" y="1013" class="t" text-anchor="start">AI in your tools</text><text x="534" y="1031" class="s">Notebooks, IDEs, chat</text><g class="stackpill" data-max="164" style=""><rect x="528" y="1020" width="145.54238891601562" height="18" rx="9" fill="var(--wb-f)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="536" y="1032.5" class="pill-t" fill="var(--wb)">Jupyter AI, Continue, chat</text></g><circle cx="520" cy="990" r="11" fill="var(--wb)"></circle><text x="520" y="994" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">12</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Metric plugin + evals: Any language, with checks" data-id="plugin"><rect class="box" x="770" y="990" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="784" y="1013" class="t" text-anchor="start">Metric plugin + evals</text><text x="784" y="1031" class="s">Any language, with checks</text><g class="stackpill" data-max="164" style=""><rect x="778" y="1020" width="115.35774993896484" height="18" rx="9" fill="var(--wb-f)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="786" y="1032.5" class="pill-t" fill="var(--wb)">pluggy + containers</text></g><circle cx="770" cy="990" r="11" fill="var(--wb)"></circle><text x="770" y="994" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">12</text></g><g class="node haspill" tabindex="0" role="button" aria-label="Evals + A/B check: Old vs new on past data" data-id="ab"><rect class="box" x="1020" y="990" width="180" height="54" rx="10" fill="var(--bg)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="1034" y="1013" class="t" text-anchor="start">Evals + A/B check</text><text x="1034" y="1031" class="s">Old vs new on past data</text><g class="stackpill" data-max="164" style=""><rect x="1028" y="1020" width="109.73212432861328" height="18" rx="9" fill="var(--wb-f)" stroke="var(--wb)" stroke-dasharray="none"></rect><text x="1036" y="1032.5" class="pill-t" fill="var(--wb)">pytest + A/B report</text></g><circle cx="1020" cy="990" r="11" fill="var(--wb)"></circle><text x="1020" y="994" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">13</text></g></g><g id="packets"></g></svg><svg id="topo" viewBox="0 0 1240 985" role="img" aria-label="Deployment view of the metrics platform on Kubernetes">
+<defs><marker id="ta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--edge)"/></marker></defs>
+<rect x="232" y="120" width="990" height="855" rx="18" fill="var(--k8-f)" fill-opacity="0.45" stroke="var(--k8)" stroke-width="2"/>
+<text x="252" y="146" class="zone-label" text-anchor="start" fill="var(--k8)" >Kubernetes cluster on lab servers (distribution to confirm)</text>
+<text x="1202" y="146" class="edge-label" text-anchor="end" >3 small control-plane servers run Kubernetes itself</text>
+<rect x="244" y="160" width="966" height="220" rx="12" fill="var(--bg)" fill-opacity="0.7" stroke="var(--rule)"/>
+<rect x="244" y="392" width="966" height="222" rx="12" fill="var(--bg)" fill-opacity="0.7" stroke="var(--rule)"/>
+<rect x="244" y="626" width="966" height="148" rx="12" fill="var(--bg)" fill-opacity="0.7" stroke="var(--rule)"/>
+<rect x="244" y="786" width="966" height="178" rx="12" fill="var(--bg)" fill-opacity="0.7" stroke="var(--rule)"/>
+<g class="tnode" tabindex="0" role="button" data-tid="gen" aria-label="Server g1">
+<rect x="256" y="190" width="304" height="180" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="520" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="529" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="538" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="runlog" aria-label="Run-log form">
+<rect x="268" y="228" width="138" height="28" rx="7" fill="var(--z4-f)" stroke="var(--z4)" stroke-width="1.5" class="box"/>
+<text x="278" y="246.5" class="pod-t" text-anchor="start" fill="var(--z4)" >Run-log form</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="pg" aria-label="PostgreSQL (primary)">
+<rect x="414" y="228" width="138" height="28" rx="7" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5" class="box"/>
+<text x="424" y="246.5" class="pod-t" text-anchor="start" fill="var(--z3)" >PostgreSQL (primary)</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="daemon" aria-label="Dagster daemon">
+<rect x="268" y="268" width="138" height="28" rx="7" fill="var(--z1-f)" stroke="var(--z1)" stroke-width="1.5" class="box"/>
+<text x="278" y="286.5" class="pod-t" text-anchor="start" fill="var(--z1)" >Dagster daemon</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="dagweb" aria-label="Dagster web UI">
+<rect x="414" y="268" width="138" height="28" rx="7" fill="var(--z1-f)" stroke="var(--z1)" stroke-width="1.5" class="box"/>
+<text x="424" y="286.5" class="pod-t" text-anchor="start" fill="var(--z1)" >Dagster web UI</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="gen" aria-label="Server g2">
+<rect x="576" y="190" width="304" height="180" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="840" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="849" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="858" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="gitlab" aria-label="GitLab">
+<rect x="588" y="228" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="598" y="246.5" class="pod-t" text-anchor="start" fill="var(--pf)" >GitLab</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="web" aria-label="Metric pages (web)">
+<rect x="734" y="228" width="138" height="28" rx="7" fill="var(--z4-f)" stroke="var(--z4)" stroke-width="1.5" class="box"/>
+<text x="744" y="246.5" class="pod-t" text-anchor="start" fill="var(--z4)" >Metric pages (web)</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="runner" aria-label="GitLab Runner">
+<rect x="588" y="268" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="598" y="286.5" class="pod-t" text-anchor="start" fill="var(--pf)" >GitLab Runner</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="pg" aria-label="PostgreSQL (replica)">
+<rect x="734" y="268" width="138" height="28" rx="7" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5" class="box"/>
+<text x="744" y="286.5" class="pod-t" text-anchor="start" fill="var(--z3)" >PostgreSQL (replica)</text>
+</g>
+<text x="588" y="330" class="edge-label" text-anchor="start" >Long-running pods, restarted</text>
+<text x="588" y="345" class="edge-label" text-anchor="start" >automatically if they fail</text>
+<g class="tnode" tabindex="0" role="button" data-tid="gen" aria-label="Server g3">
+<rect x="896" y="190" width="304" height="180" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="1160" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1169" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1178" y="199" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="ingress" aria-label="Ingress + certificates">
+<rect x="908" y="228" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="918" y="246.5" class="pod-t" text-anchor="start" fill="var(--pf)" >Ingress + certificates</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="harbor" aria-label="Harbor registry">
+<rect x="1054" y="228" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="1064" y="246.5" class="pod-t" text-anchor="start" fill="var(--pf)" >Harbor registry</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="argocd" aria-label="Argo CD">
+<rect x="908" y="268" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="918" y="286.5" class="pod-t" text-anchor="start" fill="var(--pf)" >Argo CD</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="mon" aria-label="Monitoring">
+<rect x="1054" y="268" width="138" height="28" rx="7" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5" class="box"/>
+<text x="1064" y="286.5" class="pod-t" text-anchor="start" fill="var(--pf)" >Monitoring</text>
+</g>
+<text x="908" y="330" class="edge-label" text-anchor="start" >Long-running pods, restarted</text>
+<text x="908" y="345" class="edge-label" text-anchor="start" >automatically if they fail</text>
+<g class="tnode" tabindex="0" role="button" data-tid="mem" aria-label="Server m1 (64 cores, 512 GB RAM)">
+<rect x="256" y="422" width="466" height="180" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="682" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="691" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="700" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<rect x="268" y="456" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:0s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: adapter ds-1042">
+<rect x="268" y="456" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="278" y="475.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: adapter ds-1042</text>
+</g>
+</g>
+<rect x="492" y="456" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:3s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: scoring ds-1039">
+<rect x="492" y="456" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="502" y="475.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: scoring ds-1039</text>
+</g>
+</g>
+<rect x="268" y="496" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:6s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: DIS decode ds-1042">
+<rect x="268" y="496" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="278" y="515.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: DIS decode ds-1042</text>
+</g>
+</g>
+<rect x="492" y="496" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:9s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: fingerprint ds-1045">
+<rect x="492" y="496" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="502" y="515.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: fingerprint ds-1045</text>
+</g>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="nvme" aria-label="Local NVMe scratch">
+<rect x="268" y="540" width="440" height="26" rx="6" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.2" class="box"/>
+<text x="278" y="557" class="pod-t" text-anchor="start" fill="var(--pf)" >Local NVMe scratch disk: spill space for big jobs</text>
+</g>
+<text x="268" y="588" class="edge-label" text-anchor="start" >Empty dashed slots are free capacity for more datasets</text>
+<g class="tnode" tabindex="0" role="button" data-tid="mem" aria-label="Server m2 (64 cores, 512 GB RAM)">
+<rect x="738" y="422" width="466" height="180" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="1164" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1173" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1182" y="431" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<rect x="750" y="456" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:1.5s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: adapter ds-1044">
+<rect x="750" y="456" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="760" y="475.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: adapter ds-1044</text>
+</g>
+</g>
+<rect x="974" y="456" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:4.5s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: scoring ds-1042">
+<rect x="974" y="456" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="984" y="475.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: scoring ds-1042</text>
+</g>
+</g>
+<rect x="750" y="496" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:7.5s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: golden tests (CI)">
+<rect x="750" y="496" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="760" y="515.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: golden tests (CI)</text>
+</g>
+</g>
+<rect x="974" y="496" width="216" height="30" rx="7" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+<g class="job" style="animation-delay:10.5s">
+<g class="pod tnode" tabindex="0" role="button" data-tid="job" aria-label="Job: summary ds-1039">
+<rect x="974" y="496" width="216" height="30" rx="7" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5" class="box"/>
+<text x="984" y="515.5" class="pod-t" text-anchor="start" fill="var(--z2)" >Job: summary ds-1039</text>
+</g>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="nvme" aria-label="Local NVMe scratch">
+<rect x="750" y="540" width="440" height="26" rx="6" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.2" class="box"/>
+<text x="760" y="557" class="pod-t" text-anchor="start" fill="var(--pf)" >Local NVMe scratch disk: spill space for big jobs</text>
+</g>
+<text x="750" y="588" class="edge-label" text-anchor="start" >Empty dashed slots are free capacity for more datasets</text>
+<g class="tnode" tabindex="0" role="button" data-tid="gpu" aria-label="Server gpu1 (2 x 80 GB GPUs)">
+<rect x="738" y="650" width="466" height="112" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="1164" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1173" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="1182" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="vllm" aria-label="vLLM model server">
+<rect x="750" y="688" width="216" height="28" rx="7" fill="var(--ai-f)" stroke="var(--ai)" stroke-width="1.5" class="box"/>
+<text x="760" y="706.5" class="pod-t" text-anchor="start" fill="var(--ai)" >vLLM model server</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="gpu" aria-label="GPU">
+<rect x="980" y="688" width="100" height="28" rx="7" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="3 2" class="box"/>
+<text x="990" y="706.5" class="pod-t" text-anchor="start" fill="var(--ai)" >GPU 0</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="gpu" aria-label="GPU">
+<rect x="1088" y="688" width="100" height="28" rx="7" fill="var(--bg)" stroke="var(--ai)" stroke-dasharray="3 2" class="box"/>
+<text x="1098" y="706.5" class="pod-t" text-anchor="start" fill="var(--ai)" >GPU 1</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="gateway" aria-label="AI gateway (sign-in, logs)">
+<rect x="750" y="724" width="216" height="28" rx="7" fill="var(--ai-f)" stroke="var(--ai)" stroke-width="1.5" class="box"/>
+<text x="760" y="742.5" class="pod-t" text-anchor="start" fill="var(--ai)" >AI gateway (sign-in, logs)</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="whisper" aria-label="Speech-to-text jobs">
+<rect x="980" y="724" width="208" height="28" rx="7" fill="var(--ai-f)" stroke="var(--ai)" stroke-width="1.5" class="box"/>
+<text x="990" y="742.5" class="pod-t" text-anchor="start" fill="var(--ai)" >Speech-to-text jobs</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="nbsrv" aria-label="Server n1">
+<rect x="505" y="650" width="215" height="112" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-opacity="0.55" stroke-width="1.5" class="box"/>
+<rect x="680" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="689" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+<rect x="698" y="659" width="5" height="12" rx="1.5" fill="var(--muted)" opacity="0.5"/>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="jhub" aria-label="JupyterHub">
+<rect x="517" y="688" width="191" height="28" rx="7" fill="var(--wb-f)" stroke="var(--wb)" stroke-width="1.5" class="box"/>
+<text x="527" y="706.5" class="pod-t" text-anchor="start" fill="var(--wb)" >JupyterHub</text>
+</g>
+<g class="pod tnode" tabindex="0" role="button" data-tid="nbpods" aria-label="Notebooks, one per analyst">
+<rect x="517" y="724" width="191" height="28" rx="7" fill="var(--wb-f)" stroke="var(--wb)" stroke-width="1.5" class="box"/>
+<text x="527" y="742.5" class="pod-t" text-anchor="start" fill="var(--wb)" >Notebooks, one per analyst</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="nfsmount" aria-label="Lab data (NFS)">
+<path class="box" d="M256,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="326.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="326.0" y="884" class="srv-t" text-anchor="middle" >Lab data (NFS)</text>
+<text x="326.0" y="902" class="edge-label" text-anchor="middle" >read-only mount</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="stdvol" aria-label="Standardized data">
+<path class="box" d="M416,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="486.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="486.0" y="884" class="srv-t" text-anchor="middle" >Standardized data</text>
+<text x="486.0" y="902" class="edge-label" text-anchor="middle" >Parquet, shared</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="dbvol" aria-label="Database disks">
+<path class="box" d="M576,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="646.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="646.0" y="884" class="srv-t" text-anchor="middle" >Database disks</text>
+<text x="646.0" y="902" class="edge-label" text-anchor="middle" >PostgreSQL</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="goldvol" aria-label="Golden datasets">
+<path class="box" d="M736,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="806.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="806.0" y="884" class="srv-t" text-anchor="middle" >Golden datasets</text>
+<text x="806.0" y="902" class="edge-label" text-anchor="middle" >reference data</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="weights" aria-label="Model weights">
+<path class="box" d="M896,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="966.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="966.0" y="884" class="srv-t" text-anchor="middle" >Model weights</text>
+<text x="966.0" y="902" class="edge-label" text-anchor="middle" >read-only</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="sitevol" aria-label="Published pages">
+<path class="box" d="M1056,834 a70.0,12 0 0,1 140,0 v96 a70.0,12 0 0,1 -140,0 z" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<ellipse cx="1126.0" cy="834" rx="70.0" ry="12" fill="var(--bg)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="1126.0" y="884" class="srv-t" text-anchor="middle" >Published pages</text>
+<text x="1126.0" y="902" class="edge-label" text-anchor="middle" >static site</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_cond" aria-label="Test conductors">
+<rect x="268" y="22" width="140" height="52" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="338.0" y="45" class="srv-t" text-anchor="middle" >Test conductors</text>
+<text x="338.0" y="62" class="edge-label" text-anchor="middle" >confirm run logs</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_owner" aria-label="Lab owners">
+<rect x="588" y="22" width="140" height="52" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="658.0" y="45" class="srv-t" text-anchor="middle" >Lab owners</text>
+<text x="658.0" y="62" class="edge-label" text-anchor="middle" >review AI changes</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_mgr" aria-label="Engineers, analysts">
+<rect x="840" y="22" width="160" height="52" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="920.0" y="45" class="srv-t" text-anchor="middle" >Engineers, analysts</text>
+<text x="920.0" y="62" class="edge-label" text-anchor="middle" >metrics and notebooks</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_airgap" aria-label="Air-gap transfer">
+<rect x="1040" y="22" width="170" height="52" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="1125.0" y="45" class="srv-t" text-anchor="middle" >Air-gap transfer</text>
+<text x="1125.0" y="62" class="edge-label" text-anchor="middle" >approved media</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_etl" aria-label="Existing custom ETL">
+<rect x="24" y="700" width="190" height="56" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="119.0" y="723" class="srv-t" text-anchor="middle" >Existing custom ETL</text>
+<text x="119.0" y="740" class="edge-label" text-anchor="middle" >harvest, copy, process</text>
+</g>
+<g class="tnode" tabindex="0" role="button" data-tid="u_nfs" aria-label="Lab NFS share">
+<rect x="24" y="852" width="190" height="56" rx="10" fill="var(--in-f)" stroke="var(--in)" stroke-dasharray="6 4" stroke-width="1.5" class="box"/>
+<text x="119.0" y="875" class="srv-t" text-anchor="middle" >Lab NFS share</text>
+<text x="119.0" y="892" class="edge-label" text-anchor="middle" >post-processed data</text>
+</g>
+<text x="24" y="196" class="pool-label" text-anchor="start" >Pod colors by namespace</text>
+<rect x="24" y="210" width="22" height="18" rx="5" fill="var(--wb-f)" stroke="var(--wb)" stroke-width="1.5"/>
+<text x="54" y="224" class="edge-label" text-anchor="start" >Analyst notebooks</text>
+<rect x="24" y="240" width="22" height="18" rx="5" fill="var(--z1-f)" stroke="var(--z1)" stroke-width="1.5"/>
+<text x="54" y="254" class="edge-label" text-anchor="start" >Orchestration</text>
+<rect x="24" y="270" width="22" height="18" rx="5" fill="var(--z2-f)" stroke="var(--z2)" stroke-width="1.5"/>
+<text x="54" y="284" class="edge-label" text-anchor="start" >Processing jobs</text>
+<rect x="24" y="300" width="22" height="18" rx="5" fill="var(--z3-f)" stroke="var(--z3)" stroke-width="1.5"/>
+<text x="54" y="314" class="edge-label" text-anchor="start" >Data and storage</text>
+<rect x="24" y="330" width="22" height="18" rx="5" fill="var(--ai-f)" stroke="var(--ai)" stroke-width="1.5"/>
+<text x="54" y="344" class="edge-label" text-anchor="start" >Local AI</text>
+<rect x="24" y="360" width="22" height="18" rx="5" fill="var(--z4-f)" stroke="var(--z4)" stroke-width="1.5"/>
+<text x="54" y="374" class="edge-label" text-anchor="start" >Web pages</text>
+<rect x="24" y="390" width="22" height="18" rx="5" fill="var(--pf-f)" stroke="var(--pf)" stroke-width="1.5"/>
+<text x="54" y="404" class="edge-label" text-anchor="start" >Platform services</text>
+<g id="tflows">
+<path class="tflow" d="M338,74 V228" marker-end="url(#ta)"/>
+<path class="tflow" d="M658,74 V228" marker-end="url(#ta)"/>
+<path class="tflow" d="M920,74 V228" marker-end="url(#ta)"/>
+<path class="tflow" d="M1125,74 V228" marker-end="url(#ta)"/>
+<path class="tflow" d="M908,242 H872" marker-end="url(#ta)"/>
+<path class="tflow" d="M119,756 V852" marker-end="url(#ta)"/>
+<path class="tflow" d="M214,880 H256" marker-end="url(#ta)"/>
+<path class="tflow" d="M326,822 V602" marker-end="url(#ta)"/>
+<path class="tflow" d="M486,602 V822" marker-end="url(#ta)"/>
+<path class="tflow" d="M395,296 V456" marker-end="url(#ta)"/>
+<path class="tflow" d="M1100,602 V650" marker-end="url(#ta)"/>
+<path class="tflow" d="M970,762 V822" marker-end="url(#ta)"/>
+</g>
+<text x="938" y="100" class="flow-label halo" text-anchor="start" >HTTPS</text>
+<text x="402" y="385" class="flow-label halo" text-anchor="start" >launches Job pods</text>
+<text x="128" y="810" class="flow-label halo" text-anchor="start" >writes</text>
+<text x="332" y="715" class="flow-label halo" text-anchor="start" >read in place</text>
+<text x="492" y="800" class="flow-label halo" text-anchor="start" >writes Parquet</text>
+<text x="1106" y="630" class="flow-label halo" text-anchor="start" >AI calls</text>
+<text x="974" y="795" class="flow-label halo" text-anchor="start" >loads model</text>
+<text x="1129" y="100" class="flow-label halo" text-anchor="start" >images in</text>
+<text x="258" y="180" class="pool-label halo">General pool: always-on services</text>
+<text x="258" y="412" class="pool-label halo">High-memory pool: per-dataset jobs appear, run, and disappear</text>
+<text x="258" y="646" class="pool-label halo">Notebook and GPU pools: analyst notebooks and the local AI model</text>
+<text x="258" y="806" class="pool-label halo">Storage: persistent volumes</text>
+<text x="268" y="210" class="srv-t halo">Server g1</text>
+<text x="588" y="210" class="srv-t halo">Server g2</text>
+<text x="908" y="210" class="srv-t halo">Server g3</text>
+<text x="268" y="442" class="srv-t halo">Server m1</text>
+<text x="672" y="442" class="edge-label halo" text-anchor="end">64 cores, 512 GB RAM</text>
+<text x="750" y="442" class="srv-t halo">Server m2</text>
+<text x="1154" y="442" class="edge-label halo" text-anchor="end">64 cores, 512 GB RAM</text>
+<text x="750" y="670" class="srv-t halo">Server gpu1</text>
+<text x="1154" y="670" class="edge-label halo" text-anchor="end">2 x 80 GB GPUs</text>
+<text x="517" y="670" class="srv-t halo">Server n1</text>
+</svg></div>
+      <div class="legend">
+        <span><svg viewBox="0 0 34 12"><line x1="0" y1="6" x2="34" y2="6" stroke="var(--edge)" stroke-width="2"></line></svg>Data flow</span>
+        <span><svg viewBox="0 0 34 12"><line x1="0" y1="6" x2="34" y2="6" stroke="var(--ai)" stroke-width="2" stroke-dasharray="8 5"></line></svg>AI maintenance loop</span>
+        <span><svg viewBox="0 0 34 12"><line x1="0" y1="6" x2="34" y2="6" stroke="var(--support)" stroke-width="2" stroke-dasharray="2 4"></line></svg>Reads data or uses a service</span>
+        <span><svg viewBox="0 0 34 12"><rect x="1" y="1" width="32" height="10" rx="3" fill="none" stroke="var(--in)" stroke-dasharray="4 3"></rect></svg>Input, to confirm in lab</span>
+        <span class="lg-stack"><svg viewBox="0 0 34 12"><rect x="1" y="1" width="32" height="10" rx="5" fill="var(--z1-f)" stroke="var(--z1)"></rect></svg>Proposed tool</span>
+        <span class="lg-stack"><svg viewBox="0 0 34 12"><rect x="1" y="1" width="32" height="10" rx="5" fill="var(--z3-f)" stroke="var(--flag)" stroke-dasharray="3 2"></rect></svg>Open decision</span>
+
+      </div>
+    </div>
+    <aside aria-live="polite">
+      <div id="panel"><h2>Full architecture</h2><p class="kind">Metrics are intended to be used to evaluate on Army Systems: the current system targets are SUTX (BPG2)</p>
+  <p>Data flows left to right through the following stages: "Detected and Registered", "Identified and Standardized" into one common model, "Scored" by the metric library, "Presented", and "Published" for exploration.</p>
+  <p>The analyst workbench lets the joint analysis team explore in Jupyter and turn what they find into tested metric plugins. AI will enable drafting, testing, and production of additional plugins and evals.</p>
+  <p>The AI maintenance loop has multiple purposes: schema / IDL change detection, plugin &amp; eval updates, test changes on datasets, then creating MRs for human reviewers.</p>
+  <p>The tech stack view shows the proposed tool for each part. The deployment view shows what this looks like running on the lab's Kubernetes cluster.</p>
+  <p>Amber dots are products that JD &amp; I have developed and some will need to change to meet the new use cases and lab environment</p></div>
+      <ol class="steps" id="steps"><li><button data-step="0"><span class="n">1</span><span>New data arrives</span></button></li><li><button data-step="1"><span class="n">2</span><span>The watcher spots a finished dataset</span></button></li><li><button data-step="2"><span class="n">3</span><span>Register the test event</span></button></li><li><button data-step="3"><span class="n">4</span><span>Identify what the data is</span></button></li><li><button data-step="4"><span class="n">5</span><span>Read and map common data</span></button></li><li><button data-step="5"><span class="n">6</span><span>Score every metric and eval</span></button></li><li><button data-step="6"><span class="n">7</span><span>Store results with lineage</span></button></li><li><button data-step="7"><span class="n">8</span><span>Compare versions</span></button></li><li><button data-step="8"><span class="n">9</span><span>Publish the views</span></button></li><li><button data-step="9"><span class="n">10</span><span>Adapt when something new arrives</span></button></li><li><button data-step="10"><span class="n">11</span><span>Analysts explore in their own tools</span></button></li><li><button data-step="11"><span class="n">12</span><span>AI drafts a metric plugin</span></button></li><li><button data-step="12"><span class="n">13</span><span>Evals as a test</span></button></li><li><button data-step="13"><span class="n">14</span><span>Merge once, runs on every dataset</span></button></li></ol>
+    </aside>
+  </div>
+</div>
+<script>
+if (document.documentElement.dataset.deployment === "off") { const r = document.getElementById("m-deploy"); r.disabled = true; r.closest(".modes").querySelector('label[for="m-deploy"]').title = "Deployment view is still in review"; }
+if (document.documentElement.dataset.stack === "off") { const r = document.getElementById("m-stack"); r.disabled = true; r.closest(".modes").querySelector('label[for="m-stack"]').title = "Tech stack view is still in review"; }
+
+const N = {
+  test:  { x: 40, y: 90,  w: 160, z: "in", t: "Test events", s: "Simulation and live runs", tbd: true,
+    kind: "Input (tarballs)", d: "Soldiers and Test conductors run one or many system-of-systems configurations. Several datasets are produced per day, often with multiple system versions on the same day.",
+    li: ["Many systems, vendors, and configurations from day one", "Sim and live results must stay distinguishable"] },
+  etl:   { x: 40, y: 200, w: 160, z: "in", t: "Custom ETL", s: "Post Processing like WSMRs", tbd: true,
+    kind: "Input (existing pipeline)", d: "The existing custom pipeline harvests tarballs, copies them onto the network, and post-processes them into SQlite3 databases, JSONs, or CSVs. The Metrics Architecture will consume its output and has no intention to modify it.",
+    li: ["To confirm: how completion is signaled", "To confirm: whether failed or partial runs are marked"] },
+  repo:  { x: 40, y: 310, w: 160, z: "in", t: "Post-processed data", s: "Storage TBD (NFS?)", tbd: true,
+    kind: "Input", d: "Post-processed datasets range from 10 GB to 1 TB. Storage location and access method are still unknown; an NFS share is likely.",
+    li: ["Formats: proprietary binaries, DIS, and others", "Some files may indicate data version", "Read-only access is expected"] },
+  watch: { x: 270, y: 90,  z: "z1", t: "Directory watcher", s: "Polls until files settle", tbd: true,
+    kind: "Ingest", d: "Swaps out the GSIL's directory watcher pattern, which polls the repository, waits until file sizes stop changing (or a completion marker appears), uses cURL to provide the data directory to analysis tools, then stores success.",
+    li: ["Polling, because file-change events are unreliable on NFS", "Configurable quiet period before a dataset counts as complete", "Idempotent: a dataset is never processed twice by accident"] },
+  orch:  { x: 270, y: 200, z: "z1", t: "Orchestrator", s: "Queues jobs, retries, history",
+    kind: "Control plane", d: "Receives the watcher's call and runs the per-dataset pipeline as a job: register, fingerprint, standardize, score, publish. Handles parallelism across many simultaneous datasets, retries, and a full run history.",
+    li: ["One job per dataset is ideal, but many steps within the job will run in parallel where possible", "Failures will be seen in observability (Prometheus & Grafana)"] },
+  reg:   { x: 270, y: 310, z: "z1", t: "Dataset registry", s: "ID, path, checksum, status", tbd: true,
+    kind: "Catalog", d: "Every dataset gets a stable ID and a record of where it lives, its checksum, and its processing status. Every metric can trace back to a registered dataset.",
+    li: ["Status: detected, processing, scored, failed, excluded", "Small relational table(s) to store the registered dataset"] },
+  runlog:{ x: 270, y: 420, z: "z1", t: "Run log", s: "Config, versions, run status",
+    kind: "Metadata", d: "Creates structured metadata records per test run: systems and versions, configuration, sim/live/training, any test objective(s), and outcome status. AI will pre-fill the run-log from what the fingerprinter finds, then the test conductors will confirm or correct.",
+    li: ["Supplies additional metadata for fine-tuned querying", "Labels failed and partial runs so they can be filtered in a query", "Updates to the run-log can accumulate asynchronously and aid downstream metric labeling.", "Run log can be used to understand the program's test history"] },
+  fp:    { x: 520, y: 90,  z: "z2", t: "Fingerprinter", s: "Format, vendor, version", tbd: true,
+    kind: "Identification", d: "Inspects directory/file signatures, headers, version files, and directory structure to identify each file's format, vendor, and data version. Known fingerprints route to an adapter while the unknown ones raise a drift alert.",
+    li: ["Deterministic rules first, so results are repeatable", "Unknown fingerprint triggers the AI maintenance loop"] },
+  areg:  { x: 520, y: 200, z: "z2", t: "Adapter registry", s: "Versions per vendor schema",
+    kind: "Configuration", d: "Maps each fingerprint (vendor, format, data version) to a specific adapter version stored in Git. Multiple versions of the schemas are running and this allows old and new system versions to both be scored on the same day.",
+    li: ["Adapter versions recorded in lineage", "Updated only through approved Git merges"] },
+  adapt: { x: 520, y: 310, z: "z2", t: "Shared readers", s: "Readers for common data", tbd: true,
+    kind: "Transformation", d: "A reader parses one vendor's format & version. When metrics are comparable across vendors, a short mapping turns the reader's output into common data model tables. Note that proprietary binaries need vendor interface documentation or parsers.",
+    li: [ "Each reader tested against golden datasets", "Can require an agreed vendor export format going forward"] },
+  std:   { x: 520, y: 420, z: "z2", t: "Common data model", s: "Shared tables",
+    kind: "Storage", d: "Intended to be the most common tables that allow comparisons and aggregations across systems within the configuration. An initial list of these tables are: runs, up-time, resource usages (compute and munitions), and total messages sent/received. Metrics can be built against these, but existing analysis scripts can keep reading the post-processed data directly.",
+    li: ["Stored as Parquet, organized by dataset, system, and version", "Can be kept for a rolling window to save storage"] },
+  metlib:{ x: 770, y: 90,  z: "z3", t: "Metric library", s: "Every metric is a plugin",
+    kind: "Definitions", d: "Where all of the metrics live. Each one is a plugin: its code, a short definition, tags (functional area, data used, systems, author), and its evals. A plugin can read the common data model, or, for an existing analyst script, the post-processed data as-is. Analysts promote their approved code to the Metric library.",
+    li: ["Plugins in Python, MATLAB, Java, or C++", "Each plugin declares the data it reads", "Only reviewed plugins run in production"] },
+  evals: { x: 770, y: 200, z: "z3", t: "Eval suites", s: "Tests for metric plugins", tbd: true,
+    kind: "Definitions", d: "An eval is a test for a metric plugin, much like a unit test: it runs the plugin on a dataset with a known answer and checks that the output matches. Every plugin carries its own evals. An eval suite is a named set of evals that run together, such as all the evals for SIAP metrics or for one system.",
+    li: ["One plugin can belong to many suites", "AI helps draft the evals and authors approve them."] },
+  thr:   { x: 770, y: 310, z: "z3", t: "Threshold registry", s: "Pass/fail values, baselines", tbd: true,
+    kind: "Definitions", d: "Pass/fail values when requirements exist and historical comparisons/baselines when they don't. AI can suggest thresholds from history and documents.",
+    li: ["Changes are reviewed like code", "Baselines account for normal run-to-run variation"] },
+  score: { x: 770, y: 440, z: "z3", t: "Scoring engine", s: "Runs plugins as job steps",
+    kind: "Compute", d: "The scoring engine picks the plugins that apply to the data, runs each one as its own step (in parallel where it can), then checks the results against thresholds. The metric library, eval suites, and thresholds are the instructions for the scoring engine.",
+    li: ["A failed plugin step can be retried on its own"] },
+  mstore:{ x: 770, y: 580, z: "z3", t: "Results store", s: "Per-event and per-run results",
+    kind: "Storage", d: "Associates the result with the plugin that produces it. The result can be per event (even millions per dataset), per run, or per version. Detailed results go to Parquet files that grow with the data; summaries go to PostgreSQL for fast lookups. Each result records the relevant datasets, plugin versions, reader versions, and thresholds.",
+    li: ["No practical limit on detail; storage grows with the data"] },
+  anom:  { x: 1020, y: 90,  z: "z4", t: "Version comparison", s: "Statistical tests",
+    kind: "Comparison", d: "Compares a new version with earlier ones in different possible ways, such as: scenario, configuration, threat set, test event, sim or live, or conditions noted in the run log. Each comparison shows how many runs were found in each version. When there are too few runs or the conditions don't line up, which is common with live events, a sample-size alert will be presented that indicates the value of the comparison.",
+    li: ["Shows the spread of results and the number of runs alongside each average", "Uses standard statistical methods rather than AI judgement"] },
+  sum:   { x: 1020, y: 200, z: "z4", t: "AI answers", s: "Questions and summaries",
+    kind: "Analysis", d: "The AI Answers will do two things: write summaries of what changed and it answers questions about the metrics, such as how version 4.2 did on track completeness. To answer, it runs read-only queries with the \"asking person's\" own permissions and looks up definitions and notes, and every answer cites the results it used.",
+    li: ["Only explains metrics and their results. The AI here will not perform calculations, only summaries.", "Cannot change or delete anything", "Every question and answer is logged"] },
+  dash:  { x: 1020, y: 310, z: "z4", t: "Dashboard generator", s: "Builds the web views",
+    kind: "Presentation", d: "Rebuilds the web views whenever new results arrive. Most pages can be prebuilt so that they load quickly and are easy to export.",
+    li: ["Options: Evidence, Quarto, or Observable Framework", "The orchestrator triggers each rebuild"] },
+  exec:  { x: 1020, y: 440, h: 50, z: "z4", t: "Metric explorer", s: "View the results",
+    kind: "Output", d: "The metric explorer is where results are viewed. Look at one dataset or across all of them, and filter by time window, system, vendor, version, configuration, scenario, run status, or threshold result, such as every run where track completeness fell below 90%. Compare versions side by side and click through to the run log and lineage.",
+    li: ["Enables viewing trends over time", "Failed and partial runs are shown, and left out of comparisons by default"] },
+  mid:   { x: 1020, y: 510, h: 50, z: "z4", t: "High-level Summary", s: "Curated KPPs and KPIs",
+    kind: "Output", d: "A short list of metrics that BPG2 thinks matters. Could be KPPs or KPIs, with status against thresholds and a short AI-written summary.",
+    li: ["Same numbers as the explorer, but a focused view."] },
+  snap:  { x: 1020, y: 580, h: 50, z: "z4", t: "Snapshot export", s: "HTML and PDF exports",
+    kind: "Output", d: "Creates a copy for briefings or for records.",
+    li: ["Dated and versioned"] },
+  drift: { x: 270, y: 765, z: "ai", t: "Change alert", s: "New format or schema",
+    kind: "AI maintenance loop", d: "A change alert occurs when a dataset arrives in a format, schema, or data version that no reader handles yet, or when it doesn't match what is expected. The affected part of the dataset enters a pending-drift state.",
+    li: ["The alert includes samples and what changed", "Metrics that don't read the changed data keep processing; only the affected metrics wait"] },
+  llm:   { x: 520, y: 765, z: "ai", t: "AI drafts the change", s: "Reader, plugin, or threshold",
+    kind: "AI maintenance loop", d: "The local model drafts a fix, which is likely to be an updated reader for a new schema, a plugin or eval, or a new suggested threshold.",
+    li: ["Works from the schema changes and sample records"] },
+  golden:{ x: 770, y: 765, z: "ai", t: "Golden dataset tests", s: "Re-run known-good data",
+    kind: "AI maintenance loop", d: "The draft runs against reference datasets with known-correct results. If any existing result changes unexpectedly, the change is blocked.",
+    li: ["Results are attached to the review"] },
+  review:{ x: 1020, y: 765, z: "ai", t: "Human review", s: "Guarding against incorrect plugins",
+    kind: "AI maintenance loop", d: "Analysts review metric plugins, and DSO specialists review platform changes. Lower-risk changes that pass every test, like a renamed field or a data type change (from double to float32), get a quick review, but a change to how a metric is calculated requires confirmation from an author or SME.",
+    li: ["Approved changes deploy automatically"] },
+  pack:  { x: 40,  y: 875, h: 44, z: "pf", t: "Air-gap packaging", s: "", plat: true,
+    kind: "Platform", d: "Everything ships as pinned container images and offline packages with a software bill of materials, so the whole stack installs without network access.",
+    li: ["Container platform to confirm in the lab"] },
+  obs:   { x: 270, y: 875, h: 44, z: "pf", t: "Observability", s: "", plat: true,
+    kind: "Platform", d: "Pipeline health, failed jobs, processing times, and change alerts are captured so problems can be caught, inspected, and remediated.",
+    li: ["Alerts on failed or stuck datasets", "Tracks time from data arrival to published results"] },
+  llmsrv:{ x: 520, y: 875, h: 44, z: "pf", t: "AI gateway + model", s: "", plat: true,
+    kind: "Platform", d: "Each AI request, from any tool, goes through the gateway, which records the requesting user, logs the request and the answer, and applies limits. The model is an open-weight model that runs on lab hardware and can only be reached through the gateway.",
+    li: ["These same controls exist for Jupyter notebooks, IDEs, MATLAB, and chat", "Can also answer typed questions with probabilities (CLEF)"] },
+  goldsets:{ x: 770, y: 875, h: 44, z: "pf", t: "Golden datasets", s: "", plat: true,
+    kind: "Platform", d: "Pairs metrics with known-correct results and reference datasets for each vendor and format.",
+    li: ["Grows as new vendors and versions arrive"] },
+  git:   { x: 1020, y: 875, h: 44, z: "pf", t: "Git repository", s: "", plat: true,
+    kind: "Platform", d: "The code repository for readers, metric plugins, suites, thresholds, and pipeline code. Every change is reviewed and versioned.",
+    li: ["Approved merges update the registries and the metric library"] },
+};
+
+
+
+Object.assign(N, {
+  voice: { x: 270, y: 545, z: "z1", t: "Voice notes to text", s: "New approach to TC notes",
+    kind: "Metadata", d: "Test conductors speak their notes during or right after a run, into a tablet, headset, or the run-log page. An open-source speech model (Whisper) transcribes them, and the transcript is attached to the run log, where it also helps the AI pre-fill details. The original audio is kept alongside.",
+    li: ["Enables more specific and \"in-the-moment\" descriptions.", "Searchable by analysts and by AI answers"] },
+  catalog: { x: 1020, y: 640, h: 50, z: "z4", t: "Metric catalog", s: "Browse existing metrics",
+    kind: "Output", d: "A searchable list of the metric library and what each metric measures, who authors it, which systems it applies to, its tags and eval suites, its thresholds, and whether its evals are passing. Note: the library is the code and the catalog is the information that people can use to find/understand plugins.",
+    li: ["Analysts are encouraged to check the metric catalog before building something new"] },
+  analysts: { x: 40, y: 990, w: 160, z: "in", t: "Joint analysis team", s: "",
+    kind: "People", d: "The analysts around the product work mostly on Windows, in Python, MATLAB, Java, and C++.",
+    li: ["Own and review metric plugins", "DSO specialists still approve platform changes"] },
+  jhub: { x: 270, y: 990, z: "wb", t: "Analyst tools", s: "Jupyter, MATLAB, IDEs",
+    kind: "Analyst workbench", d: "Analysts keep their own tools. Desktop tools like MATLAB and VS Code connect to the same data over the lab network, and a browser-based Jupyter environment in the cluster is there for anyone who wants it.",
+    li: ["There is a mixed bag of these, but most analysts are using Windows.", "Notebooks run inside the lab, fully offline"] },
+  libm: { x: 270, y: 1057, z: "wb", t: "labmetrics libraries", s: "Python, MATLAB, Java, C++",
+    kind: "Analyst workbench", d: "Including/importing labmetrics enables loading any result, common data model table, or post-processed file, filterable by system, version, date, and/or another tag.",
+    li: ["Built on existing database and Parquet libraries", "Also creates new plugins from a template and runs their evals locally"] },
+  jai: { x: 520, y: 990, z: "wb", t: "AI in your tools", s: "Notebooks, IDEs, chat",
+    kind: "Analyst workbench", d: "AI is initially targeted to be available in Jupyter, in VS Code, from MATLAB scripts, and in a chat page, all through the AI gateway. If you describe a metric or point at working code, it will attempt a draft of the plugin and its evals for review.",
+    li: ["Everything that runs, runs as the analyst's own user.", "All drafts are required to pass the same evals as human-written code"] },
+  plugin: { x: 770, y: 990, z: "wb", t: "Metric plugin + evals", s: "Any language, with checks",
+    kind: "Analyst workbench", d: "The expected outcome is a small package consisting of the metric code, the events it runs on, its tags, and its evals. Python plugins should run natively, but MATLAB, Java, and C++ plugins will require a container runtime. Analysts will test the new code against a sample dataset before proposing it.",
+    li: ["Plugins and evals start from a standard template", "Lives in Git with an author/owner"] },
+  ab: { x: 1020, y: 990, z: "wb", t: "Evals + A/B check", s: "Old vs new on past data",
+    kind: "Analyst workbench", d: "When a plugin is proposed, its evals run against known-good datasets, and other metrics are checked for unexpected changes. If it changes how an existing metric is calculated, it compares runs between the old and new versions so reviewers can see what would change.",
+    li: ["Results are attached to the review", "This step prevents accidental changes to a metric"] },
+});
+
+// ---------- TECH STACK ----------
+// st: "existing" | "proposed" | "selected" | "open"
+const STACK = {
+  test:   { tool: "Existing lab systems", st: "existing", why: "SUTX." },
+  etl:    { tool: "Existing custom ETL", st: "existing", why: "Consumed read-only. Ask the owners whether they can write a completion marker." },
+  repo:   { tool: "NFS share (to confirm):", st: "open", why: "Locations, access methods, and permissions." },
+  watch:  { tool: "Dagster sensor", st: "proposed", alt: ["Continued customization to GSIL's Directory Watcher"], why: "Polling is reliable on NFS, and a sensor inside the orchestrator avoids running a separate service." },
+  orch:   { tool: "Dagster", st: "proposed", alt: ["Prefect", "Apache Airflow", "Argo Workflows"], why: "Its asset model matches the idea that each dataset produces metrics, it shows lineage well, runs offline, and launches each run as a Kubernetes Job." },
+  reg:    { tool: "PostgreSQL", st: "proposed", alt: ["SQLite (single server only)"], why: "Handles many parallel jobs writing at once with minimal software wrappers and has extension/plugin support for many different future use cases." },
+  runlog: { tool: "Postgres + typed decisions", st: "proposed", alt: ["Manual entry only"], why: "Population of the run log is constrained through a decision API (which configuration, sim or live, which outcome), filled by a decision model (CLEF is likely the best at the moment), then confirmed by the conductor." },
+  fp:     { tool: "Rules + typed decisions", st: "proposed", alt: ["File signatures and header rules only"], why: "Deterministic signatures handle known formats. For an unknown file, the typed decision API picks vendor and format from a fixed list, with a probability that decides whether a human must confirm." },
+  areg:   { tool: "YAML registry in Git", st: "proposed", alt: ["Registry table in PostgreSQL"], why: "Plain text, reviewable, and versioned with the adapter code." },
+  adapt:  { tool: "Python + PyArrow", st: "proposed", alt: ["Vendor parsers wrapped in Python", "C++ readers for very large binaries"], why: "PyArrow writes Parquet directly; readers are packaged so analysts' scripts can import the same code." },
+  std:    { tool: "Parquet, partitioned", st: "proposed", alt: ["Apache Iceberg tables for schema evolution"], why: "Is columnar and supports future AI approaches, such as RAG." },
+  metlib: { tool: "Plugins + YAML specs", st: "proposed", alt: ["dbt with MetricFlow"], why: "Definitions in YAML, logic in tested Python, and SME tools wrapped where possible." },
+  evals:  { tool: "Python eval harness", st: "proposed", alt: ["pytest-style check suites"], why: "Uses the same spec format as metrics, grouped into suites per point of contact." },
+  thr:    { tool: "YAML in Git", st: "proposed", alt: ["Typed decisions to find threshold statements in documents"], why: "Thresholds are numbers that bound values. Thresholds have their own Git review history. The typed decision API can flag passages that state thresholds, but the values will need to be extracted on the Analysts workbench." },
+  score:  { tool: "DuckDB + Polars", st: "proposed", alt: ["Apache Spark, only if one node is not enough"], why: "Intended to be capable of scanning terabytes of data on a single node. Needs to gracefully utilize disk when all memory is used." },
+  mstore: { tool: "Postgres + Parquet", st: "proposed", alt: ["TimescaleDB extension for time series"], why: "Parquet holds detailed per-event results and PostgreSQL holds the summaries. CloudNativePG's built-in PgBouncer pooler can handle the connections from many short-lived jobs, notebooks, and web pages." },
+  anom:   { tool: "Python + SciPy stats", st: "proposed", alt: ["statsmodels for mixed-effects models across scenarios"], why: "Standard statistical comparisons that show run counts and the spread of results. Can be compared against many different conditions." },
+  sum:    { tool: "vLLM + pgvector", st: "proposed", alt: ["llama.cpp or Ollama on smaller hardware"], why: "The model answers through read-only SQL for numbers and pgvector search for definitions and notes, both inside PostgreSQL's permission checks." },
+  dash:   { tool: "Evidence", st: "proposed", alt: ["Quarto", "Observable Framework"], why: "Turns SQL and Markdown into static sites, and builds offline." },
+  exec:   { tool: "Evidence pages", st: "proposed", alt: ["Grafana or Apache Superset for free-form exploration"], why: "Filterable static pages can likely cover most exploration, but a BI tool can be added if analysts need ad hoc queries." },
+  mid:    { tool: "Static HTML", st: "proposed", alt: ["Grafana"], why: "Same site as the explorer, showing only the curated metrics." },
+  snap:   { tool: "HTML + PDF export", st: "proposed", alt: ["Quarto PDF output"], why: "A headless browser will print the page to a PDF." },
+  drift:  { tool: "Pandera + typed triage", st: "proposed", alt: ["Contracts and rules only"], why: "Data contracts detect drift deterministically. The typed decision API identifies what changed: a new data version, a corrupt file, new data, or a new vendor." },
+  llm:    { tool: "Open-weight coder, vLLM", st: "proposed", alt: ["Agent harness such as Aider or OpenHands using the local model"], why: "Drafting code and specs needs a generative model." },
+  golden: { tool: "pytest + golden data", st: "proposed", why: "Each change runs against reference datasets with known results." },
+  review: { tool: "GitLab MRs + risk score", st: "proposed", alt: ["Fixed rules for which changes are low-risk"], why: "The typed decision API rates each AI change's risk, and low-risk changes that pass golden tests take the fast path. Some merges are more risky than others, having this risk score with the merge request can help fault isolate potential issues and garner more attention by reviewers." },
+  pack:   { tool: "Zarf + Harbor", st: "proposed", alt: ["Offline Helm charts and image tarballs"], why: "One signed package per platform release crosses the air gap and installs offline." },
+  obs:    { tool: "Prometheus + Grafana", st: "proposed", alt: ["Dagster run monitoring alone"], why: "Pipeline and cluster health with alerts in one place." },
+  llmsrv: { tool: "LiteLLM + vLLM", st: "proposed", alt: ["llama.cpp or Ollama behind the same gateway"], why: "LiteLLM is an open-source gateway for sign-in, logging, and limits. vLLM serves the open-weight model for text and typed answers." },
+  goldsets:{ tool: "Versioned on NFS", st: "proposed", alt: ["DVC for dataset versioning"], why: "Golden datasets are versioned alongside the code, and multiple metrics, plugins, evals, and thresholds can use the same golden dataset." },
+  git:    { tool: "GitLab (self-hosted)", st: "proposed", alt: ["Gitea"], why: "Merge requests are the review queue for AI-proposed changes, and GitLab Runner executes the golden tests." },
+};
+Object.assign(STACK, {
+  voice:    { tool: "Whisper (faster-whisper)", st: "proposed", alt: ["whisper.cpp for CPU-only servers"], why: "Open-source speech-to-text that runs fully offline on the GPU server." },
+  catalog:  { tool: "Evidence page from Git", st: "proposed", why: "Built from plugin metadata in Git on every merge." },
+  jhub:     { tool: "JupyterHub + desktop", st: "proposed", alt: ["Desktop tools only"], why: "Browser notebooks for anyone who wants them; desktop tools connect directly." },
+  libm:     { tool: "Library support starting in 4 languages", pill: "Starting in 4 languages", st: "proposed", alt: ["Arrow Flight SQL server with JDBC and ODBC drivers"], why: "Effectively thin wrappers over PostgreSQL and Parquet libraries that already exist in Python, MATLAB, Java, and C++." },
+  jai:      { tool: "Jupyter AI, Continue, chat", st: "proposed", alt: ["Open WebUI for the chat page"], why: "Each tool will be configured to point at the AI gateway." },
+  plugin:   { tool: "pluggy + containers", st: "proposed", alt: ["Python entry points"], why: "Python plugins can run natively via pluggy hooks, but the other languages run as containers. The containers are responsible for reading the data, then writing results to an artifact. MATLAB plugins will need the MATLAB Runtime and a MATLAB Compiler license." },
+  ab:       { tool: "pytest + A/B report", st: "proposed", why: "Analysts are likely familiar with pytest-style tests, and the A/B report is a generated notebook attached to the merge request." },
+});
+const ST_LABEL = { existing: "Existing system", proposed: "Proposed", selected: "Selected", open: "Open decision" };
+
+const K8S = {};
+const E = {
+  in1: ["M120,144 V200", "input"],
+  in2: ["M120,254 V310", "input"],
+  repo_watch: ["M200,337 H235 V117 H270", "main"],
+  watch_orch: ["M360,144 V200", "main"],
+  orch_reg: ["M360,254 V310", "main"],
+  reg_runlog: ["M360,364 V420", "main"],
+  orch_fp: ["M450,227 H478 V117 H520", "main"],
+  fp_areg: ["M610,144 V200", "main"],
+  areg_adapt: ["M610,254 V310", "main"],
+  adapt_std: ["M610,364 V420", "main"],
+  std_score: ["M700,460 H770", "main"],
+  metlib_score: ["M950,117 H976 V452 H950", "main"],
+  evals_score: ["M950,227 H967 V467 H950", "main"],
+  thr_score: ["M950,337 H958 V482 H950", "main"],
+  score_mstore: ["M860,494 V580", "main"],
+  runlog_mstore: ["M450,460 H478 V672 H860 V634", "main", [600, 666, "run metadata"]],
+  audio_voice: ["M188,518 H232 V572 H270", "input"],
+  voice_runlog: ["M360,545 V474", "main"],
+  fp_score: ["M700,100 H735 V422 H800 V440", "main"],
+  mstore_anom: ["M950,607 H990 V117 H1020", "main"],
+  anom_sum: ["M1110,144 V200", "main"],
+  sum_dash: ["M1110,254 V310", "main"],
+  dash_exec: ["M1110,364 V440", "main"],
+  dash_mid: ["M1020,337 H1008 V535 H1020", "main"],
+  dash_snap: ["M1020,337 H1008 V605 H1020", "main"],
+  fp_drift: ["M520,130 H490 V792 H450", "loop", [384, 758, ""]],
+  drift_llm: ["M450,792 H520", "loop"],
+  llm_golden: ["M700,792 H770", "loop"],
+  golden_review: ["M950,792 H1020", "loop"],
+  review_git: ["M1110,819 V875", "loop"],
+  git_metlib: ["M1200,897 H1228 V24 H860 V90", "loop", [960, 18, "approved changes deploy via Argo CD"]],
+  git_areg: ["M1200,897 H1228 V24 H742 V214 H700", "loop"],
+  llm_srv: ["M610,819 V875", "support"],
+  golden_sets: ["M860,819 V875", "support"],
+  an_jhub: ["M200,1017 H270", "main"],
+  jhub_libm: ["M360,1044 V1057", "support"],
+  libm_std: ["M450,1076 H712 V500 H610 V474", "support"],
+  libm_mstore: ["M450,1094 H745 V610 H770", "support"],
+  libm_repo: ["M270,1100 H242 V352 H200", "support"],
+  jhub_jai: ["M450,1017 H520", "main"],
+  jai_srv: ["M610,990 V919", "support"],
+  jai_plugin: ["M700,1017 H770", "main"],
+  plugin_ab: ["M950,1017 H1020", "main"],
+  ab_review: ["M1200,1017 H1215 V792 H1200", "loop"],
+  dash_catalog: ["M1020,337 H1008 V665 H1020", "main"],
+};
+const STEPS = [
+  { t: "New data arrives", n: ["test","etl","repo"], e: [["in1"],["in2"]],
+    p: "Soldiers and Test conductors run one or many system-of-systems configurations. The existing custom pipeline harvests tarballs, copies them onto the network, and post-processes them into SQlite3 databases, JSONs, or CSVs. The Metrics Architecture will consume its output and has no intention to modify it." },
+  { t: "The watcher spots a finished dataset", n: ["repo","watch"], e: [["repo_watch"]],
+    p: "The watcher polls the repository and waits until a dataset's files stop changing, or until a completion marker appears. It then calls the orchestrator's API." },
+  { t: "Register the test event", n: ["watch","orch","reg","runlog","voice"], e: [["watch_orch"],["orch_reg"],["reg_runlog","audio_voice"],["voice_runlog"]],
+    p: "The orchestrator starts a job for the dataset, gives it a stable ID in the registry, and opens a run-log entry. Many datasets can be processed simultaneously." },
+  { t: "Identify what the data is", n: ["orch","fp","areg"], e: [["orch_fp"],["fp_areg"]],
+    p: "The fingerprinter inspects headers, version files, and structure to determine format, vendor, and data version, then looks up the matching adapter version." },
+  { t: "Read and map common data", n: ["areg","adapt","std","fp","score"], e: [["areg_adapt","fp_score"],["adapt_std"]],
+    p: "Shared readers parse each vendor's format, using the same parsing code the analysts' scripts use. Where a metric compares vendors or versions, the reader's output is mapped into the common data model. Existing scripts skip this and read the post-processed data as-is, so nothing the analysts have requires heavy re-writes." },
+  { t: "Score every metric and eval", n: ["std","metlib","evals","thr","score"], e: [["std_score","metlib_score","evals_score","thr_score"]],
+    p: "The scoring engine runs every applicable metric spec and eval suite, then compares results with thresholds or historical baselines." },
+  { t: "Store results with lineage", n: ["score","runlog","mstore"], e: [["score_mstore","runlog_mstore"]],
+    p: "Results go to the results store at whatever detail the plugin produces, joined to the run log. Each result records the dataset, plugin version, reader version, and threshold." },
+  { t: "Compare versions", n: ["mstore","anom","sum"], e: [["mstore_anom"],["anom_sum"]],
+    p: "Versions can be compared against many different conditions, but when the sample set is low or conditions don't match, the view will make this apparent. A model can be used to write a short summary of the comparison results." },
+  { t: "Publish the views", n: ["dash","exec","mid","snap"], e: [["sum_dash"],["dash_exec","dash_mid","dash_snap"]],
+    p: "The dashboard generator rebuilds the metric explorer and high-level summary, and makes dated snapshots for briefings." },
+  { t: "Adapt when something new arrives", n: ["fp","drift","llm","golden","review","git","llmsrv","goldsets","areg","metlib"],
+    e: [["fp_drift"],["drift_llm","llm_srv"],["llm_golden","golden_sets"],["golden_review"],["review_git"],["git_areg","git_metlib"]],
+    p: "When a new schema or a new metric request appears, the local model drafts the change, golden datasets check it, then a person reviews and approves it. After approval, the change is merged into the Git repository and Argo CD deploys it. Metrics that don't depend on the changed data keep processing in the meantime, and the waiting part of the dataset is then scored normally." },
+  { t: "Analysts explore in their own tools", n: ["analysts","jhub","libm","std","mstore","repo"], e: [["an_jhub"],["jhub_libm"],["libm_std","libm_mstore","libm_repo"]],
+    p: "Analysts are likely going to work in Python, MATLAB, Java, C++, or a browser notebook. Including/importing the labmetrics library in their language will load results, common data model tables, or post-processed files." },
+  { t: "AI drafts a metric plugin", n: ["jhub","jai","llmsrv","plugin"], e: [["jhub_jai","jai_srv"],["jai_plugin"]],
+    p: "When an idea works, the analyst asks the AI to turn the new code into a plugin with evals, or describes a new metric in plain words. The analyst is then responsible for reviewing, editing, and testing the draft on a sample dataset." },
+  { t: "Evals as a test", n: ["plugin","ab","review"], e: [["plugin_ab"],["ab_review"]],
+    p: "Proposing the plugin runs its evals on known-good datasets, checks that no other metric changed, and, if the new code changes an existing metric, shows old and new results side by side on past data for review. Additional analysts will be called upon to review the changes." },
+  { t: "Merge once, runs on every dataset", n: ["review","git","metlib","dash","catalog"], e: [["review_git"],["git_metlib"],["dash_catalog"]],
+    p: "Once approved, Argo CD deploys the plugin into the metric library, and it runs on every future dataset automatically. The metric catalog lists it with its owner and eval status." },
+];
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("svg");
+const panel = document.getElementById("panel");
+const stepsOl = document.getElementById("steps");
+const zc = { in: ["--in","--in-f"], z1: ["--z1","--z1-f"], z2: ["--z2","--z2-f"], z3: ["--z3","--z3-f"], z4: ["--z4","--z4-f"], ai: ["--ai","--ai-f"], wb: ["--wb","--wb-f"], pf: ["--pf","--pf-f"], k8: ["--k8","--k8-f"] };
+const zones = [
+  { x: 20,  y: 40, w: 200, h: 660, z: "in", label: "Inputs\n(CC process in progress)", dashed: true },
+  { x: 250, y: 40, w: 220, h: 660, z: "z1", label: "1  Detect and register" },
+  { x: 500, y: 40, w: 220, h: 660, z: "z2", label: "2  Identify and standardize" },
+  { x: 750, y: 40, w: 220, h: 660, z: "z3", label: "3  Score" },
+  { x: 1000,y: 40, w: 220, h: 660, z: "z4", label: "4  Analyze and present" },
+  { x: 250, y: 720, w: 970, h: 120, z: "ai", label: "AI maintenance loop, every change human-approved" },
+  { x: 250, y: 943, w: 970, h: 177, z: "wb", label: "Analyst workbench: explore in notebooks, turn findings into tested metric plugins" },
+];
+const stepOf = {};
+STEPS.forEach((s, i) => s.n.forEach(n => { if (!(n in stepOf)) stepOf[n] = i + 1; }));
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+
+function overviewHtml() {
+  return `<h2>Full architecture</h2><p class="kind">Metrics are intended to be used to evaluate on Army Systems: the current system targets are SUTX (BPG2)</p>
+  <p>Data flows left to right through the following stages: "Detected and Registered", "Identified and Standardized" into one common model, "Scored" by the metric library, "Presented", and "Published" for exploration.</p>
+  <p>The analyst workbench lets the joint analysis team explore in Jupyter and turn what they find into tested metric plugins. AI will enable drafting, testing, and production of additional plugins and evals.</p>
+  <p>The AI maintenance loop has multiple purposes: schema / IDL change detection, plugin & eval updates, test changes on datasets, then creating MRs for human reviewers.</p>
+  <p>The tech stack view shows the proposed tool for each part. The deployment view shows what this looks like running on the lab's Kubernetes cluster.</p>
+  <p>Amber dots are products that JD & I have developed and some will need to change to meet the new use cases and lab environment</p>`;
+}
+
+// ---------- one-time build (skipped when the diagram is already baked into the file) ----------
+function build() {
+  const defs = el("defs", {});
+  [["main","var(--edge)"],["input","var(--in)"],["loop","var(--ai)"],["support","var(--support)"]].forEach(([k,c]) => {
+    const m = el("marker", { id: "ar-" + k, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", fill: c }, m);
+  });
+  const gz = el("g", {});
+  zones.forEach(z => {
+    const [c, f] = zc[z.z];
+    const g = el("g", z.cls ? { class: z.cls } : {}, gz);
+    el("rect", { x: z.x, y: z.y, width: z.w, height: z.h, rx: 16, fill: `var(${f})`, "fill-opacity": 0.6, stroke: `var(${c})`, "stroke-opacity": 0.55, "stroke-width": 1.5, "stroke-dasharray": z.dashed ? "6 5" : "none" }, g);
+    const tx = el("text", { x: z.x + 16, y: z.y + 25, class: "zone-label", fill: `var(${c})` }, g); z.label.split("\n").forEach((ln, i) => { const ts = el("tspan", { x: z.x + 16, dy: i ? "1.2em" : 0 }, tx); ts.textContent = ln; });
+  });
+  const note = el("text", { x: 40, y: 560, class: "edge-label" }, gz);
+  ["", "", ""].forEach((s, i) => { const t = el("tspan", { x: 40, dy: i ? 15 : 0 }, note); t.textContent = s; });
+  [["Proprietary binaries", 390], ["DIS (IEEE 1278)", 428], ["Packet Captures", 466], ["Audio Recordings", 504], ["Operator Notes", 542], ["Other formats", 580]].forEach(([s, y]) => {
+    el("rect", { x: 52, y, width: 136, height: 28, rx: 14, fill: "var(--bg)", stroke: "var(--in)", "stroke-dasharray": "4 3" }, gz);
+    const t = el("text", { x: 120, y: y + 18, "text-anchor": "middle", class: "edge-label" }, gz); t.textContent = s;
+  });
+  const ge = el("g", { id: "edges" });
+  for (const id in E) {
+    const [d, cls, lab] = E[id];
+    el("path", { d, class: "edge " + cls, "marker-end": `url(#ar-${cls})`, "data-id": id }, ge);
+    if (lab && lab[2]) { const t = el("text", { x: lab[0], y: lab[1], class: "edge-label", "data-edge": id }, ge); t.textContent = lab[2]; }
+  }
+  const gn = el("g", { id: "nodes" });
+  for (const id in N) {
+    const n = N[id]; const w = n.w || 180, h = n.h || 54;
+    const [c, f] = zc[n.z];
+    const sk = STACK[id], kk = K8S[id];
+    const g = el("g", { class: "node" + (sk || kk ? " haspill" : ""), tabindex: "0", role: "button", "aria-label": n.t + ": " + (n.s || n.kind), "data-id": id }, gn);
+    el("rect", { class: "box", x: n.x, y: n.y, width: w, height: h, rx: n.plat ? h / 2 : 10, fill: n.plat ? `var(${f})` : "var(--bg)", stroke: `var(${c})`, "stroke-dasharray": n.z === "in" ? "6 4" : "none" }, g);
+    const isChip = n.plat;
+    const t = el("text", { x: isChip ? n.x + w / 2 : n.x + 14, y: isChip ? n.y + h / 2 + 5 : (h < 50 ? n.y + 19 : n.y + 23), class: isChip && (sk || kk) ? "t ptitle" : "t", "text-anchor": isChip ? "middle" : "start" }, g); t.textContent = n.t;
+    if (n.s) { const s = el("text", { x: n.x + 14, y: h < 50 ? n.y + 35 : n.y + 41, class: "s" }, g); s.textContent = n.s; const room = w - 24; if (s.getComputedTextLength() > room) s.style.fontSize = (11 * room / s.getComputedTextLength()).toFixed(1) + "px"; }
+    const pill = (cls, text, colors, dashed) => {
+      if (isChip) { const p = el("text", { x: n.x + w / 2, y: n.y + h / 2 + 12, class: (cls === "stackpill" ? "pstack" : "pk8") + " pill-t", "text-anchor": "middle", fill: colors[2] }, g); p.textContent = text; return; }
+      const pg = el("g", { class: cls, "data-max": w - 16 }, g);
+      el("rect", { x: n.x + 8, y: n.y + 30, width: w - 16, height: 18, rx: 9, fill: colors[1], stroke: colors[0], "stroke-dasharray": dashed ? "3 2" : "none" }, pg);
+      const tt = el("text", { x: n.x + 16, y: n.y + 42.5, class: "pill-t", fill: colors[2] }, pg); tt.textContent = text;
+    };
+    if (sk) pill("stackpill", sk.pill || sk.tool, sk.st === "open" ? ["var(--flag)", "var(--z3-f)", "var(--z3)"] : sk.st === "existing" ? ["var(--in)", "var(--in-f)", "var(--in)"] : [`var(${c})`, `var(${f})`, `var(${c})`], sk.st === "open");
+    if (kk) pill("k8pill", kk.k, kk.out ? ["var(--in)", "var(--in-f)", "var(--in)"] : ["var(--k8)", "var(--k8-f)", "var(--k8)"], false);
+    if (n.tbd && n.z !== "in") el("circle", { cx: n.x + w - 12, cy: n.y + 12, r: 5, fill: "var(--flag)" }, g);
+    if (stepOf[id] && !n.plat && n.z !== "in" && n.z !== "k8") {
+      el("circle", { cx: n.x, cy: n.y, r: 11, fill: `var(${c})` }, g);
+      const b = el("text", { x: n.x, y: n.y + 4, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: "#fff" }, g); b.textContent = stepOf[id];
+    }
+  }
+  el("g", { id: "packets" });
+  panel.innerHTML = overviewHtml();
+  stepsOl.innerHTML = STEPS.map((s, i) => `<li><button data-step="${i}"><span class="n">${i + 1}</span><span>${esc(s.t)}</span></button></li>`).join("");
+}
+
+function fitPills() {
+  svg.style.setProperty("--force", "1");
+  const groups = svg.querySelectorAll(".stackpill, .k8pill");
+  groups.forEach(g => { g.style.display = "inline"; });
+  groups.forEach(g => {
+    const r = g.querySelector("rect"), t = g.querySelector("text"), len = t.getComputedTextLength();
+    if (len > 0) r.setAttribute("width", Math.min(+g.dataset.max, len + 16));
+  });
+  groups.forEach(g => { g.style.display = ""; });
+}
+
+if (!svg.querySelector("#nodes")) { build(); fitPills(); }
+
+// ---------- interactivity ----------
+document.documentElement.classList.add("has-js");
+const nodeEls = {}, edgeEls = {};
+svg.querySelectorAll(".node").forEach(g => { nodeEls[g.dataset.id] = g; });
+svg.querySelectorAll("path.edge").forEach(p => { edgeEls[p.dataset.id] = p; });
+const gp = svg.querySelector("#packets");
+
+const noSettle = new Set(["orch", "reg", "runlog", "fp", "areg", "std", "metlib", "score", "mstore", "anom", "sum", "dash", "exec", "mid", "snap", "catalog", "drift", "llm", "golden", "review", "jhub", "libm", "jai", "plugin", "ab", "pack", "obs", "llmsrv", "goldsets", "git"]);
+function showNode(id) {
+  const n = N[id], sk = STACK[id], kk = K8S[id];
+  Object.values(nodeEls).forEach(g => g.classList.remove("sel"));
+  nodeEls[id].classList.add("sel");
+  const status = n.z === "k8" ? `<span class="status k8">Kubernetes platform</span>` : "";
+  const st = sk ? `<p><strong>${esc(sk.tool)}</strong></p><p>${esc(sk.why)}</p>${sk.alt ? `<p class="kind">Alternatives</p><ul>${sk.alt.map(a => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}` : "";
+  const k8 = kk ? `<h3>Kubernetes</h3>${kk.out ? `<span class="status existing">Outside the cluster</span>` : `<span class="status k8">Namespace: ${esc(kk.ns)}</span>`}<p><strong>${esc(kk.k)}</strong></p><p>${esc(kk.d)}</p>` : "";
+  panel.innerHTML = `<h2>${esc(n.t)}</h2><p class="kind">${esc(n.kind)}${stepOf[id] && n.z !== "in" && n.z !== "k8" && !n.plat ? ", step " + stepOf[id] : ""}</p>${status}<p>${esc(n.d)}</p><ul>${n.li.map(x => `<li>${esc(x)}</li>`).join("")}</ul>${st}${k8}`;
+}
+for (const id in nodeEls) {
+  nodeEls[id].addEventListener("click", () => showNode(id));
+  nodeEls[id].addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); showNode(id); } });
+}
+
+let cur = -1, playing = false, token = 0;
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function setFocus(nodes, edges) {
+  const ns = new Set(nodes), es = new Set(edges), on = nodes.length > 0;
+  for (const id in nodeEls) nodeEls[id].classList.toggle("dim", on && !ns.has(id));
+  for (const id in edgeEls) edgeEls[id].classList.toggle("dim", on && !es.has(id));
+  svg.querySelectorAll("[data-edge]").forEach(t => t.classList.toggle("dim", on && !es.has(t.dataset.edge)));
+}
+function markStep(i) { stepsOl.querySelectorAll("button").forEach((b, k) => { if (k === i) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); }); }
+function goStep(i) {
+  cur = i; const s = STEPS[i];
+  setFocus(s.n, s.e.flat());
+  Object.values(nodeEls).forEach(g => g.classList.remove("sel"));
+  panel.innerHTML = `<h2>${i + 1}. ${esc(s.t)}</h2><p class="kind">Step ${i + 1} of ${STEPS.length}</p><p>${esc(s.p)}</p>`;
+  markStep(i);
+  return animateStep(s, ++token);
+}
+const alias = { srv: "llmsrv", sets: "goldsets" };
+function destOf(edgeId) { const d = edgeId.split("_").slice(1).join("_"); return alias[d] || d; }
+function colorFor(edgeId) {
+  const cls = E[edgeId][1];
+  if (cls === "loop") return "var(--ai)"; if (cls === "input") return "var(--in)"; if (cls === "support") return "var(--support)";
+  const n = N[destOf(edgeId)]; return n ? `var(${zc[n.z][0]})` : "var(--edge)";
+}
+function runPacket(edgeId, tok) {
+  return new Promise(res => {
+    if (reduce) return res();
+    const p = edgeEls[edgeId], L = p.getTotalLength();
+    const c = el("circle", { r: 6.5, fill: colorFor(edgeId), stroke: "var(--bg)", "stroke-width": 2 }, gp);
+    const dur = Math.max(450, L * 2.4), t0 = performance.now();
+    function f(now) {
+      if (tok !== token) { c.remove(); return res(); }
+      const k = Math.min(1, (now - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const pt = p.getPointAtLength(e * L); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y);
+      if (k < 1) return requestAnimationFrame(f);
+      c.remove(); const tgt = nodeEls[destOf(edgeId)];
+      if (tgt) { tgt.classList.remove("pulse"); void tgt.getBBox(); tgt.classList.add("pulse"); }
+      res();
+    }
+    requestAnimationFrame(f);
+  });
+}
+async function animateStep(s, tok) { for (const grp of s.e) { if (tok !== token) return; await Promise.all(grp.map(id => runPacket(id, tok))); } }
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const playBtn = document.getElementById("play");
+async function play() {
+  playing = true; playBtn.textContent = "Pause";
+  const start = cur < 0 || cur >= STEPS.length - 1 ? 0 : cur + 1;
+  for (let i = start; i < STEPS.length; i++) { if (!playing) return; await goStep(i); if (!playing) return; await wait(reduce ? 4000 : 2600); }
+  stopPlay();
+}
+function stopPlay() { playing = false; playBtn.textContent = "Play walkthrough"; }
+playBtn.addEventListener("click", () => playing ? (stopPlay(), token++) : play());
+document.getElementById("next").addEventListener("click", () => { stopPlay(); goStep(Math.min(STEPS.length - 1, cur + 1)); });
+document.getElementById("prev").addEventListener("click", () => { stopPlay(); goStep(Math.max(0, cur - 1)); });
+document.getElementById("all").addEventListener("click", () => {
+  stopPlay(); token++; cur = -1; setFocus([], []); panel.innerHTML = overviewHtml();
+  Object.values(nodeEls).forEach(g => g.classList.remove("sel")); markStep(-1);
+});
+stepsOl.querySelectorAll("button").forEach((b, i) => b.addEventListener("click", () => { stopPlay(); goStep(i); }));
+if (reduce) document.getElementById("motion").checked = false;
+if (document.fonts) document.fonts.ready.then(fitPills);
+// ---------- DEPLOYMENT VIEW DETAILS ----------
+const TOPO = {
+  gen: ["General pool server", "Always-on services", "These servers run the parts of the platform that are always up: the orchestrator, the database, Git, the registry, web pages, and monitoring. If a pod or a whole server fails, Kubernetes restarts the pods on another server.", ["Typically 3 servers so one can fail safely", "Moderate size: 16 to 32 cores, 64 to 128 GB RAM each"]],
+  mem: ["High-memory server", "Where the heavy work happens", "When a dataset arrives, the orchestrator creates Job pods here: one per processing step. Each pod reads the dataset from the NFS mount, does its work, writes results, and then disappears, freeing the capacity for the next dataset.", ["Several datasets process in parallel", "A rate limiter will likely need to be applied to prevent servers from receiving too many requests.", "Add servers to this pool as data volume grows"]],
+  job: ["Job pod", "Temporary, one per processing step", "A Job pod is a short-lived container that runs one step for one dataset (for example, the vendor adapter for dataset 1042), then exits. Its logs and run-result are stored by the orchestrator. This gives traceability into the exact job and code version that was executed.", ["Created automatically by the orchestrator", "If it fails, it is retried or the dataset is flagged"]],
+  nvme: ["Local NVMe scratch disk", "Fast temporary space", "Big scoring jobs spill intermediate data to these fast local disks rather than holding a terabyte in memory. The space is cleared when each job finishes.", ["8 to 30 TB per server"]],
+  gpu: ["GPU server", "Runs the local AI model", "One server with GPUs runs the open-weight language model. The only thing running on these GPUs is the AI service.", ["2 x 80 GB GPUs recommended, 1 x 48 GB minimum"]],
+  gateway: ["AI gateway", "Local AI", "The only way to reach the model. It checks who is asking, logs every request and answer, applies limits, and passes along the person's identity so any data lookups use their own permissions.", ["Network policies block every other path to the model server", "Same controls for every tool and language"]],
+  whisper: ["Speech-to-text jobs", "Local AI", "Short jobs that transcribe test conductors' voice notes with Whisper, running on the GPU when it is free. Enabling spoken precision to enhance test artifacts and metadata.", []],
+  vllm: ["vLLM model server", "Local AI service", "A long-running pod serving the open-weight model inside the cluster, reachable only through the AI gateway. Job pods and CI jobs call the models to draft adapters and specs, write summaries, and answer typed decision questions.", ["One service for text and typed answers"]],
+  runlog: ["Run-log form", "Web pod", "A small web page where test conductors confirm or correct the run details that the system pre-fills for each dataset.", []],
+  pg: ["PostgreSQL", "Database pods", "Holds the dataset registry, run log, result summaries, and the orchestrator's own records. A PgBouncer connection pooler needs to be incorporated, so that short-lived jobs and Jupyter Notebooks don't crash the database server. Intend to run as a primary plus a replica on different servers, with automated backups, so one server failing doesn't lose data.", ["Managed by the CloudNativePG operator"]],
+  daemon: ["Dagster daemon", "Orchestrator pod", "Watches the NFS share for finished datasets and, for each one, launches the Job pods on the high-memory servers in the right order.", ["Replaces the standalone directory watcher"]],
+  dagweb: ["Dagster web UI", "Orchestrator pod", "Shows every dataset run, which steps succeeded or failed, how long each took, and the full lineage from dataset to metric.", ["Where lab owners check pipeline health"]],
+  gitlab: ["GitLab", "Platform pod", "Stores all code, metric definitions, adapters, and thresholds. AI-proposed changes arrive here as merge requests for lab owners to approve.", []],
+  runner: ["GitLab Runner", "Platform pod", "Runs automated checks, including the golden dataset tests, as temporary pods whenever a change is proposed.", []],
+  web: ["Metric pages", "Web pod", "Serves the metric explorer and high-level summary as static pages, rebuilt whenever new results arrive.", []],
+  ingress: ["Ingress and certificates", "Platform pod", "The entry point to viewing every web page within the metrics pipeline and cluster. Will be served over HTTPS with certificates from the lab's internal authority.", []],
+  harbor: ["Harbor registry", "Platform pod", "Stores every container image the cluster runs. Images arrive through the approved transfer process because nothing can be pulled from the internet.", []],
+  argocd: ["Argo CD", "Platform pod", "Keeps the cluster matching what is approved in Git. Merging a change in GitLab is how everything will get deployed.", []],
+  mon: ["Monitoring", "Platform pods", "Prometheus, Alertmanager, and Grafana track server load, failed jobs, stuck datasets, and time from data arrival to published metrics.", []],
+  nfsmount: ["Lab data (NFS mount)", "Persistent volume", "The lab's existing NFS share, mounted into job pods read-only. The data should live on the NFS (or in the native location from the Post-processing).", []],
+  stdvol: ["Standardized data", "Persistent volume", "Shared storage for the vendor-neutral Parquet tables that the scoring jobs read.", ["Can be kept on a rolling window to save space"]],
+  dbvol: ["Database disks", "Persistent volumes", "Durable disks behind the PostgreSQL primary and replica.", []],
+  goldvol: ["Golden datasets", "Persistent volume", "Reference datasets with known-correct results, mounted read-only into test jobs.", []],
+  weights: ["Model weights", "Persistent volume", "The open-weight model files, brought in through the approved transfer process and mounted read-only into the model server.", []],
+  sitevol: ["Published pages", "Persistent volume", "The rebuilt static site that the web pod serves.", []],
+  nbsrv: ["Notebook server", "Analyst workbench", "The server that hosts both JupyterHub and the analysts' notebooks.", ["16 to 32 cores, 128 to 256 GB RAM to start", "Add servers as the team grows"]],
+  jhub: ["JupyterHub", "Analyst workbench", "Signs analysts in and starts a personal notebook server for each one, preloaded with the labmetrics library and the AI assistant.", ["Installed from the standard Helm chart"]],
+  nbpods: ["Analyst notebooks", "One pod per analyst", "Each analyst's JupyterLab runs in its own pod with a personal home folder, read access to the standardized data and metrics store, and the AI assistant connected to the in-lab model.", ["Stops when idle to free capacity", "Home folders kept on a persistent volume"]],
+  u_cond: ["Test conductors", "Outside the cluster", "Use the run-log form through the browser to confirm run details.", []],
+  u_owner: ["Lab owners", "Outside the cluster", "Review and approve changes in GitLab, and watch pipeline health in the Dagster web UI.", []],
+  u_mgr: ["Engineers and analysts", "Outside the cluster", "Primary goal is to enable browsing metrics and to enable analysts to explore. Should connect through a web browser on the lab network through a configured cluster ingress.", []],
+  u_airgap: ["Air-gap transfer", "Outside the cluster", "New platform releases and container images arrive as signed packages through the lab's approved transfer process and are loaded into Harbor.", []],
+  u_etl: ["Existing custom ETL", "Outside the cluster", "This is currently being characterized as a prerequisite and is an input into the metric pipeline, so there's no intention to change this.", []],
+  u_nfs: ["Lab NFS share", "Outside the cluster", "Existing storage holding the post-processed datasets. The cluster mounts it rather than copying it.", []],
+};
+function topoOverview() {
+  return `<h2>Deployment view</h2><p class="kind">What the platform looks like running on the lab's Kubernetes cluster</p>
+  <p>The cluster is a group of lab servers in three pools. The general pool runs services that are always on. The high-memory pool is mostly empty until datasets arrive; then temporary Job pods appear, process the data, and disappear. A notebook server hosts the analysts' JupyterLab sessions, and one GPU server runs the local AI model.</p>
+  <p>Data stays on the lab's existing NFS share and is read-only mounted into the container/jobs. Results go to the database and the published pages.</p>
+  <p>Select any server, pod, or volume for an explanation.</p>`;
+}
+function showTopo(tid, g) {
+  const [t, kind, d, li] = TOPO[tid];
+  svgTopo.querySelectorAll(".tnode.sel").forEach(x => x.classList.remove("sel")); g.classList.add("sel");
+  panel.innerHTML = `<h2>${esc(t)}</h2><p class="kind">${esc(kind)}</p><p>${esc(d)}</p>${li.length ? `<ul>${li.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}`;
+}
+const svgTopo = document.getElementById("topo");
+svgTopo.querySelectorAll(".tnode").forEach(g => {
+  const go = ev => { ev.stopPropagation(); showTopo(g.dataset.tid, g); };
+  g.addEventListener("click", go);
+  g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(ev); } });
+});
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", () => {
+  stopPlay(); token++; cur = -1; setFocus([], []); markStep(-1);
+  panel.innerHTML = document.getElementById("m-deploy").checked ? topoOverview() : overviewHtml();
+}));
+</script>
+
+
+</body></html>
