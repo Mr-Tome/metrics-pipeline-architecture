@@ -1,0 +1,35 @@
+# Open WebUI chat page. Talks only to the LiteLLM gateway; bundled Ollama and pipelines are off.
+image:
+  repository: ${OPEN_WEBUI_REPO}
+  tag: ${OPEN_WEBUI_TAG}
+ollama:
+  enabled: false
+pipelines:
+  enabled: false
+openaiBaseApiUrl: http://litellm.ai.svc:4000/v1
+extraEnvVars:
+  - name: OPENAI_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: open-webui-gateway-key
+        key: key
+        optional: true
+  - name: OFFLINE_MODE
+    value: "true"
+  - name: ENABLE_OLLAMA_API
+    value: "false"
+  - name: SCARF_NO_ANALYTICS
+    value: "true"
+  - name: DO_NOT_TRACK
+    value: "true"
+  - name: ANONYMIZED_TELEMETRY
+    value: "false"
+persistence:
+  enabled: true
+  size: 20Gi
+ingress:
+  enabled: true
+  class: nginx
+  host: "###ZARF_VAR_CHAT_HOST###"
+  tls: true
+  existingSecret: ai-tls

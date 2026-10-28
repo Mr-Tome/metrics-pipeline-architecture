@@ -1,0 +1,44 @@
+# LiteLLM gateway. Every client (chat page, Jupyter, VS Code, MATLAB) goes through here,
+# so sign-in keys, logging, and usage limits live in one place.
+image:
+  repository: ${LITELLM_REPO}
+  tag: ${LITELLM_TAG}
+masterkeySecretName: litellm-masterkey
+db:
+  useExisting: true
+  deployStandalone: false
+  endpoint: ai-postgres-rw.ai.svc
+  database: litellm
+  url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+  secret:
+    name: ai-postgres-app
+    usernameKey: username
+    passwordKey: password
+proxy_config:
+  model_list:
+    - model_name: gpt-oss-120b
+      litellm_params:
+        model: hosted_vllm/gpt-oss-120b
+        api_base: http://vllm.ai.svc:8000/v1
+    - model_name: whisper
+      litellm_params:
+        model: openai/Systran/faster-whisper-large-v3
+        api_base: http://whisper.ai.svc:8000/v1
+      model_info:
+        mode: audio_transcription
+  general_settings:
+    master_key: os.environ/PROXY_MASTER_KEY
+  litellm_settings:
+    telemetry: false
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: "###ZARF_VAR_API_HOST###"
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ai-tls
+      hosts:
+        - "###ZARF_VAR_API_HOST###"

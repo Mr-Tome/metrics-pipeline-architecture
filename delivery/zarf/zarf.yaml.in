@@ -1,0 +1,112 @@
+# Zarf package for the AI phase. Rendered by 20-build-zarf-package.sh, not used directly.
+# Placeholders are filled from versions.env; image list lines are filled from build/images/<COMPONENT>.txt.
+kind: ZarfPackageConfig
+metadata:
+  name: ${RELEASE_NAME}
+  description: AI service phase 1 - GPU operator, model server, gateway, chat page, database
+  version: "${RELEASE_VERSION}"
+  architecture: ${ARCH}
+
+# Set at deploy time: zarf package deploy ... --set CHAT_HOST=chat.lab.example
+variables:
+  - name: CHAT_HOST
+    description: DNS name for the chat page
+    prompt: true
+  - name: API_HOST
+    description: DNS name for the gateway API (Jupyter, VS Code, MATLAB)
+    prompt: true
+  - name: PG_INSTANCES
+    description: PostgreSQL instances. 3 in the lab (one per service node), 1 on staging.
+    default: "3"
+
+components:
+  - name: gpu-operator
+    description: NVIDIA GPU Operator. Host driver is installed separately; the operator runs the toolkit, device plugin, and monitoring.
+    required: true
+    charts:
+      - name: gpu-operator
+        url: https://helm.ngc.nvidia.com/nvidia
+        version: ${GPU_OPERATOR_VERSION}
+        namespace: gpu-operator
+        valuesFiles:
+          - values/gpu-operator.yaml
+    images:
+      ${IMAGES_GPU_OPERATOR}
+
+  - name: database
+    description: CloudNativePG operator and one PostgreSQL cluster (gateway logs, chat history, pgvector for document search)
+    required: true
+    charts:
+      - name: cloudnative-pg
+        url: https://cloudnative-pg.github.io/charts
+        version: ${CNPG_CHART_VERSION}
+        namespace: cnpg-system
+        valuesFiles:
+          - values/cnpg.yaml
+    manifests:
+      - name: ai-postgres
+        namespace: ai
+        files:
+          - manifests/namespace.yaml
+          - manifests/pg-cluster.yaml
+    images:
+      ${IMAGES_DATABASE}
+    actions:
+      onDeploy:
+        after:
+          - description: Wait for PostgreSQL before the gateway starts
+            maxTotalSeconds: 900
+            wait:
+              cluster:
+                kind: clusters.postgresql.cnpg.io
+                name: ai-postgres
+                namespace: ai
+                condition: Ready
+
+  - name: model-server
+    description: vLLM serving the language model from local NVMe on the GPU node
+    required: true
+    manifests:
+      - name: vllm
+        namespace: ai
+        files:
+          - manifests/vllm.yaml
+    images:
+      - "${VLLM_IMAGE}"
+
+  - name: transcription
+    description: faster-whisper speech-to-text with an OpenAI-compatible API
+    required: false
+    manifests:
+      - name: whisper
+        namespace: ai
+        files:
+          - manifests/whisper.yaml
+    images:
+      - "${WHISPER_IMAGE}"
+
+  - name: gateway
+    description: LiteLLM gateway - API keys, logging, usage limits. Jupyter, VS Code, and MATLAB call this.
+    required: true
+    charts:
+      - name: litellm
+        url: oci://ghcr.io/berriai/litellm-helm
+        version: ${LITELLM_CHART_VERSION}
+        namespace: ai
+        valuesFiles:
+          - values/litellm.yaml
+    images:
+      ${IMAGES_GATEWAY}
+
+  - name: chat
+    description: Open WebUI chat page, pointed at the gateway
+    required: true
+    charts:
+      - name: open-webui
+        url: https://helm.openwebui.com
+        version: ${OPEN_WEBUI_CHART_VERSION}
+        namespace: ai
+        valuesFiles:
+          - values/open-webui.yaml
+    images:
+      ${IMAGES_CHAT}

@@ -1,0 +1,3 @@
+# CloudNativePG operator. Chart defaults are fine; the operator image is pinned by the chart version.
+monitoring:
+  podMonitorEnabled: false

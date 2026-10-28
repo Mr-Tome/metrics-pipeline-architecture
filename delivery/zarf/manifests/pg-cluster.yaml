@@ -1,0 +1,21 @@
+# One PostgreSQL cluster, three instances (one per service node) for failover.
+# The "standard" image includes pgvector, used later for document search.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: ai-postgres
+  namespace: ai
+spec:
+  instances: ###ZARF_VAR_PG_INSTANCES###
+  imageName: ${POSTGRES_IMAGE}
+  storage:
+    size: 100Gi
+  bootstrap:
+    initdb:
+      database: litellm
+      owner: litellm
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS vector;
+  affinity:
+    nodeSelector:
+      node-role.ai/service: "true"

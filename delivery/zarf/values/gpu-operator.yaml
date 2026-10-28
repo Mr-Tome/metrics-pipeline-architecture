@@ -1,0 +1,17 @@
+# GPU Operator values for RKE2. The NVIDIA driver is installed on the host
+# (60-pull-nvidia-driver.sh), so the operator's driver container is disabled.
+driver:
+  enabled: false
+toolkit:
+  enabled: true
+  env:
+    - name: CONTAINERD_CONFIG
+      value: /var/lib/rancher/rke2/agent/etc/containerd/config.toml.tmpl
+    - name: CONTAINERD_SOCKET
+      value: /run/k3s/containerd/containerd.sock
+    - name: CONTAINERD_RUNTIME_CLASS
+      value: nvidia
+    - name: CONTAINERD_SET_AS_DEFAULT
+      value: "true"
+dcgmExporter:
+  enabled: true

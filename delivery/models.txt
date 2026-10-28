@@ -1,0 +1,6 @@
+# Models to pull. One per line:  name  repo  revision  layout
+#   revision: a branch or tag; the script resolves it to a commit and records it.
+#   layout:   local = plain folder (vLLM reads it), cache = Hugging Face cache layout (whisper server reads it)
+# Model selection, origin, and license are subject to program approval (BOM, Assumptions section 2).
+gpt-oss-120b              openai/gpt-oss-120b               main  local
+faster-whisper-large-v3   Systran/faster-whisper-large-v3   main  cache

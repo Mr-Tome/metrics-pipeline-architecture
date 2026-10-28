@@ -1,0 +1,6 @@
+# Python packages analysts install on their own machines (Jupyter AI and the OpenAI client).
+# 50-pull-client-tools.sh downloads wheels for these plus all dependencies, and writes the
+# resolved versions to clients/RESOLVED.txt so the exact set is recorded.
+jupyter-ai
+langchain-openai
+openai
