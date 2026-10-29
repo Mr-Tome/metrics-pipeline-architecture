@@ -37,7 +37,7 @@ Government pricing (GSA, SEWP) is welcome.
 |---|---|---|---|---|---|---|
 | 8a | 10G optic, lab end of the uplink: goes in the lab C9300-48S (C9300-NM-8X port) | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
 | 8b | 10G optic, our end of the uplink: goes in our switch (item 4). Fiber (8c) joins it to 8a. | Dell 407-BBOU | 2 | $150 | $300 | https://www.networktigers.com/a/s/products/407-bbou-dell-transceiver-new |
-| 8c | Fiber patch cord, LC-LC duplex, OM4, 3 m | any | 4 | $25 | $100 | |
+| 8c | Fiber patch cord, LC-LC duplex, OM4. 3 m if the lab has installed fiber with a patch panel at each end (one cord per link at each end). If not, 2 cords cut to the measured run, up to 100 m. See question 7. | any | 4 | $25 | $100 | |
 | 8d | 8 x 10G uplink module for the C9300-48S. **Only if the lab's switch has no free 10G ports.** | Cisco C9300-NM-8X | 1 | $1,600 | $1,600 | https://www.disctech.com/Cisco-9300-NM-8X-8-Port-10GE-Network-Module |
 | 9 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,100 | $1,100 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
 | 10 | Blanking panels, tool-less 1U, 10-pack (both racks) | Vertiv VRA2000 | 8 | $85 | $680 | https://www.cdw.com/product/vertiv-rack-toolless-airflow-blanking-panel-1u/5323823 |
@@ -90,3 +90,6 @@ With both, the total is $241,910.
 6. **Operating system.** Does the lab require a specific server OS (for example RHEL 9 with STIG)? If it
    must be RHEL, each server needs a Red Hat subscription (item 15, about $1,400 per server per year),
    which is not in the original BOM. If the lab allows it, Rocky Linux 9 is compatible and free.
+7. **Fiber to the lab switch.** The lab's C9300-48S is not in our row. Is there installed fiber with a
+   patch panel near our racks and near that switch? If yes, 3 m patch cords at each end are enough. If
+   no, how long is the cable path, and will the lab run the fiber or should we order long cords?
