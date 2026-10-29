@@ -22,7 +22,7 @@ Government pricing (GSA, SEWP) is welcome.
 | 2 | GPU, installed in item 1 (select in item 1 as "NVIDIA RTX PRO 6000 Blackwell Server Edition - 96GB", qty 2) | NVIDIA RTX PRO 6000 Blackwell Server Edition 96 GB, mfr NVRTXPRO6000TCGPU-KIT | 2 | $18,246 | $36,492 | https://www.cdw.com/product/nvidia-rtx-pro-6000-blackwell-server-edition-graphics-card-rtx-pro-60/8426124 |
 | 3 | Service node, 1U. Redundant 1300 W PSUs are part of the base system (the "Barebone" line), nothing to select. Select: AMD EPYC 9115 (16-core); 128 GB DDR5 ECC RDIMM; 2 x 1.92TB U.2 NVMe; Broadcom N225P OCP 3.0 (2 x 25G SFP28); 5 Year Advanced Parts Replacement Warranty | Thinkmate RAX RE95-1104-01 | 3 | $22,083 | $66,249 | https://www.thinkmate.com/system/rax-re95-1104-01 |
 | 4 | 25G switch, 48 x SFP28, 4 x QSFP28, OS10. On the Dell page choose S5248F-ON, then **airflow: PSU to I/O (port-side exhaust)**. New, not refurbished. | Dell PowerSwitch S5248F-ON, 210-APFB | 1 | $3,515 | $3,515 | https://www.dell.com/en-us/shop/povw/networking-s-series-25-100gbe |
-| 5 | 25G SFP28 direct attach cable, 3 m | Dell 470-ACEU | 10 | $100 | $1,000 | https://www.networktigers.com/a/s/products/dell-470-aceu-54m38-3m-25gb-sfp28-passive-direct-attach-cable |
+| 5 | 25G SFP28 direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Dell 470-ACEU | 10 | $100 | $1,000 | https://www.networktigers.com/a/s/products/dell-470-aceu-54m38-3m-25gb-sfp28-passive-direct-attach-cable |
 
 **Staging**
 
@@ -35,8 +35,8 @@ Government pricing (GSA, SEWP) is welcome.
 
 | # | Item | Part / model | Qty | Est. each | Est. total | Link |
 |---|---|---|---|---|---|---|
-| 8a | 10G optic for the lab's C9300-48S | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
-| 8b | 10G optic for our switch (item 4) | Dell 407-BBOU | 2 | $150 | $300 | https://www.networktigers.com/a/s/products/407-bbou-dell-transceiver-new |
+| 8a | 10G optic, lab end of the uplink: goes in the lab C9300-48S (C9300-NM-8X port) | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
+| 8b | 10G optic, our end of the uplink: goes in our switch (item 4). Fiber (8c) joins it to 8a. | Dell 407-BBOU | 2 | $150 | $300 | https://www.networktigers.com/a/s/products/407-bbou-dell-transceiver-new |
 | 8c | Fiber patch cord, LC-LC duplex, OM4, 3 m | any | 4 | $25 | $100 | |
 | 8d | 8 x 10G uplink module for the C9300-48S. **Only if the lab's switch has no free 10G ports.** | Cisco C9300-NM-8X | 1 | $1,600 | $1,600 | https://www.disctech.com/Cisco-9300-NM-8X-8-Port-10GE-Network-Module |
 | 9 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,100 | $1,100 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
