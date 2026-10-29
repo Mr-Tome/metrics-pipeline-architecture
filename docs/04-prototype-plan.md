@@ -4,16 +4,25 @@
 
 ## 1. The short answer
 
-**The prototype is the staging environment.** The BOM already buys a staging GPU server (items S1, S2, S3:
-same platform as the lab, 1 GPU, 2 NVMe). Order it first, set it up on the unclassified side, and let
-unclassified users try the AI service on it. When the lab hardware arrives, the same box becomes staging,
-which is its job in the BOM anyway. Nothing is rebuilt and nothing is thrown away.
+**The prototype is the lab rack, and it is treated as production from day 1.** Users already have AI on
+the unclassified side, so the goal is AI inside the lab. A separate group orders the equipment, and the
+work happens in the server room.
 
-**About "direct connect to the GPUs":** this is fine for the unclassified staging server. One workstation can
-plug straight into the server's second 25G port with a cable, no switch needed. It is **not** fine for the
-lab GPU servers once they are in the lab. Lab hardware must never be connected to unclassified
+**Plan for no internet during the build.** Unless the ISSM says otherwise ([07](07-open-questions.md), L5),
+all software arrives on transfer media. A connected **build workstation** on the unclassified side does the
+downloading. It runs the scripts in `delivery/`, which write one checked bundle to the transfer drive.
+Any connected Linux machine with about 2 TB free disk will do; it doesn't need to be bought.
+
+**Staging server (BOM S1-S3).** It stays in the BOM. Its job is to rehearse each install and update before
+it reaches the lab. Where it lives, and whether it gets internet, is a question for the ISSM
+([09](09-site-visit-checklist.md)). If it can sit on the unclassified side with internet, that is where
+debugging is easiest.
+
+**About "direct connect to the GPUs":** with no internet, the direct cable doesn't change much. It is
+only useful for one person testing on the staging server, on the unclassified side (section 4). It is
+**not** allowed for the lab GPU servers. Lab hardware must never be connected to unclassified
 machines. Hardware and media only move one way (into the lab). Check the exact rules with the lab ISSM
-before connecting anything (see [07-open-questions.md](07-open-questions.md), S1-S3).
+(see [07-open-questions.md](07-open-questions.md), S1-S3).
 
 ## 2. Why this order works
 
@@ -30,7 +39,7 @@ before connecting anything (see [07-open-questions.md](07-open-questions.md), S1
 ### P0. Order and prepare (week 0)
 
 - [ ] Send [01-facility-requirements.md](01-facility-requirements.md) to the lab.
-- [ ] Order the staging hardware (S1-S3) and the staging PDUs (A2) first. Order lab hardware in the same
+- [ ] Send [08-quote-request-email.md](08-quote-request-email.md) to purchasing. Order lab and staging hardware in the same
       PO or right after. GPU lead times can run long.
 - [ ] Pick a build workstation on the unclassified side: Linux x86_64, internet access, about 2 TB
       free disk. An existing machine is fine.

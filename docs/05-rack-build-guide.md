@@ -33,9 +33,8 @@ work fine for the sliding-rail steps, which are the same on almost every 2U serv
 
 ## 1. Before you start
 
-**Tools:** #2 Phillips, cage-nut tool (if the rack uses cage nuts), label maker, velcro (not zip ties),
-flashlight, ESD wrist strap, laptop with USB crash-cart adapter (BOM addition A7), console cable
-(USB-C or RJ45-to-USB) for the switches.
+**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 15) and the rack
+console (item 14). Use velcro, not zip ties.
 
 **People:** two people for the GPU server. Never lift it alone.
 
@@ -92,15 +91,38 @@ Install heaviest first, at the bottom, so the rack can't tip.
 
 ![Power wiring](diagrams/power-wiring.svg)
 
+**What A and B mean.** The rack gets two separate circuits, A and B, ideally from different panels or
+UPS paths. Each circuit feeds its own rack PDU, so there are two PDU input cords and two receptacles.
+Every server has two or more power supplies, and each supply has its own cord. Half of a server's
+cords go to PDU-A and half to PDU-B. If circuit A fails, everything keeps running on B. Belden's
+explainer has a picture of this:
+https://www.belden.com/blog/exploring-dual-power-feeds-in-data-centers
+
+**How you know which is A and which is B.** Facilities labels each receptacle with its panel and
+breaker numbers, for example `PDU-2A / CB 12,14,16`. Copy those labels during the site visit
+([09](09-site-visit-checklist.md)). Then put matching labels on PDU-A and PDU-B and on their input cords.
+
+0. **Before plugging anything in:** facilities confirms that both breakers (A and B) are off and
+   locked out per the lab's lockout/tagout process. Check that the receptacle labels match the circuits
+   facilities assigned to the rack.
 1. Label every cord at both ends **before** plugging in: `gpu01-PSU1 / A-01`, and so on.
 2. Plug every device's odd-numbered PSU into PDU-A and its even-numbered PSU into PDU-B. **Never put
-   both PSUs of one device on the same PDU.**
-3. Spread the load across the PDU's three outlet banks (phases). Suggested: gpu01 PSUs on bank 1,
-   service nodes on bank 2, switches on bank 3.
-4. Plug the PDU inputs into the L21-30R receptacles. Facility staff turn the breakers on.
+   both PSUs of one device on the same PDU.** The GPU server has 4 PSUs: PSU1 and PSU3 to A, PSU2 and PSU4 to B.
+3. Spread the load across the PDU's three phases. A 3-phase PDU groups its outlets into three banks,
+   printed on the PDU face (for example L1-L2, L2-L3, L3-L1). Each bank is one phase pair. Put roughly
+   equal load on each bank:
+   - Bank 1: gpu01 PSUs
+   - Bank 2: service nodes
+   - Bank 3: switches and console
+
+   After power-on, the PDU display shows the current on each phase. The three readings should be
+   within a few amps of each other. If one is much higher, move a cord to a lighter bank.
+4. Plug the PDU inputs into the L21-30R receptacles. Facilities removes the lockout and switches the
+   breakers on.
 5. Power on in this order: switches, then service nodes, then gpu01.
-6. **Feed test:** with everything running, have facilities open breaker A. Everything must stay up. Close it,
-   wait 2 minutes, open breaker B. Same result. Record per-phase current from the PDU display.
+6. **Feed test:** with everything running, facilities switches breaker A **off**. Everything must stay up
+   on feed B. Facilities switches A back on. Wait 2 minutes, then repeat with breaker B off. Same result.
+   Record the per-phase current from each PDU display.
 
 ## 5. Network cabling
 

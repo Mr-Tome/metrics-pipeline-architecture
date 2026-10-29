@@ -4,13 +4,9 @@
 
 ## 1. What the lab told us
 
-- 2 x "C9300-485" access switches, uplinked to a C9500X core.
-- Links between them "might be fiber" and are 10Gb.
-
-"C9300-485" is almost certainly a misread of a Catalyst 9300 model. **C9300-48S** (48 x 1G SFP) is the
-closest match. Other options are C9300-48P, -48T, -48U, or -48UXM. The exact model changes what the
-user-facing ports are, but it does not change the conclusion below. Ask the network team for
-`show inventory` from each switch ([07-open-questions.md](07-open-questions.md), N1).
+- 2 x **C9300-48S** access switches (48 x 1G SFP), both uplinked to a C9500X core over 10G.
+- One C9300-48S is in the analysts' building. The other is in the building with the racks.
+- Analyst traffic path: analyst desk, analysts' C9300-48S, C9500X core, rack building C9300-48S, our switch.
 
 ## 2. Is 10G enough? For the AI phase, yes, by a wide margin
 
@@ -32,8 +28,9 @@ A 10G uplink carries about 1,250 MB/s. Twenty users chatting use well under 1% o
 1. **Inside our rack (east-west).** The gateway, chat page, and database on the service nodes talk to
    the GPU server constantly. That is why the BOM has its own 25G switch (sw01). This traffic never
    leaves the rack.
-2. **Later pipeline phases.** Bulk test-data onboarding (telemetry, video, large datasets) can saturate
-   10G. That is a future concern, and the preferred uplink (section 3, option A) already handles it.
+2. **Later pipeline phases, maybe.** If a later phase moves large test data sets into the rack, 10G
+   could become the limit. Whether that happens depends on future pipeline scope, which isn't set.
+   It doesn't change this purchase.
 3. **Multi-server model serving.** Splitting one model across two servers needs very fast links
    (InfiniBand or RoCE at 200-400G). **We avoid this by design.** gpt-oss-120b is about 65 GB at its native
    4-bit format, so it fits on one 96 GB GPU. Adding users adds more copies of the model on more GPUs,
@@ -41,7 +38,13 @@ A 10G uplink carries about 1,250 MB/s. Twenty users chatting use well under 1% o
 
 ## 3. How our rack connects
 
-**Option A (preferred): lab switch to the C9500X core, 2 x 100G.**
+The lab is more likely to allow option B. The quote request ([08](08-quote-request-email.md)) prices
+option B as item 9, with option A as item 9-alt at the same budget.
+
+**Option A (if allowed): lab switch to the C9500X core, 2 x 100G.**
+
+We do not buy a C9500X. The lab owns it. We buy only the optics that plug into its ports. 100G is 10 times
+10G per link, but the AI phase does not need it (section 2).
 
 - The C9500X-28C8D has 28 x 100G QSFP28 and 8 x 400G QSFP-DD ports. If two 100G ports are free,
   this is the cleanest design. It does not touch the access layer, and it is ready for the later pipeline.
@@ -52,11 +55,11 @@ A 10G uplink carries about 1,250 MB/s. Twenty users chatting use well under 1% o
 - Coding: use Cisco-coded optics in the C9500X and Dell-compatible optics in sw01. Check the Cisco
   optics-to-device compatibility matrix for the lab's IOS-XE version before ordering.
 
-**Option B (fallback): 2 x 10G from the C9300 network modules.**
+**Option B (likely): 2 x 10G to the C9300-48S in the rack building.**
 
-- Use this if the core has no free ports or the network team won't allow it.
-- It requires the C9300s to have a network module with free 10G ports (for example C9300-NM-8X,
-  8 x 10G SFP+).
+- Use this if the network team won't allow a direct core connection.
+- It requires that C9300-48S to have a network module with free 10G ports (C9300-NM-8X,
+  8 x 10G SFP+). If it has none, the quote includes one.
 - sw01's 25G SFP28 ports accept 10G SFP+ optics. No extra hardware is needed on our side beyond
   10GBASE-SR (multimode) or -LR (single-mode) optics.
 - This is enough for the whole AI phase (section 2). Later pipeline phases may need Option A.

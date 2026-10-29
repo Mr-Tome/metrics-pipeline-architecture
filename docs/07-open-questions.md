@@ -7,8 +7,8 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| F1 | The model number given, CR035RA1A7X..., decodes to a **Liebert CRV in-row cooling unit** (35 kW, air cooled), not aisle containment or a rack. What are the **rack** model numbers? (Label on the rear door or frame, starts with VR.) | Facilities | Assume Vertiv VR, 42U, 600 mm wide, 1100 mm deep | |
-| F2 | Are the 96 racks all the same model, and which row and rack position will we get? Is that row served by a CRV and inside the containment? | Facilities | One rack in a contained row with a CRV | |
+| F1 | The model number given, CR035RA1A7X..., decodes to a **Liebert CRV in-row cooling unit** (35 kW, air cooled), not aisle containment or a rack. What we need from the rack: depth between rails, hole type, existing PDUs. The model label is a shortcut to those. | Site visit ([09](09-site-visit-checklist.md)) | Assume Vertiv VR, 42U, 600 mm wide, 1100 mm deep, square holes | |
+| F2 | Are the 96 racks all the same model, and which position will we get? | Facilities | One rack in a contained row with a CRV | Same model, all empty, any position. Rows of 8, two rows joined with glass doors (aisle containment). Ask for: one rack near a CRV, the next rack held for growth. Confirm hot or cold aisle containment. |
 | F3 | Can you provide 2 x 208V 3-phase WYE 30A circuits on NEMA L21-30R per rack, from separate A and B sources? | Facilities | Yes (README says power is sufficient) | |
 | F4 | Is facility ground available at the rack? | Facilities | Yes | |
 | F5 | Any rule on rack PDU brand or model (some sites standardize on one)? | Facilities | Vertiv Geist, to match the racks | |
@@ -17,13 +17,13 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| N1 | Exact access switch model: "C9300-485" is probably C9300-48S. Please send `show inventory` from each switch. | Lab network team | C9300-48S with an 8 x 10G network module | |
-| N2 | Exact core model and two free 100G QSFP28 ports? (`show interfaces status`) | Lab network team | C9500X-28C8D, ports available, so option A | |
-| N3 | Fiber type in the plant: multimode OM4 (MPO or LC) or single-mode? | Lab network team | OM4 MPO, 100G-SR4 | |
-| N4 | Are the existing 10G links between access and core in a port-channel? What is their busy-hour 5-minute rate? | Lab network team | Bonded, under 50% | |
-| N5 | IP subnets for servers (/27) and BMC (/28), plus DNS names for the chat and API endpoints | Lab network team | Assigned at install | |
-| N6 | DNS, NTP, and the internal CA (for the HTTPS certificate) | Lab network team | Lab provides all three | |
-| N7 | Where does the out-of-band management switch uplink go? | Lab network team | Lab management VLAN | |
+| N1 | Exact access switch model | Lab network team | | C9300-48S (confirmed). One in the analysts' building, one in the rack building, both uplinked to the C9500X. |
+| N2 | May our switch connect directly to the C9500X core, or only to the C9300-48S in the rack building? Free 10G ports on that C9300-48S? (The network team runs `show interfaces status`; we have no access to their switches.) | Lab network team | Through the C9300-48S, 2 x 10G (option B, quote item 9) | Likely not direct to the core. Open. |
+| N3 | Fiber type between that switch and our rack: multimode or single-mode, LC or MPO? | Lab network team | OM4 multimode, LC | |
+| N4 | Load on the existing 10G links between the C9300s and the core | Lab network team | Under 50% | Low priority. Our racks are empty, but these links already carry other traffic. Ask only if we connect through them. |
+| N5 | IP subnets for servers (/27) and BMC (/28), plus DNS names for the chat and API endpoints | Lab network team | Assigned at install | Not needed for purchasing. Ask after the order. |
+| N6 | DNS, NTP, and the internal CA (for the HTTPS certificate) | Lab network team | Lab provides all three | Not needed for purchasing. Ask after the order. |
+| N7 | Where does the management switch uplink go? | Lab network team | Lab management VLAN | Not needed for purchasing. Ask after the order. |
 
 ## Security (S)
 
@@ -40,16 +40,17 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| L1 | Server OS and version (RHEL 9? Rocky? Ubuntu?) and whether a local package mirror exists | Lab IT | RHEL 9 with a lab mirror | |
-| L2 | Does the lab already run Kubernetes? (BOM: "RKE2 or the lab's existing Kubernetes") | Lab IT | No; we bring RKE2 | |
-| L3 | Python version on analyst machines, and Windows or Linux? | Lab IT | Python 3.11, both | |
+| L1 | Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? Is there a package mirror? | Lab IT, ISSM | RHEL 9 | Our choice unless accreditation says otherwise. It matters for two reasons: the NVIDIA driver is built against the OS kernel, so the driver package must match it; and RHEL needs paid subscriptions (not in the BOM), while Rocky Linux 9 is free and compatible. |
+| L2 | Does the lab already run Kubernetes? | Lab IT | | No. We bring our own (RKE2). |
+| L3 | Python versions on analyst machines, and Windows or Linux? | Lab IT | | Many versions, mostly Windows, some Linux. Client packages must cover Python 3.9 to 3.13 on both. |
+| L5 | Internet access during the initial build and debug? | ISSM | No. All software arrives on transfer media. | |
 | L4 | Is MATLAB allowed to make HTTPS calls to an internal service? | Lab IT | Yes | |
 
 ## Vendor (V)
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| V1 | GPU server PSU wattage, count, and inlet type (C14 or C20) | Thinkmate | 4 x 2000 W+, C20 | |
+| V1 | GPU server PSU inlet type (C14 or C20) | Thinkmate | C20 | 4 x 2000 W (Thinkmate page). Inlet still open. |
 | V2 | Does the quote include a dual-port 25GbE NIC that does not take a GPU slot? | Thinkmate | Add an OCP 3.0 2 x 25G NIC | |
 | V3 | Lead time for the GPUs | Thinkmate, CDW | 4 to 8 weeks | |
 | V4 | Rail kit fits a square-hole rack 1100 mm deep? | Thinkmate | Yes | |

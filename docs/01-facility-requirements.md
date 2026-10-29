@@ -24,7 +24,7 @@ Status of each number:
 | Airflow | Front to back. Cold aisle intake, hot aisle exhaust. | Front to back |
 | Intake air | 18 to 27 C (64.4 to 80.6 F), the ASHRAE recommended range | Same |
 | Weight | under 200 kg (440 lb) of equipment in the rack | under 80 kg |
-| Network | See section 5 | Unclassified LAN drop, 10G preferred |
+| Network | See section 5 | Unclassified LAN drop, 10G preferred (only if staging lives on the unclassified side) |
 
 Nothing in this build is non-standard: no liquid cooling, no 400V or 480V, no special connectors. The only
 item to watch is the GPU server power cord type (section 3).
@@ -45,7 +45,7 @@ The lab asked us not to question facility capacity. Two things set our ask:
 From the BOM (`Assumptions` tab, section 4). Maximum draw, not typical draw. Typical inference load
 runs well below this.
 
-| Tag | Device | Qty (20 users) | Max W each | Input | Power cord (device end to PDU end) | Status |
+| Tag | Device | Qty (20 users) | Max W each | Input | Power cord (device end to rack PDU end; the rack PDU plugs into the facility receptacle) | Status |
 |---|---|---|---|---|---|---|
 | gpu01 | 2U GPU server, 2 x RTX PRO 6000 Server Edition | 1 | 2,100 (900 platform + 2 x 600 GPU) | 200-240V AC, 50/60 Hz, redundant PSUs | C20 to C19, or C14 to C13. Depends on PSU wattage. | **Confirm** with Thinkmate |
 | svc01-03 | 1U service node | 3 | 400 | 100-240V AC, 2 PSUs | C14 to C13 | Confirm |
