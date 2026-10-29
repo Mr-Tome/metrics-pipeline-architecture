@@ -11,7 +11,7 @@ can be sent with the quote request. All other links go straight to the exact par
 
 **Subject:** Quote request: GPU servers and rack items, metrics analysis pipeline (20-user build)
 
-Please get quotes for the items below. Estimated total is $231,310, under the $250,000 limit.
+Please get quotes for the items below. Estimated total is $231,420, under the $250,000 limit.
 Government pricing (GSA, SEWP) is welcome.
 
 **Lab**
@@ -37,8 +37,9 @@ Government pricing (GSA, SEWP) is welcome.
 |---|---|---|---|---|---|---|
 | 8a | 10G optic, lab end of the uplink: goes in the lab C9300-48S (C9300-NM-8X port) | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
 | 8b | 10G optic, our end of the uplink: goes in our switch (item 4). Fiber (8c) joins it to 8a. | Dell 407-BBOU | 2 | $150 | $300 | https://www.networktigers.com/a/s/products/407-bbou-dell-transceiver-new |
-| 8c | Fiber patch cord, LC-LC duplex, OM4. 3 m if the lab has installed fiber with a patch panel at each end (one cord per link at each end). If not, 2 cords cut to the measured run, up to 100 m. See question 7. | any | 4 | $25 | $100 | |
-| 8d | 8 x 10G uplink module for the C9300-48S. **Only if the lab's switch has no free 10G ports.** | Cisco C9300-NM-8X | 1 | $1,600 | $1,600 | https://www.disctech.com/Cisco-9300-NM-8X-8-Port-10GE-Network-Module |
+| 8c | Fiber cord, LC-LC duplex, OM4, one per uplink, run directly from our switch to the lab switch. Length to the measured cable path (estimate 30 m; plenum or riser rated if the lab requires). See question 7. | any | 2 | $80 | $160 | |
+| 8d | Fiber patch cord, LC-LC duplex, OM4, 3 m (spares, and for the lab's patch panel if they install one) | any | 2 | $25 | $50 | |
+| 8e | 8 x 10G uplink module for the C9300-48S. **Only if the lab's switch has no free 10G ports.** | Cisco C9300-NM-8X | 1 | $1,600 | $1,600 | https://www.disctech.com/Cisco-9300-NM-8X-8-Port-10GE-Network-Module |
 | 9 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,100 | $1,100 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
 | 10 | Blanking panels, tool-less 1U, 10-pack (both racks) | Vertiv VRA2000 | 8 | $85 | $680 | https://www.cdw.com/product/vertiv-rack-toolless-airflow-blanking-panel-1u/5323823 |
 | 11 | Cat6 patch cable, 3 ft, 10-pack | any | 2 | $72 | $144 | |
@@ -52,9 +53,9 @@ Government pricing (GSA, SEWP) is welcome.
 |---|---|
 | Lab (1-5) | $155,048 |
 | Staging (6-7) | $66,038 |
-| Network, rack, setup (8-14) | $10,224 |
-| **Total** | **$231,310** |
-| Left under $250,000 | $18,690 |
+| Network, rack, setup (8-14) | $10,334 |
+| **Total** | **$231,420** |
+| Left under $250,000 | $18,580 |
 
 **Only if needed (not in the total)**
 
@@ -63,7 +64,7 @@ Government pricing (GSA, SEWP) is welcome.
 | 15 | Red Hat Enterprise Linux Server, Standard, 1 year, 2 sockets, 1 physical node (RH00004) | If the OS must be RHEL (question 6). One per server. Can also be selected in the Thinkmate configurator ("Red Hat Enterprise Linux 9 Server (Standard) (1 Year)"). Rocky Linux 9 is free and needs none. | 5 | $7,000 per year | https://cdw.com/product/red-hat-enterprise-linux-server-standard-subscription-2-sockets-1-phys/6905904 |
 | 16 | Rack PDU for staging, Vertiv Geist MNR3E1R6-12CF18-3TL21A0H10-S (208V 3-phase, L21-30P, 12 x C13/C19) | If staging goes somewhere without rack PDUs | 2 | $3,600 | https://icgsupply.com/products/geist-rpdu-mnr3e1r6-12cf18-3tl21a0h10-s-12-outlets-pdu |
 
-With both, the total is $241,910.
+With both, the total is $242,020.
 
 **Setup checklist (item 14)**
 
@@ -90,6 +91,7 @@ With both, the total is $241,910.
 6. **Operating system.** Does the lab require a specific server OS (for example RHEL 9 with STIG)? If it
    must be RHEL, each server needs a Red Hat subscription (item 15, about $1,400 per server per year),
    which is not in the original BOM. If the lab allows it, Rocky Linux 9 is compatible and free.
-7. **Fiber to the lab switch.** The lab's C9300-48S is not in our row. Is there installed fiber with a
-   patch panel near our racks and near that switch? If yes, 3 m patch cords at each end are enough. If
-   no, how long is the cable path, and will the lab run the fiber or should we order long cords?
+7. **Fiber to the lab switch.** There are no fiber patch panels in the racks, and the lab's C9300-48S is
+   not in our row. Where is that switch, and how long is the cable path to our racks (overhead tray or
+   under the raised floor)? Will the lab run the fiber, or should we order long cords (item 8c)? Does the
+   lab require plenum or riser rated cable?

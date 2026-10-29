@@ -26,7 +26,7 @@ C = dict(gpu="#c8e6c9", gpur="#eeeeee", svc="#bbdefb", sw="#ffe0b2", oob="#fff9c
 # ---------------------------------------------------------------- rack elevation
 U = 16
 LAYOUT = {  # top U of each item: (height in U, label, color)
-    42: (1, "Fiber patch panel, only if needed", C["patch"]),
+    42: (1, "Blanking (fiber patch panel later, if the lab adds one)", C["patch"]),
     41: (1, "sw01  Lab switch, Dell S5248F-ON (ports face rear)", C["sw"]),
     40: (1, "oob01  1G management switch (ports face rear)", C["oob"]),
     21: (1, "con01  Rack console, 1U LCD and keyboard (pull out to use)", C["patch"]),
@@ -144,46 +144,49 @@ def box(x, y, w, h, title, sub, fill):
 
 def network_svg():
     b = [text(30, 34, "Network cabling: lab", 20, weight="bold"),
-         text(30, 56, "The lab switch hangs off the existing core. Users reach the AI service through their normal access switches. Nothing about the existing user network changes.", 12, fill="#444")]
-    b.append(box(80, 90, 250, 70, "Analyst workstations", ["Jupyter, VS Code, MATLAB, browser", "existing desks"], "#f3e5f5"))
-    b.append(box(80, 210, 250, 70, "Access: Cisco C9300-48? x2", ["existing; model to confirm", "10G fiber uplinks to core"], "#e0e0e0"))
-    b.append(box(80, 340, 250, 70, "Core: Cisco C9500X", ["existing; 100G QSFP28 ports", "need 2 free ports (preferred)"], "#e0e0e0"))
-    b.append(line(205, 160, 205, 210, C["cu"], 2))
-    b.append(text(215, 190, "1G copper or fiber (existing)", 10.5, fill=C["cu"]))
-    b.append(line(195, 280, 195, 340, C["fiber"], 3))
-    b.append(line(215, 280, 215, 340, C["fiber"], 3))
-    b.append(text(225, 315, "2 x 10G fiber (existing)", 10.5, fill=C["fiber"]))
-    b.append(box(540, 340, 500, 70, "sw01 Lab switch, Dell S5248F-ON", ["48 x 25G SFP28, 4 x 100G QSFP28", "new, in the lab rack"], C["sw"]))
-    b.append(path("M330 365 L540 365", C["fiber"], 4))
-    b.append(path("M330 385 L540 385", C["fiber"], 4))
-    b.append(text(435, 357, "Option A: 2 x 100G fiber (LACP)", 11, "middle", "bold", C["fiber"]))
-    b.append(text(435, 402, "C9500X 100G port to sw01 QSFP28", 10, "middle", fill=C["fiber"]))
-    b.append(path("M330 240 C 450 240, 600 260, 640 340", C["fiber"], 2, "6 4"))
-    b.append(text(500, 245, "Option B (fallback): 2 x 10G from C9300 NM-8X", 10.5, fill=C["fiber"]))
-    b.append(text(500, 259, "to sw01 SFP28 ports running at 10G", 10.5, fill=C["fiber"]))
+         text(30, 56, "Our switch connects to the C9300-48S in the rack building. Users reach the AI service through their normal switches. The existing network does not change.", 12, fill="#444")]
+    b.append(box(80, 80, 250, 62, "Analyst workstations", ["Jupyter, VS Code, MATLAB, browser"], "#f3e5f5"))
+    b.append(box(80, 180, 250, 62, "Cisco C9300-48S", ["existing, analysts' building"], "#e0e0e0"))
+    b.append(box(80, 280, 250, 62, "Cisco C9500X core", ["existing"], "#e0e0e0"))
+    b.append(box(80, 380, 250, 70, "Cisco C9300-48S", ["existing, rack building", "C9300-NM-8X: 8 x 10G SFP+"], "#e0e0e0"))
+    b.append(line(205, 142, 205, 180, C["cu"], 2))
+    b.append(text(215, 166, "1G (existing)", 10.5, fill=C["cu"]))
+    for x0, y0 in ((195, 242), (195, 342)):
+        b.append(line(x0, y0, x0, y0 + 38, C["fiber"], 3))
+        b.append(line(x0 + 20, y0, x0 + 20, y0 + 38, C["fiber"], 3))
+        b.append(text(225, y0 + 24, "10G fiber (existing)", 10.5, fill=C["fiber"]))
+    b.append(box(540, 380, 500, 70, "sw01 Lab switch, Dell S5248F-ON", ["48 x 25G SFP28, 4 x 100G QSFP28", "new, in lab rack 1"], C["sw"]))
+    b.append(path("M330 405 L540 405", C["fiber"], 4))
+    b.append(path("M330 425 L540 425", C["fiber"], 4))
+    b.append(text(435, 397, "2 x 10G fiber (LACP), plan", 11, "middle", "bold", C["fiber"]))
+    b.append(text(435, 442, "Cisco SFP-10G-SR-S to Dell 407-BBOU", 10, "middle", fill=C["fiber"]))
+    b.append(text(435, 470, "Racks have no patch panels:", 10, "middle", fill="#444"))
+    b.append(text(435, 484, "one LC-LC OM4 cord per link, length per path", 10, "middle", fill="#444"))
+    b.append(path("M330 300 C 470 300, 620 320, 660 380", C["fiber"], 2, "6 4"))
+    b.append(text(480, 298, "Only if the lab allows: 2 x 100G to the core", 10.5, fill=C["fiber"]))
     nodes = [("gpu01", "1/1/1-2", C["gpu"]), ("svc01", "1/1/3-4", C["svc"]), ("svc02", "1/1/5-6", C["svc"]),
              ("svc03", "1/1/7-8", C["svc"]), ("gpu02", "future, 1/1/9-10", C["gpur"])]
     x = 545
     for n, p, col in nodes:
-        b.append(box(x, 520, 92, 64, n, ["2 x 25G", p], col))
-        b.append(line(x + 38, 410, x + 38, 520, C["dac"], 2))
-        b.append(line(x + 54, 410, x + 54, 520, C["dac"], 2))
+        b.append(box(x, 560, 92, 64, n, ["2 x 25G", p], col))
+        b.append(line(x + 38, 450, x + 38, 560, C["dac"], 2))
+        b.append(line(x + 54, 450, x + 54, 560, C["dac"], 2))
         x += 102
-    b.append(text(530, 462, "25G SFP28 passive DAC, 3 m", 11, "end", fill=C["dac"])); b.append(text(530, 477, "two per node, bonded (LACP)", 11, "end", fill=C["dac"]))
-    b.append(box(80, 620, 250, 62, "oob01 1G management switch", ["BMC / IPMI ports only", "separate VLAN, no user access"], C["oob"]))
+    b.append(text(530, 512, "25G SFP28 passive DAC, 3 m", 11, "end", fill=C["dac"])); b.append(text(530, 527, "two per node, bonded (LACP)", 11, "end", fill=C["dac"]))
+    b.append(box(80, 660, 250, 62, "oob01 1G management switch", ["BMC / IPMI ports only", "separate VLAN, no user access"], C["oob"]))
     x = 545
     for n, _, _ in nodes[:4]:
-        b.append(path(f"M330 650 C 360 650, {x+20} 640, {x+20} 584", C["mgmt"], 1.5, "3 3"))
+        b.append(path(f"M330 690 C 360 690, {x+20} 680, {x+20} 624", C["mgmt"], 1.5, "3 3"))
         x += 102
-    b.append(text(340, 700, "Cat6 from each server BMC port to oob01. oob01 uplink goes where the lab network team says (their management network).", 11, fill=C["mgmt"]))
+    b.append(text(340, 740, "Cat6 from each server BMC port to oob01. oob01 uplink goes where the lab network team says (their management network).", 11, fill=C["mgmt"]))
     leg = [(C["fiber"], "Fiber (optics + patch cord)", None), (C["dac"], "Direct-attach copper (DAC)", None),
            (C["cu"], "Existing user links", None), (C["mgmt"], "Management (BMC) Cat6", "3 3")]
-    y = 740
+    y = 780
     b.append(text(80, y, "Legend", 13, weight="bold"))
     for i, (col, lab, d) in enumerate(leg):
         b.append(line(160 + i * 220, y - 4, 200 + i * 220, y - 4, col, 3, d))
         b.append(text(206 + i * 220, y, lab, 11))
-    return svg(1100, 780, "".join(b), "Network cabling")
+    return svg(1100, 810, "".join(b), "Network cabling")
 
 # ---------------------------------------------------------------- prototype
 def proto_svg():

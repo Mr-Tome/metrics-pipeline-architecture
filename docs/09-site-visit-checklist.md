@@ -49,7 +49,9 @@ What this changed:
 - [ ] Where the C9300-48S for this building sits, and how far it is from our racks
 - [ ] On that switch: is there an uplink module on the right side with 8 SFP+ ports (C9300-NM-8X)?
       Are any of those ports empty?
-- [ ] Fiber in our racks or row: patch panel present?
+- [ ] Fiber in our racks: no patch panels (visit 1). Any fiber panel elsewhere in the row or in a network rack?
+- [ ] The cable path from our racks to the C9300-48S: overhead tray or under the raised floor? Pace it out: ____ m
+- [ ] If there is fiber anywhere nearby, note:
   - Connector: LC (small, in pairs) or MPO (wide, flat)
   - Cable color: aqua or violet means multimode, yellow means single-mode
 - [ ] A copper Ethernet drop for the management switch?

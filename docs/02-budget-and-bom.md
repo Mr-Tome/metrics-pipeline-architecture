@@ -25,13 +25,13 @@ Part numbers and links are in the quote request, [08-quote-request-email.md](08-
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
-| A1 | Uplink lot: 10G optics at both ends, fiber patch cords, and a C9300-NM-8X module if the lab switch has no free 10G ports | 1 lot | $3,000 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
+| A1 | Uplink lot: 10G optics at both ends, two long fiber cords to the lab switch (the racks have no patch panels), spare short cords, and a C9300-NM-8X module if the lab switch has no free 10G ports | 1 lot | $3,110 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
 | A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
 | A3 | Blanking panels (80, both racks), Cat6 patch cables | 1 lot | $824 | The racks have none, and hot aisle containment does not work with open U spaces |
 | A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
 | A5 | Rack console, 1U LCD and keyboard | 1 | $1,200 | First boot and BIOS setup. The lab has no crash cart. |
 | A6 | Setup kit (labels, velcro, cage nuts, ESD strap, fiber cleaner, console cables, hand tools) | 1 lot | $500 | Needed on install day |
-| | **Additions total** | | **$10,224** | |
+| | **Additions total** | | **$10,334** | |
 
 Only if needed, not in the total:
 
@@ -64,12 +64,12 @@ All items are estimates. Get quotes before you finalize.
 | Line | Amount |
 |---|---|
 | BOM hardware, 20-user tier | $221,086.00 |
-| Additions (A1-A6) | $10,224.00 |
-| **Committed subtotal** | **$231,310.00** |
-| Contingency left inside $250k | $18,690.00 (7.5%) |
+| Additions (A1-A6) | $10,334.00 |
+| **Committed subtotal** | **$231,420.00** |
+| Contingency left inside $250k | $18,580.00 (7.4%) |
 | **Total** | **$250,000.00** |
 
-If both conditional items (C1, C2) are needed, the subtotal is $241,910 and $8,090 (3.2%) is left.
+If both conditional items (C1, C2) are needed, the subtotal is $242,020 and $7,980 (3.2%) is left.
 
 Two things can add margin:
 

@@ -4,7 +4,7 @@ Hardware, facility, and delivery plan for the GPU servers behind the metrics ana
 goal is getting the AI service (language model, gateway, chat page, and access from Jupyter, VS Code,
 and MATLAB) running in the lab. The rest of the pipeline follows on the same platform.
 
-- **Budget:** $250,000.00. The 20-user build plus the install items comes to $231,310, with $18,690 left ([02](docs/02-budget-and-bom.md)).
+- **Budget:** $250,000.00. The 20-user build plus the install items comes to $231,420, with $18,580 left ([02](docs/02-budget-and-bom.md)).
 - **Site:** existing Vertiv racks (empty) with Liebert CRV in-row cooling; Cisco C9300 access and C9500X core.
 
 ## Start here

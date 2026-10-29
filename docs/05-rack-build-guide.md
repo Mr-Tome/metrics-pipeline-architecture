@@ -87,7 +87,7 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 22-39 | blanking | |
 | 40 | oob01 | Ports to the rear |
 | 41 | sw01 | Ports to the rear, PSUs to the front. Dell ReadyRails, tool-less. |
-| 42 | Fiber patch panel, if needed | Only if the lab's fiber needs one. Otherwise blanking. |
+| 42 | blanking (fiber patch panel later, only if the lab installs fiber to our rack) | The racks have no patch panels. For now the uplink fiber runs straight to sw01. |
 
 **Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak hot air from
 the contained aisle.
@@ -159,8 +159,8 @@ Label each cable at both ends with its ID.
 | D07 | svc03 NIC port 1 | sw01 1/1/7 | 25G SFP28 DAC 3 m | data |
 | D08 | svc03 NIC port 2 | sw01 1/1/8 | 25G SFP28 DAC 3 m | data |
 | (D09-D10) | reserved gpu02 | sw01 1/1/9-10 | | future |
-| U01 | sw01 QSFP28 uplink 1 | patch panel port 1, then C9500X | 100G optic + fiber | uplink (option A) |
-| U02 | sw01 QSFP28 uplink 2 | patch panel port 2, then C9500X | 100G optic + fiber | uplink (option A) |
+| U01 | sw01 port 1/1/47 (Dell 407-BBOU) | lab C9300-48S, NM-8X port (Cisco SFP-10G-SR-S) | LC-LC OM4 fiber, length per path | uplink, bond member 1 |
+| U02 | sw01 port 1/1/48 (Dell 407-BBOU) | lab C9300-48S, NM-8X port (Cisco SFP-10G-SR-S) | LC-LC OM4 fiber, length per path | uplink, bond member 2 |
 | M01 | gpu01 BMC | oob01 port 1 | Cat6 3 m | management |
 | M02 | svc01 BMC | oob01 port 2 | Cat6 3 m | management |
 | M03 | svc02 BMC | oob01 port 3 | Cat6 3 m | management |
