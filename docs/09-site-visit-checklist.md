@@ -3,92 +3,74 @@
 Bring: tape measure, flashlight, this page, a pen. **Ask before taking photos.** Many server rooms
 need approval for cameras and phones.
 
-## 1. Look
+## 1. What visit 1 found
 
-### The rack you will get
+| Item | Found |
+|---|---|
+| Rack model | Vertiv VR3300: 42U, 600 mm wide, 1200 mm deep (Vertiv spec) |
+| Hole type | Square (cage nuts for anything without tool-less rails) |
+| Vertical rails | Adjustable, currently 29 in apart front to rear |
+| Rack PDUs | Already installed: Vertiv Geist, one on the left and one on the right. Each has circuits 1, 2, and 3. Mostly C13 outlets, one C19 per circuit (three C19 per PDU), 208V. Not marked A or B. |
+| Where power arrives | Through those PDU strips. No separate receptacles needed. |
+| Ground | Green bonding wires on the rear split doors. No rack-to-ground-bar wire seen. |
+| Doors | Perforated front and rear. No blanking panels installed. |
+| Containment | Glass doors close off the rear of the racks, where the PDUs are: **hot aisle containment** |
+| Floor | Raised floor, no perforated tiles. Cooling comes from the in-row CRV units. |
+| Row layout | One CRV cooler in a rack position, then three racks to its left |
+| Requested racks | Two racks next to ACE 15 |
+| Access | Wide single-story front door |
+| On site | No server lift, crash cart, or console. Room is empty except power, racks, and cooling. |
 
-- [ ] Model label (rear door or frame, starts with VR, for example VR3300): ________
-- [ ] Height in U (numbers are printed on the rails): ____ U
-- [ ] Width: 600 mm (24") or 800 mm (31")
-- [ ] **Hole type on the mounting rails:**
-  - Square holes: needs cage nuts
-  - Round threaded holes: screws go straight in
-  - Round unthreaded holes
-- [ ] **Depth between the front and rear mounting rails** (measure the outside faces): ____ in. Can the rails slide?
-- [ ] Outside depth of the rack: ____ mm (1100 or 1200 expected)
-- [ ] Already in the rack? These are the long vertical strips at the rear with outlets.
-  - Rack PDUs: ____ (count)
-  - Model label: ________
-  - Input plug: ________
-  - Outlets: C13 (small) ____, C19 (larger) ____
-  - Marked A and B, or colored?
-- [ ] Ground wire (green) from the rack to a ground bar?
-- [ ] Doors perforated front and rear? Any blanking panels already installed?
+What this changed:
 
-### Power at the rack
+- No rack PDUs to buy for the lab.
+- Blanking panels for both racks are in the quote.
+- The rack console stays in the quote.
+- The GPU server needs C14 or C20 power cords. Each PDU has only three C19 outlets, so the cord type is a vendor question.
 
-- [ ] Where power arrives:
-  - Under the floor (receptacles or cords)
-  - Overhead cord drops ("whips")
-  - Overhead busway (a metal track with plug-in boxes)
-- [ ] The receptacle face. Write down the printed rating, or sketch the face:
-  - NEMA L21-30R: twist-lock with 5 slots in a circle. This is what we asked for.
-  - NEMA L6-30R: twist-lock with 3 slots
-  - IEC 60309 pin-and-sleeve: round, blue or red
-- [ ] **The label on each receptacle or cord drop**, for example `PDU-2A / panel 3 / CB 12,14,16`.
-  The labels are how you will tell feed A from feed B. Copy every one: ________
-- [ ] The large cabinets with transformers at the head of each aisle. These are floor power
-  distribution units, not rack PDUs. Read the nameplate:
-  - Model: ________
-  - Output voltage, for example 208Y/120 V: ________
-  - Marked A or B?
-  - Is there one per row, or two (one A side, one B side)?
+## 2. Look (next visit)
 
-### Cooling and containment
+### Each rack PDU
 
-- [ ] Which aisle do the glass doors close off?
-  - Fronts of the racks face inside the glass: cold aisle containment. Server fronts face in.
-  - Backs of the racks face inside the glass: hot aisle containment. Server backs face in.
-- [ ] Where the CRV in-row coolers sit (the CR035RA units), and which racks are next to them
-- [ ] Raised floor with perforated tiles, or concrete slab?
+- [ ] The label on the PDU (side, top, or the input end). Model number, for example MN3E...: ________
+- [ ] Input rating printed on the label, for example `208V 3PH 30A` or `24A`: ________
+- [ ] How many C13 outlets per PDU: ____
+- [ ] Display on the PDU showing amps? (Metered PDUs show current per circuit.)
+- [ ] Where the PDU input cord goes: under the floor, or overhead. Any label on it, for example
+      `RPP-2A CB 12,14,16`: ________
+
+### Ground
+
+- [ ] Under the raised floor, or at the bottom of the rack: a green or bare copper wire from the rack
+      frame to the floor grid or a ground bar?
 
 ### Network
 
-- [ ] Where the C9300-48S for this building sits, and how far it is from our rack
+- [ ] Where the C9300-48S for this building sits, and how far it is from our racks
 - [ ] On that switch: is there an uplink module on the right side with 8 SFP+ ports (C9300-NM-8X)?
-  Are any of those ports empty?
-- [ ] Fiber in our rack or row: patch panel present?
+      Are any of those ports empty?
+- [ ] Fiber in our racks or row: patch panel present?
   - Connector: LC (small, in pairs) or MPO (wide, flat)
   - Cable color: aqua or violet means multimode, yellow means single-mode
 - [ ] A copper Ethernet drop for the management switch?
 
-### Getting equipment in
-
-- [ ] Dock, elevator, and door sizes from the dock to the rack. Can a pallet jack make it?
-- [ ] Is cardboard allowed in the room? Where do you unbox?
-- [ ] Server lift available? Crash cart or console available?
-
-## 2. Ask
+## 3. Ask
 
 ### Facilities
 
-1. Which rack can we have? We want one rack in a contained row, near a CRV unit. Please hold the rack
-   next to it for growth.
-2. Do the racks already have rack PDUs? If yes: model, input plug, outlet types, and is each rack fed
-   from A and B?
-3. Can you provide 2 x 208V 3-phase 30A circuits on NEMA L21-30R, one from source A and one from source B?
-   If your standard is different, what is it? We will match our PDU plug to it.
-4. Who switches the breakers on and off, and what is the lockout/tagout process? Will you label our
-   two circuits A and B at the panel and at the receptacle?
-5. Who bonds the rack to the ground bar?
-6. Cooling: is containment hot aisle or cold aisle?
+1. Are the left and right PDUs in each rack fed from separate sources (A and B), for example different
+   panels or UPS paths? If yes, which side is A?
+2. What is each PDU's input rating? We need each PDU to carry about 3.6 kW by itself (one side down).
+3. Who switches the PDU circuits off and on upstream, and what is the lockout/tagout process?
+4. Is the rack frame bonded to the facility ground? The door straps are, but we didn't see the frame wire.
+5. Please hold the two racks next to ACE 15 for us.
 
 ### Network team
 
 1. Can our switch connect directly to the C9500X core, or must it go through the C9300-48S in this building?
 2. Does that C9300-48S have free 10G SFP+ ports (C9300-NM-8X module)? Could you send `show inventory` and
    `show interfaces status` for it?
-3. What fiber runs between that switch and our rack: multimode or single-mode, LC or MPO? Do you supply
+3. What fiber runs between that switch and our racks: multimode or single-mode, LC or MPO? Do you supply
    the optics on your side, or should we?
 4. Where should our management switch connect?
 
@@ -99,9 +81,10 @@ need approval for cameras and phones.
 3. Is a laptop allowed in the room for the first switch setup over a console cable? If not, what does
    the lab use?
 4. Where may the staging server live, and may it have internet access?
-5. May photos be taken of our rack for the as-built record?
+5. May photos be taken of our racks for the as-built record?
 
 ### Lab IT
 
 1. Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? If RHEL,
-   who supplies the subscriptions and the package mirror?
+   who supplies the subscriptions and the package mirror? (Subscriptions are about $1,400 per server
+   per year and are not in the BOM. Rocky Linux 9 is free.)

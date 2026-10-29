@@ -1,7 +1,14 @@
 # 05. Rack build guide
 
-Step-by-step for racking, powering, and cabling the lab rack. Staging is the same with one server and
-no switches (see [04-prototype-plan.md](04-prototype-plan.md), section 4).
+Step-by-step for racking, powering, and cabling the lab rack (rack 1 of the two racks next to ACE 15).
+Staging is the same with one server and no switches (see [04-prototype-plan.md](04-prototype-plan.md), section 4).
+
+Site facts from visit 1 ([09](09-site-visit-checklist.md)):
+
+- Vertiv VR3300 racks: 42U, 1200 mm deep, square holes, adjustable rails
+- Vertiv Geist PDUs already mounted, left and right
+- Hot aisle containment: the rear of the rack is inside the glass. That is where you work on cables and PDUs.
+- No lift, crash cart, or console on site
 
 Diagrams (open the SVG files for full size; they print well on 11x17):
 
@@ -15,16 +22,16 @@ Diagrams (open the SVG files for full size; they print well on 11x17):
 
 Use the vendor's own document for each step that touches their hardware. No official install videos
 were found for the exact models in this build, so the vendor PDFs are the primary reference. Ask
-Thinkmate whether they offer an install walkthrough with the order. Vertiv offers to pre-install Geist
-PDUs in VR racks before shipment (per the integration flyer below), though our racks are already on site.
+Thinkmate whether they offer an install walkthrough with the order.
 
 | Hardware | Official guide | What to read |
 |---|---|---|
-| Vertiv VR rack | VR Rack Installer/User Guide, SL-11425: https://www.vertiv.com/globalassets/shared/sl-11425_rev0.pdf | 4.6 rails, 4.7 PDU mounting, 4.9 grounding |
-| Vertiv Geist rack PDU | Vertiv rPDU and VR rack integration flyer: https://www.vertiv.com/49bd35/globalassets/shared/vertiv-rpdu-vr-rack-integration-flyer.pdf. Full manual ships in the PDU box. | Tool-less button mounting in the 0U space |
+| Vertiv VR3300 rack | VR Rack Installer/User Guide, SL-11425: https://www.vertiv.com/globalassets/shared/sl-11425_rev0.pdf. Product page: https://www.vertiv.com/en-ca/products-catalog/facilities-enclosures-and-racks/racks-and-containment/vr3300/ | 4.6 rails, 4.9 grounding |
+| Vertiv Geist rack PDU (already installed) | Vertiv rPDU and VR rack integration flyer: https://www.vertiv.com/49bd35/globalassets/shared/vertiv-rpdu-vr-rack-integration-flyer.pdf. For the full manual, search the model number from the PDU label on vertiv.com. | Outlet and circuit layout, display |
 | Liebert CRV (the CR035RA unit) | Liebert CRV design manual: https://www.vertiv.com/globalassets/products/thermal-management/in-row-cooling/liebert-crv-row-based-cooling-system-design-manual.pdf | Facility's job, for reference only |
-| Dell S5248F-ON | S5200F-ON Series Installation Guide: https://www.dell.com/support/manuals/en-us/networking-s5224f-on/s5200-on_install_pub/about-this-guide | ReadyRails 1U tool-less square-hole install, power, airflow |
-| Thinkmate GPU server | Ships with a quick-start and rail kit sheet. Ask Thinkmate for the motherboard and chassis manuals when you order. | Rails, GPU install, PSU, BMC first login |
+| Dell S5248F-ON | S5200F-ON Series Installation Guide: https://dl.dell.com/topicspdf/s5200-on_install_pub_en-us.pdf | ReadyRails 1U tool-less square-hole install, power, airflow |
+| Thinkmate GPU server and service nodes | Ships with a quick-start and rail kit sheet. Ask Thinkmate for the motherboard and chassis manuals when you order. | Rails, GPU install, PSU, BMC first login |
+| StarTech RKCONS1701 rack console | https://www.startech.com/en-us/server-management/rkcons1701 (manual under Support) | Rail and cage nut install |
 | NVIDIA RTX PRO 6000 Server Edition | Server Edition product brief (NVIDIA site, PDF) | Passive card, 16-pin power, 400-600 W setting |
 
 For video, search YouTube with the exact model number (for example "Vertiv VR3300 rail install" or
@@ -33,8 +40,8 @@ work fine for the sliding-rail steps, which are the same on almost every 2U serv
 
 ## 1. Before you start
 
-**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 15) and the rack
-console (item 14). Use velcro, not zip ties.
+**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 14) and the rack
+console (item 13). Use velcro, not zip ties.
 
 **People:** two people for the GPU server. Never lift it alone.
 
@@ -45,22 +52,24 @@ console (item 14). Use velcro, not zip ties.
 - [ ] sw01 S5248F-ON: airflow is **PSU-to-port (port-side exhaust)**. Check the fan and PSU handle color
       against the Dell guide. **If it is wrong, stop and swap it.** Don't install it.
 - [ ] oob01 management switch
-- [ ] 2 x rack PDU (PDU-A, PDU-B)
+- [ ] Rack console (StarTech RKCONS1701) with its VGA/USB cable, rails, and cage nuts
+- [ ] Power cords: C13-to-C14 for service nodes and switches; C13-to-C14 or C19-to-C20 for the GPU server (no wall-plug cords)
 - [ ] 10 x 25G SFP28 DAC, 3 m (8 used now, 2 spare)
 - [ ] Uplink optics and fiber patch cords (option A or B from [03](03-network-and-switch-capacity.md))
 - [ ] Cat6 patch cables, 6 x 3 m (BMC and oob01 uplink)
-- [ ] Blanking panels for about 32U
+- [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
 ## 2. Rack prep
 
-1. Confirm the rack's position in the row. **Front door faces the cold aisle.**
-2. Confirm the rack is grounded to the facility ground bar. Use the rack's ground stud (SL-11425
-   section 4.9). Ground the rack before anything else.
+1. Confirm the rack: rack 1 of the two next to ACE 15. **The front faces the room. The rear is inside the
+   hot aisle containment.** Servers go in from the front, cables are done from the rear.
+2. Confirm with facilities that the rack frame is bonded to facility ground (SL-11425 section 4.9).
+   The green wires on the doors only bond the doors to the frame.
 3. Set the 19" rails. In VR racks, the built-in rail alignment marks set the front rail position. Set the
    rear rails so the depth matches the GPU server's rail kit (the server rail is the longest; set for it).
-4. Mount **PDU-A on the rear left** and **PDU-B on the rear right**, in the 0U channels. Face the outlets
-   toward the center so cords don't block the server exhaust.
-5. Route the PDU input cords up or down to the L21-30R receptacles. **Leave them unplugged.**
+4. The Geist PDUs are already mounted, left and right, at the rear. Once facilities says which side is
+   feed A, label the left PDU and the right PDU `PDU-A` and `PDU-B` (or the other way round).
+5. Check each PDU's display is on (if fitted) and every outlet is empty.
 
 ## 3. Install equipment, bottom up
 
@@ -73,10 +82,15 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 5 | svc01 | |
 | 6 | svc02 | |
 | 7 | svc03 | |
-| 8-39 | blanking | Install all of them before power-on |
+| 8-20 | blanking | Install all of them before power-on |
+| 21 | con01 rack console | Eye height for a seated or kneeling person. Cage nuts (square holes). |
+| 22-39 | blanking | |
 | 40 | oob01 | Ports to the rear |
 | 41 | sw01 | Ports to the rear, PSUs to the front. Dell ReadyRails, tool-less. |
-| 42 | Fiber patch panel | Uplink fiber lands here, then short patch to sw01 |
+| 42 | Fiber patch panel, if needed | Only if the lab's fiber needs one. Otherwise blanking. |
+
+**Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak hot air from
+the contained aisle.
 
 **GPU install, if the GPUs come loose:**
 
@@ -91,38 +105,40 @@ Install heaviest first, at the bottom, so the rack can't tip.
 
 ![Power wiring](diagrams/power-wiring.svg)
 
-**What A and B mean.** The rack gets two separate circuits, A and B, ideally from different panels or
-UPS paths. Each circuit feeds its own rack PDU, so there are two PDU input cords and two receptacles.
-Every server has two or more power supplies, and each supply has its own cord. Half of a server's
-cords go to PDU-A and half to PDU-B. If circuit A fails, everything keeps running on B. Belden's
-explainer has a picture of this:
-https://www.belden.com/blog/exploring-dual-power-feeds-in-data-centers
+**What A and B mean.** Each rack has two Geist PDUs, one left and one right. If facilities feeds them
+from separate sources (A and B), losing one source leaves the other PDU running. Every server has two
+or more power supplies, each with its own cord. Half of a server's cords go to the left PDU and half to
+the right. Then if feed A fails, everything keeps running on B. Pictures of this:
 
-**How you know which is A and which is B.** Facilities labels each receptacle with its panel and
-breaker numbers, for example `PDU-2A / CB 12,14,16`. Copy those labels during the site visit
-([09](09-site-visit-checklist.md)). Then put matching labels on PDU-A and PDU-B and on their input cords.
+- Oracle server guide, dual power feed: https://docs.oracle.com/cd/E55211_01/html/E55213/gqcnz.html
+- Austin Hughes, A and B PDUs in a rack: https://www.austin-hughes.com/solutions/infrapower/dual-feed-pdu/
 
-0. **Before plugging anything in:** facilities confirms that both breakers (A and B) are off and
-   locked out per the lab's lockout/tagout process. Check that the receptacle labels match the circuits
-   facilities assigned to the rack.
-1. Label every cord at both ends **before** plugging in: `gpu01-PSU1 / A-01`, and so on.
+**How you know which is A and which is B.** The PDUs are not marked. Facilities knows which upstream
+panel and breaker feed each one. Ask them ([09](09-site-visit-checklist.md)), then label the PDUs.
+
+**Circuits on each PDU.** Each PDU has circuits 1, 2, and 3. Each circuit has its own breaker on the PDU,
+mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pair.
+
+0. **Before plugging anything in:** facilities confirms that the upstream feeds to both PDUs are off and
+   locked out per the lab's lockout/tagout process, or confirms in writing that plugging in with the
+   PDUs live is their normal practice. Check every PDU circuit breaker is switched off.
+1. Label every cord at both ends **before** plugging in: `gpu01-PSU1 / A-C1-C19`, and so on.
 2. Plug every device's odd-numbered PSU into PDU-A and its even-numbered PSU into PDU-B. **Never put
    both PSUs of one device on the same PDU.** The GPU server has 4 PSUs: PSU1 and PSU3 to A, PSU2 and PSU4 to B.
-3. Spread the load across the PDU's three phases. A 3-phase PDU groups its outlets into three banks,
-   printed on the PDU face (for example L1-L2, L2-L3, L3-L1). Each bank is one phase pair. Put roughly
-   equal load on each bank:
-   - Bank 1: gpu01 PSUs
-   - Bank 2: service nodes
-   - Bank 3: switches and console
+3. Spread the load across the PDU's three circuits. Plan for each PDU:
+   - Circuit 1: gpu01 PSU (C19 if C20 cords, else a C13), svc01
+   - Circuit 2: gpu01 PSU (C19 if C20 cords, else a C13), svc02
+   - Circuit 3: svc03, sw01, and oob01 or the console (one on each PDU)
 
-   After power-on, the PDU display shows the current on each phase. The three readings should be
-   within a few amps of each other. If one is much higher, move a cord to a lighter bank.
-4. Plug the PDU inputs into the L21-30R receptacles. Facilities removes the lockout and switches the
-   breakers on.
+   After power-on, the PDU display shows the current on each circuit. If one is much higher than the
+   others, move a cord to a lighter circuit.
+4. Facilities removes the lockout. Switch the PDU circuit breakers on.
 5. Power on in this order: switches, then service nodes, then gpu01.
-6. **Feed test:** with everything running, facilities switches breaker A **off**. Everything must stay up
-   on feed B. Facilities switches A back on. Wait 2 minutes, then repeat with breaker B off. Same result.
-   Record the per-phase current from each PDU display.
+6. **Feed test:** with everything running, facilities switches feed A **off** upstream. Everything must stay
+   up on PDU-B. Facilities switches A back on. Wait 2 minutes, then repeat with feed B off. Same result.
+   Record the current on each circuit from each PDU display. Only facilities switches the upstream feeds.
+7. Close the hot aisle containment doors when you finish. Cable work at the rear is done before power-on,
+   because the contained aisle gets hot once the servers run.
 
 ## 5. Network cabling
 
@@ -167,7 +183,7 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
 
 1. **Switch:** console in, set the management IP, then confirm `show interface status` shows each D-cable
    link up at 25G.
-2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen via the crash cart). Change the
+2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
 3. **BIOS settings on gpu01** (and stg01):
    - Above 4G decoding: on

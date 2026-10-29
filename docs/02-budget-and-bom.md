@@ -17,29 +17,35 @@ GPUs to the server we already own. Nothing gets replaced.
 ## 2. What the BOM leaves out
 
 The BOM's `Assumptions` tab, section 5, excludes racks, power distribution, cooling, and facility work.
-The lab supplies racks and cooling. The items below are still on us. Without them the rack can't be
-powered or connected.
+The site visit confirmed the lab supplies racks (Vertiv VR3300), rack PDUs (Vertiv Geist, two per rack),
+and cooling (Liebert CRV). The items below are still on us. Without them the rack can't be connected
+or set up.
 
 Part numbers and links are in the quote request, [08-quote-request-email.md](08-quote-request-email.md).
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
-| A1 | Rack PDU, Vertiv Geist, 208V 3-phase, L21-30P, 12 combination C13/C19 outlets, metered | 2 | $3,600 | Lab rack, feeds A and B. The CRV (CR035RA) is a cooler and has no outlets. **Drop if the site visit finds rack PDUs already in the racks.** |
-| A2 | Same PDU for staging | 2 | $3,600 | Depends on where staging lives. Drop if it goes in a rack that already has PDUs. |
-| A3 | Uplink lot: optics at both ends plus fiber patch cords | 1 lot | $3,000 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
-| A4 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
-| A5 | Blanking panels (40), Cat6 patch cables | 1 lot | $700 | Containment does not work with open U spaces |
-| A6 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
-| A7 | Rack console, 1U LCD and keyboard | 1 | $1,200 | First boot and BIOS setup. Drop if the lab has a crash cart. |
-| A8 | Setup kit (labels, velcro, cage nuts, ESD strap, fiber cleaner, console cables, hand tools) | 1 lot | $500 | Needed on install day |
-| | **Additions total** | | **$17,300** | |
+| A1 | Uplink lot: 10G optics at both ends, fiber patch cords, and a C9300-NM-8X module if the lab switch has no free 10G ports | 1 lot | $3,000 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
+| A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
+| A3 | Blanking panels (80, both racks), Cat6 patch cables | 1 lot | $824 | The racks have none, and hot aisle containment does not work with open U spaces |
+| A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
+| A5 | Rack console, 1U LCD and keyboard | 1 | $1,200 | First boot and BIOS setup. The lab has no crash cart. |
+| A6 | Setup kit (labels, velcro, cage nuts, ESD strap, fiber cleaner, console cables, hand tools) | 1 lot | $500 | Needed on install day |
+| | **Additions total** | | **$10,224** | |
 
-All A-items are estimates. Get quotes before you finalize.
+Only if needed, not in the total:
+
+| ID | Item | Est. total | When |
+|---|---|---|---|
+| C1 | Red Hat Enterprise Linux Server subscriptions, 5 servers, 1 year | $7,000 per year | Only if the lab requires RHEL. Rocky Linux 9 is free. Not in the original BOM. |
+| C2 | Rack PDUs for staging (2) | $3,600 | Only if staging goes somewhere without rack PDUs |
+
+All items are estimates. Get quotes before you finalize.
 
 **Terms used above:**
 
-- **Rack PDU:** a power strip built for a rack. It plugs into the facility receptacle and gives each
-  server cord an outlet.
+- **Rack PDU:** a power strip built for a rack. The ones already in the racks are the Vertiv Geist
+  strips on the left and right. Each server cord plugs into one of their outlets.
 - **Uplink optics:** the transceiver modules that plug into a switch port and turn the signal into
   light for a fiber cable. One goes in each end of the link. Each end must be coded for its own switch
   brand, so the Dell switch end uses a Dell-coded optic and the Cisco end uses a Cisco-coded optic.
@@ -49,6 +55,8 @@ All A-items are estimates. Get quotes before you finalize.
   console used for power and BIOS control.
 - **Blanking panels:** flat plates that cover empty rack spaces. They stop hot exhaust air from
   circling back to the front.
+- **Rack console:** a fold-out screen and keyboard in a 1U drawer. It plugs into one server at a time
+  for first setup. After each server's BMC has an IP address, the servers are managed over the network.
 - **Transfer media:** the approved encrypted drives that carry software into the lab.
 
 ## 3. Budget fit
@@ -56,19 +64,18 @@ All A-items are estimates. Get quotes before you finalize.
 | Line | Amount |
 |---|---|
 | BOM hardware, 20-user tier | $221,086.00 |
-| Additions (A1-A8) | $17,300.00 |
-| **Committed subtotal** | **$238,386.00** |
-| Contingency left inside $250k | $11,614.00 (4.6%) |
+| Additions (A1-A6) | $10,224.00 |
+| **Committed subtotal** | **$231,310.00** |
+| Contingency left inside $250k | $18,690.00 (7.5%) |
 | **Total** | **$250,000.00** |
 
-Three things can bring contingency back toward 10%:
+If both conditional items (C1, C2) are needed, the subtotal is $241,910 and $8,090 (3.2%) is left.
+
+Two things can add margin:
 
 1. **GPU price.** The BOM uses $18,246 per GPU (Thinkmate quote). CDW listed the same card at
-   $13,824.99 in late October 2026 (CDW 8426124). Across 3 GPUs that saves about $13,263, and contingency
-   rises to about $24,877 (10.0%).
-2. **Items the site already has.** Rack PDUs (A1, A2), approved media (A6), and a crash cart (A7) together
-   are $12,000.
-3. **Government pricing.** The BOM already notes GSA and SEWP may come in lower than commercial.
+   $13,824.99 in late October 2026 (CDW 8426124). Across 3 GPUs that saves about $13,263.
+2. **Government pricing.** The BOM already notes GSA and SEWP may come in lower than commercial.
 
 ## 4. Items to fix in the BOM workbook
 
@@ -87,11 +94,15 @@ These are corrections, not new scope:
 5. **Cell B21 on the BOM tab** ("Additional Research area under Cables and Optics: Infiniband"). It is
    answered in [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md), section 4.
    InfiniBand is not needed for this design.
+6. **Service node network card.** The RAX RE95-1104-01 base has a single 1GbE RJ45 port. Add the Broadcom
+   N225P OCP 3.0 (2 x SFP28) in the configurator to match the BOM's "2 x 25 GbE".
+7. **Operating system cost.** The `Software` tab assumes no license cost. That holds for Rocky Linux 9 or
+   Ubuntu. If the lab requires RHEL, add subscriptions (section 2, C1).
 
 ## 5. Growth path (nothing thrown away)
 
 | Step | Add | Est. cost | Reuses |
 |---|---|---|---|
 | 50 users | 2 x RTX PRO 6000 into gpu01's empty slots | about $36,500 | Same server, rack, PDUs, switch ports |
-| 100 users (after 50) | gpu02 (U3-U4, already reserved), 4 GPUs, 2 NVMe, second 25G switch, cables | about $125,300 | Same rack, same circuits (sized for 8.3 kW), same software |
+| 100 users (after 50) | gpu02, 4 GPUs, 2 NVMe, second 25G switch, cables | about $125,300 | Rack 2 (held next to rack 1) and its PDUs, same software. gpu02 can go in rack 1 at U3-U4 instead if the PSUs use C14 inlets, since each PDU has only three C19 outlets. |
 | Rest of the pipeline | CPU workloads on the lab's existing CPU servers (BOM scope note) | n/a | Same Kubernetes platform, Harbor, GitLab, Argo CD |
