@@ -10,7 +10,7 @@ need approval for cameras and phones.
 | Rack model | Vertiv VR3300: 42U, 600 mm wide, 1200 mm deep (Vertiv spec) |
 | Hole type | Square (cage nuts for anything without tool-less rails) |
 | Vertical rails | Adjustable, currently 29 in apart front to rear |
-| Rack PDUs | Already installed: Vertiv Geist, one on the left and one on the right. Each has circuits 1, 2, and 3. Mostly C13 outlets, one C19 per circuit (three C19 per PDU), 208V. Not marked A or B. |
+| Rack PDUs | Already installed: Vertiv Geist, one on the left and one on the right. Each has circuits 1, 2, and 3. Mostly C13 outlets (smaller, slots vertical), plus one C19 per circuit (larger, slots horizontal): three C19 per PDU, six per rack. 208V. Not marked A or B. |
 | Where power arrives | Through those PDU strips. No separate receptacles needed. |
 | Ground | Green bonding wires on the rear split doors. No rack-to-ground-bar wire seen. |
 | Doors | Perforated front and rear. No blanking panels installed. |
