@@ -34,7 +34,7 @@ LAYOUT = {  # top U of each item: (height in U, label, color)
     6: (1, "svc02  Service node, 1U", C["svc"]),
     5: (1, "svc01  Service node, 1U", C["svc"]),
     4: (2, "RESERVED gpu02 (100-user growth), blanking panels", C["gpur"]),
-    2: (2, "gpu01  GPU server, 2U, 2 of 4 GPU slots filled", C["gpu"]),
+    2: (2, "gpu01  GPU server, 2U, 4 x RTX PRO 6000 (all slots)", C["gpu"]),
 }
 
 def rack(x0, y0, title, rear=False):
@@ -66,7 +66,7 @@ def rack(x0, y0, title, rear=False):
     return "".join(b), w
 
 def rack_svg():
-    b = [text(30, 34, "Lab rack 1 elevation, Vertiv VR3300 42U (20-user build)", 20, weight="bold"),
+    b = [text(30, 34, "Lab rack 1 elevation, Vertiv VR3300 42U (50-user build)", 20, weight="bold"),
          text(30, 56, "Heaviest gear at the bottom. Switches at the top. Fronts face the room; the rear is inside the hot aisle containment.", 12, fill="#444")]
     f, w = rack(110, 100, "FRONT (room side)")
     r, _ = rack(560, 100, "REAR (inside hot aisle containment)", rear=True)
@@ -102,7 +102,7 @@ def power_svg():
     b.append(text(850, 254, "circuits 1-3, C13s + one C19 each", 11, "middle"))
     b.append(line(150, 160, 150, 210, C["A"], 4))
     b.append(line(850, 160, 850, 210, C["B"], 4))
-    devs = [("gpu01 GPU server", "PSU1 c1, PSU3 c2", "PSU2 c1, PSU4 c2", "C19-C20 or C13-C14 (confirm)", 2100),
+    devs = [("gpu01 GPU server", "PSU1 c1, PSU3 c2", "PSU2 c1, PSU4 c2", "C19-C20 or C13-C14 (confirm)", 3300),
             ("svc01 service node", "PSU1 c1", "PSU2 c1", "C13 to C14", 400),
             ("svc02 service node", "PSU1 c2", "PSU2 c2", "C13 to C14", 400),
             ("svc03 service node", "PSU1 c3", "PSU2 c3", "C13 to C14", 400),
@@ -129,8 +129,8 @@ def power_svg():
              "- Never plug both supplies of one device into the same PDU.",
              "- Label each cord at both ends: device, PSU number, PDU outlet (example: gpu01-PSU1 / A-c1-C19).",
              "- c1, c2, c3 = PDU circuit 1, 2, 3. Spread load across them; the PDU display shows current per circuit.",
-             "- Test: facilities switches feed A off upstream; everything stays up. Restore. Repeat with feed B.",
-             "- Each PDU must carry the whole rack alone: about 3.6 kW at 20 users. Confirm the PDU input rating on its label."]
+             "- Test: facilities switches feed A off upstream; everything with two or more PSUs stays up. Restore. Repeat with feed B.",
+             "- Each PDU must carry the whole rack alone: about 4.8 kW at 50 users. Confirm the PDU input rating on its label."]
     for i, r in enumerate(rules):
         b.append(text(40, y + 20 + i * 19, r, 13 if i == 0 else 12, weight="bold" if i == 0 else "normal"))
     return svg(1000, y + 150, "".join(b), "Power wiring")
@@ -190,31 +190,28 @@ def network_svg():
 
 # ---------------------------------------------------------------- prototype
 def proto_svg():
-    b = [text(30, 34, "Prototype on the unclassified side (becomes staging)", 20, weight="bold"),
-         text(30, 56, "The staging GPU server from the BOM is the prototype. It stays on the unclassified side for good. Nothing gets rebuilt later.", 12, fill="#444")]
-    b.append(rect(30, 80, 1040, 330, "#f1f8e9", "#558b2f", 2, 8))
-    b.append(text(46, 102, "UNCLASSIFIED", 13, weight="bold", fill="#33691e"))
-    b.append(box(60, 130, 250, 80, "Build workstation", ["internet access", "runs delivery/ pull scripts", "existing machine, 2 TB+ free disk"], "#fff3e0"))
-    b.append(box(420, 130, 280, 80, "stg01 staging GPU server", ["BOM items S1, S2, S3", "1 x RTX PRO 6000, RKE2 single node", "2 x 25G NIC"], C["gpu"]))
-    b.append(box(800, 130, 240, 80, "Unclass workstation(s)", ["prototype users", "browser, Jupyter, VS Code"], "#f3e5f5"))
-    b.append(path("M310 160 L420 160", C["cu"], 2))
-    b.append(text(365, 152, "Phase P1 only", 10, "middle", fill=C["cu"]))
-    b.append(text(365, 178, "LAN, pulls direct", 10, "middle", fill=C["cu"]))
-    b.append(path("M185 210 L185 300 L560 300 L560 210", "#795548", 2, "6 4"))
-    b.append(text(372, 292, "Phase P2+: approved transfer media only (same as the lab)", 11, "middle", fill="#795548"))
-    b.append(path("M700 170 L800 170", C["dac"], 3))
-    b.append(text(750, 162, "Direct cable", 10, "middle"))
-    b.append(text(750, 190, "25G DAC or 10G", 10, "middle"))
-    b.append(text(60, 345, "Direct cable option: one workstation plugs straight into stg01's second 25G port with a DAC (or 10G SFP+ if", 11))
-    b.append(text(60, 361, "the workstation only has 10G). Static IPs, no switch. For more than one or two users, use the unclassified LAN instead.", 11))
-    b.append(text(60, 385, "Either way, users hit the same LiteLLM gateway URL and API keys they will use in the lab.", 11, weight="bold"))
-    b.append(rect(30, 440, 1040, 110, "#ffebee", "#b71c1c", 2, 8))
-    b.append(text(46, 462, "LAB (CLASSIFIED / AIR-GAPPED)", 13, weight="bold", fill="#b71c1c"))
-    b.append(text(60, 490, "Lab GPU servers never connect to unclassified machines once they are in the lab. Hardware and media only move one way: in.", 12))
-    b.append(text(60, 510, "Optional, with ISSM approval: burn in new lab hardware on the unclassified side BEFORE it enters the lab (catch dead parts early).", 12))
-    b.append(text(60, 530, "Software reaches the lab only as a sealed, checksummed release bundle that already passed staging.", 12))
-    b.append(text(560, 428, "one way only: sealed release bundle on approved media, after staging sign-off", 11, "middle", "bold", "#795548"))
-    return svg(1100, 580, "".join(b), "Prototype topology")
+    b = [text(30, 34, "Software path: build workstation to the lab", 20, weight="bold"),
+         text(30, 56, "No staging server. The build workstation rehearses each bundle; the lab rack is production from day 1.", 12, fill="#444")]
+    b.append(rect(30, 80, 1040, 230, "#f1f8e9", "#558b2f", 2, 8))
+    b.append(text(46, 102, "UNCLASSIFIED (internet)", 13, weight="bold", fill="#33691e"))
+    b.append(box(60, 130, 300, 96, "Build workstation", ["existing Linux machine, 2 TB+ free disk", "runs delivery/pull-all.sh", "rehearses verify.sh + deploy.sh in a VM"], "#fff3e0"))
+    b.append(box(460, 130, 240, 96, "Transfer drive", ["Apricorn A25-3PL256-S4000F", "ext4, sealed bundle", "SHA256SUMS (+ signature)"], C["oob"]))
+    b.append(box(800, 130, 240, 96, "ISSM intake", ["approved media process", "scan with the bundled Trivy", "one way only: in"], "#f3e5f5"))
+    b.append(path("M360 178 L460 178", C["cu"], 2))
+    b.append(path("M700 178 L800 178", "#795548", 2, "6 4"))
+    b.append(text(60, 260, "Rehearsal without a GPU catches most problems: missing images, checksum errors, script bugs, wrong versions.", 11))
+    b.append(text(60, 278, "GPU driver and model problems first show up in the lab. The 4-GPU rolling update keeps users served while a new version proves itself.", 11))
+    b.append(rect(30, 340, 1040, 200, "#ffebee", "#b71c1c", 2, 8))
+    b.append(text(46, 362, "LAB (AIR-GAPPED)", 13, weight="bold", fill="#b71c1c"))
+    b.append(box(60, 390, 300, 96, "Rack 1, production", ["gpu01: 4 x RTX PRO 6000", "svc01-03: RKE2, gateway, database", "sw01 2 x 10G to the lab C9300-48S"], C["gpu"]))
+    b.append(box(460, 390, 240, 96, "Update, one GPU at a time", ["vLLM replicas 3 -> new version on 1", "other 2 keep serving", "stalls if the new one fails"], C["svc"]))
+    b.append(box(800, 390, 240, 96, "Lab users", ["browser, Jupyter, VS Code, MATLAB", "https://api.&lt;lab-domain&gt;/v1", "per-user gateway keys"], "#f3e5f5"))
+    b.append(path("M920 226 L920 300 L210 300 L210 390", "#795548", 2, "6 4"))
+    b.append(text(565, 294, "sealed release bundle on approved media", 11, "middle", "bold", "#795548"))
+    b.append(path("M360 438 L460 438", C["dac"], 2))
+    b.append(path("M700 438 L800 438", C["cu"], 2))
+    b.append(text(60, 520, "Lab hardware never connects to unclassified machines. Hardware and media only move one way: in.", 12))
+    return svg(1100, 570, "".join(b), "Software path")
 
 os.makedirs(OUT, exist_ok=True)
 for name, fn in [("rack-elevation", rack_svg), ("power-wiring", power_svg), ("network-cabling", network_svg), ("prototype-topology", proto_svg)]:

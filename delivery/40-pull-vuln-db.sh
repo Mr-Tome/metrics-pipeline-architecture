@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pulls the Trivy scanner and its vulnerability databases, so scans inside staging and the lab
+# Pulls the Trivy scanner and its vulnerability databases, so scans inside the lab
 # use current data with no internet.
 source "$(dirname "$0")/lib.sh"
 require curl sha256sum tar

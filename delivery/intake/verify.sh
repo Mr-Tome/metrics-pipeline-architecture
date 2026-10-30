@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Intake check for a release bundle, run on the receiving side (staging or lab) before anything
+# Intake check for a release bundle, run on the receiving side (build workstation rehearsal or lab) before anything
 # is loaded. Exit code 0 means every file matches the sealed checksum list and the signature,
 # if one was made, is valid.
 #

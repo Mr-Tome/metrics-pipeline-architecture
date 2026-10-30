@@ -2,10 +2,10 @@
 """Load test for the AI gateway. Python standard library only, so it runs on any lab machine.
 
 Sends N users' worth of streaming chat requests at once and reports time-to-first-token and
-tokens per second. The BOM plans for 4 simultaneous requests at 20 users (Assumptions B8).
+tokens per second. The BOM plans for 10 simultaneous requests at 50 users (Assumptions C8).
 
 usage:
-  llm-load-test.py --url https://api.lab.example/v1 --key sk-... --users 4 --rounds 3
+  llm-load-test.py --url https://api.lab.example/v1 --key sk-... --users 10 --rounds 3
   llm-load-test.py ... --ca /path/to/lab-ca.pem      (lab CA for HTTPS)
 """
 import argparse

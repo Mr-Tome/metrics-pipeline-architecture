@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # Hardware acceptance check for a GPU or service node. Run as root after the OS is installed.
 #
-#   ./hw-check.sh --gpus 2          lab gpu01 (2 GPUs at the 20-user size)
-#   ./hw-check.sh --gpus 1          staging stg01
+#   ./hw-check.sh --gpus 4          lab gpu01 (4 GPUs at the 50-user size)
 #   ./hw-check.sh --gpus 0          service node
-#   ./hw-check.sh --gpus 2 --burn   adds a 24-hour-capable DCGM stress run (needs DCGM installed)
+#   ./hw-check.sh --gpus 4 --burn   adds a 24-hour-capable DCGM stress run (needs DCGM installed)
 #
 # Prints PASS/FAIL per check and exits non-zero if anything failed.
 set -uo pipefail

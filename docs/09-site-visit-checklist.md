@@ -62,7 +62,7 @@ What this changed:
 
 1. Are the left and right PDUs in each rack fed from separate sources (A and B), for example different
    panels or UPS paths? If yes, which side is A?
-2. What is each PDU's input rating? We need each PDU to carry about 3.6 kW by itself (one side down).
+2. What is each PDU's input rating? We need each PDU to carry about 4.8 kW by itself (one side down).
 3. Who switches the PDU circuits off and on upstream, and what is the lockout/tagout process?
 4. Is the rack frame bonded to the facility ground? The door straps are, but we didn't see the frame wire.
 5. Please hold the two racks next to ACE 15 for us.
@@ -82,7 +82,7 @@ What this changed:
 2. What transfer media is approved, and does the lab provide it?
 3. Is a laptop allowed in the room for the first switch setup over a console cable? If not, what does
    the lab use?
-4. Where may the staging server live, and may it have internet access?
+4. May the build workstation's rehearsal VM run on the unclassified side with internet access? (There is no staging server.)
 5. May photos be taken of our racks for the as-built record?
 
 ### Lab IT

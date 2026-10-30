@@ -4,8 +4,9 @@ This follows the **Delivery** view in `FUTURE_NEED_TO_WORK_metrics_architecture_
 
 1. A connected build environment pulls everything.
 2. It packs everything into one sealed release bundle.
-3. The bundle moves by the approved media process to staging.
-4. After staging sign-off, the same bundle moves to the lab.
+3. The build workstation rehearses the install from the bundle in an offline VM ([04](04-prototype-plan.md), P1).
+   There is no staging server.
+4. After the rehearsal passes, the same bundle moves to the lab by the approved media process.
 
 The scripts are in [`delivery/`](../delivery) and [`validate/`](../validate).
 
@@ -74,7 +75,7 @@ RTX PRO 6000, check that the driver branch and GPU Operator release list Blackwe
 **Transfer media:** the Hugging Face cache layout uses symbolic links. Format the transfer drive ext4 or
 XFS, or tar the bundle first (`tar -cf bundle.tar -C out <bundle>`). exFAT and NTFS drop the links.
 
-## 4. Install on staging or in the lab
+## 4. Install in the lab
 
 On the receiving side, from the bundle:
 
@@ -86,17 +87,21 @@ Then, as root ([`delivery/intake/deploy.sh`](../delivery/intake/deploy.sh) has t
 
 | Where | Command |
 |---|---|
-| svc01 (or the single staging node) | `./intake/deploy.sh server-init` (prints the join token) |
+| svc01 | `./intake/deploy.sh server-init` (prints the join token) |
 | svc02, svc03 | `RKE2_TOKEN=<token> ./intake/deploy.sh server-join <svc01-ip>` |
 | gpu01 | `RKE2_TOKEN=<token> ./intake/deploy.sh agent-join <svc01-ip>` |
 | gpu01 | `./intake/deploy.sh driver`, then `./intake/deploy.sh models` |
 | svc01 | `./intake/deploy.sh platform` |
-| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --api-host api.<lab-domain> --tls-cert ai.crt --tls-key ai.key` (add `--staging` on staging) |
+| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --api-host api.<lab-domain> --tls-cert ai.crt --tls-key ai.key` (3 language model copies by default; `--llm-gpus N` to change) |
 | svc01 | `./intake/deploy.sh gateway-key` |
 | svc01 | `./intake/deploy.sh status` |
 
-For staging with one node, run every step on stg01 and use `apps --staging`. That gives one PostgreSQL
-instance and no Whisper, because the single GPU runs the language model.
+gpu01's four GPUs run three copies of the language model and one Whisper. An update replaces one model
+copy at a time, so two keep serving users.
+
+The rehearsal VM on the build workstation runs every step on one node, skips `driver`, and uses
+`apps --rehearsal`: one PostgreSQL instance, no Whisper, and 0 model copies, since the VM has no GPU.
+A single-GPU test machine, if one is added later, uses `apps --single-node` (one model copy).
 
 What the host needs from the lab's own OS mirror (not in the bundle): gcc, make, kernel headers for the
 running kernel (to build the driver), rsync, openssl, iperf3, and optionally DCGM for burn-in.

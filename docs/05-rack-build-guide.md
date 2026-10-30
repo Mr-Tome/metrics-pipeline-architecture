@@ -1,7 +1,7 @@
 # 05. Rack build guide
 
 Step-by-step for racking, powering, and cabling the lab rack (rack 1 of the two racks next to ACE 15).
-Staging is the same with one server and no switches (see [04-prototype-plan.md](04-prototype-plan.md), section 4).
+There is no staging server; this rack is the whole build (50 users).
 
 Site facts from visit 1 ([09](09-site-visit-checklist.md)):
 
@@ -44,14 +44,14 @@ work fine for the sliding-rail steps, which are the same on almost every 2U serv
 
 ## 1. Before you start
 
-**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 14) and the rack
-console (item 13). Use velcro, not zip ties.
+**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 12) and the rack
+console (item 11). Use velcro, not zip ties.
 
 **People:** two people for the GPU server. Never lift it alone.
 
 **Check the delivery against the BOM:**
 
-- [ ] gpu01: 2 GPUs installed (or loose in boxes), 2 x 3.84 TB NVMe, dual-port 25G NIC, rail kit, power cords
+- [ ] gpu01: 4 GPUs installed (or loose in boxes), 2 x 3.84 TB NVMe, dual-port 25G NIC, rail kit, power cords
 - [ ] svc01, svc02, svc03: rail kits, cords
 - [ ] sw01 S5248F-ON: airflow is **PSU-to-port (port-side exhaust)**. Check the fan and PSU handle color
       against the Dell guide. **If it is wrong, stop and swap it.** Don't install it.
@@ -60,7 +60,7 @@ console (item 13). Use velcro, not zip ties.
 - [ ] Power cords: C13-to-C14 for service nodes and switches; C13-to-C14 or C19-to-C20 for the GPU server (no wall-plug cords)
 - [ ] 10 x 25G SFP28 DAC, 3 m (8 used now, 2 spare)
 - [ ] Uplink optics (2 x Dell 407-BBOU, 2 x Cisco SFP-10G-SR-S) and fiber cords (2 long, sized to the path, plus 2 x 3 m spares)
-- [ ] Cat6 patch cables, 6 x 3 m (BMC and oob01 uplink)
+- [ ] Cat6 patch cables, 10 ft (3 m), 2 ten-packs (BMC and oob01 uplink, rest spare)
 - [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
 ## 2. Rack prep
@@ -99,11 +99,11 @@ the contained aisle.
 **GPU install, if the GPUs come loose:**
 
 1. ESD strap on. Server unplugged, out on its rails or on a bench.
-2. Use the slots the vendor marks for GPUs 1 and 2. Leave slots 3 and 4 for growth.
+2. Fill all four GPU slots, in the order the vendor marks them (GPU 1 to GPU 4).
 3. Seat the card fully. Fasten the bracket. Connect the 16-pin power cable until it clicks. A half-seated
    16-pin connector is the most common failure on 600 W cards: **push it in until there is no gap.**
-4. Install the air shroud or baffle the vendor supplies. Passive GPUs overheat without it.
-5. Fit slot covers or the vendor's blank fillers in the empty GPU slots.
+4. Check all four 16-pin connectors again: no gap on any of them.
+5. Install the air shroud or baffle the vendor supplies. Passive GPUs overheat without it.
 
 ## 4. Power cabling
 
@@ -191,7 +191,7 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
    link up at 25G.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
-3. **BIOS settings on gpu01** (and stg01):
+3. **BIOS settings on gpu01**:
    - Above 4G decoding: on
    - Resizable BAR: on
    - SR-IOV: on
@@ -200,7 +200,7 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
    - Boot mode: UEFI
    - Secure Boot: per lab policy. With Secure Boot on, the NVIDIA driver must be signed, so tell the
      software team.
-4. Install the OS, then run `validate/hw-check.sh --gpus 2`. It checks:
+4. Install the OS, then run `validate/hw-check.sh --gpus 4`. It checks:
    - GPU count, and that each GPU is on PCIe Gen5 x16
    - GPU temperature and power limit
    - NVMe drives present

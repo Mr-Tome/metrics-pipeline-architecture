@@ -1,5 +1,5 @@
-# Speech-to-text (faster-whisper behind an OpenAI-compatible API). Uses the second GPU in the lab.
-# On staging (one GPU) leave this component out, or it will wait for a free GPU.
+# Speech-to-text (faster-whisper behind an OpenAI-compatible API). Uses one of the four GPUs in the lab.
+# On a single-GPU install leave this component out, or it will wait for a free GPU.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-# Installs a verified release bundle on staging or in the lab. Run as root, from inside the bundle.
+# Installs a verified release bundle in the lab (or a single-node test install). Run as root, from inside the bundle.
 # Run verify.sh first. Steps, in order (see docs/06-software-delivery.md):
 #
-#   On svc01 (or the single staging node):  ./deploy.sh server-init
+#   On svc01 (or the single node):          ./deploy.sh server-init
 #   On svc02 and svc03:                     RKE2_TOKEN=... ./deploy.sh server-join <svc01-ip>
 #   On gpu01:                               RKE2_TOKEN=... ./deploy.sh agent-join <svc01-ip>
 #                                           ./deploy.sh driver
 #                                           ./deploy.sh models
 #   On svc01:                               ./deploy.sh platform
-#                                           ./deploy.sh apps --chat-host H --api-host H --tls-cert F --tls-key F [--staging]
+#                                           ./deploy.sh apps --chat-host H --api-host H --tls-cert F --tls-key F [--llm-gpus N] [--single-node | --rehearsal]
 #                                           ./deploy.sh gateway-key
 #   Any time on svc01:                      ./deploy.sh user-key <name>
 #                                           ./deploy.sh status
 #
-# Staging (one node) runs server-init, driver, models, platform, apps --staging, gateway-key.
+# A single-node test install runs server-init, driver, models, platform, apps --single-node, gateway-key.
+# --llm-gpus sets the language model replicas (default 3: four GPUs, one for Whisper).
+# A rehearsal on the build workstation VM (no GPU) runs server-init, models, platform, apps --rehearsal:
+# like --single-node, but with 0 model replicas, so nothing waits for a GPU that isn't there.
 set -euo pipefail
 
 BUNDLE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -97,14 +100,16 @@ platform)
     ( cd "${BUNDLE}/zarf" && ./zarf init --confirm )
     ;;
 apps)
-    chat="" api="" cert="" key="" staging=0
+    chat="" api="" cert="" key="" single=0 rehearse=0 llm=3
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --chat-host) chat="$2"; shift 2 ;;
             --api-host)  api="$2";  shift 2 ;;
             --tls-cert)  cert="$2"; shift 2 ;;
             --tls-key)   key="$2";  shift 2 ;;
-            --staging)   staging=1; shift ;;
+            --llm-gpus)  llm="$2";  shift 2 ;;
+            --single-node) single=1; shift ;;
+            --rehearsal) rehearse=1; shift ;;
             *) die "unknown option $1" ;;
         esac
     done
@@ -116,9 +121,10 @@ apps)
         || kubectl -n ai create secret generic litellm-masterkey --from-literal=masterkey="sk-$(openssl rand -hex 24)"
     pkg=$(ls "${BUNDLE}"/package/zarf-package-*.tar.zst | head -1)
     pg=3 components="transcription"
-    if [[ ${staging} -eq 1 ]]; then pg=1 components=""; fi  # one GPU on staging: no room for whisper
+    if [[ ${single} -eq 1 ]]; then pg=1 llm=1 components=""; fi  # one GPU: no room for whisper
+    if [[ ${rehearse} -eq 1 ]]; then pg=1 llm=0 components=""; fi  # no GPU: images load, nothing waits for one
     ( cd "${BUNDLE}/zarf" && ./zarf package deploy "${pkg}" --confirm \
-        --set CHAT_HOST="${chat}" --set API_HOST="${api}" --set PG_INSTANCES="${pg}" \
+        --set CHAT_HOST="${chat}" --set API_HOST="${api}" --set PG_INSTANCES="${pg}" --set VLLM_REPLICAS="${llm}" \
         ${components:+--components="${components}"} )
     log "deployed. Next: ./deploy.sh gateway-key"
     ;;

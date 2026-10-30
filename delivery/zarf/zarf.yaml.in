@@ -16,7 +16,10 @@ variables:
     description: DNS name for the gateway API (Jupyter, VS Code, MATLAB)
     prompt: true
   - name: PG_INSTANCES
-    description: PostgreSQL instances. 3 in the lab (one per service node), 1 on staging.
+    description: PostgreSQL instances. 3 in the lab (one per service node), 1 on a single-node install.
+    default: "3"
+  - name: VLLM_REPLICAS
+    description: Language model replicas, one GPU each. 3 in the lab (4 GPUs, one for Whisper), 1 on a single-node install.
     default: "3"
 
 components:

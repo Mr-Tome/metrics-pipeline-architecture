@@ -1,5 +1,7 @@
 # vLLM serving the language model. Weights are read from local NVMe on the GPU node
 # (/var/lib/models), copied there by intake/deploy.sh. Nothing is downloaded at runtime.
+# One replica per GPU: 3 in the lab (the fourth GPU runs Whisper). Updates replace one replica at a
+# time, so two keep serving, and a new version that never gets ready stops the rollout.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,9 +10,12 @@ metadata:
   labels:
     app: vllm
 spec:
-  replicas: 1
+  replicas: ###ZARF_VAR_VLLM_REPLICAS###
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: vllm

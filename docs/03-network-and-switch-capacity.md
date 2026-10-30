@@ -13,15 +13,15 @@
 The language model runs on our GPU server, in our rack. What crosses the lab network is text going in and
 text coming out. Rough numbers:
 
-| Traffic | Size | 20 users at peak | Notes |
+| Traffic | Size | 50 users at peak | Notes |
 |---|---|---|---|
-| Chat prompt + streamed answer | 10 to 200 KB per request | under 5 Mbps total | Streaming sends tokens as small chunks. |
+| Chat prompt + streamed answer | 10 to 200 KB per request | under 10 Mbps total | Streaming sends tokens as small chunks. |
 | Large document pasted or uploaded | 1 to 50 MB, now and then | bursts, under 1 s at 1G | Limited by the user's own 1G desk port, not the 10G uplink. |
 | Voice note for transcription | 1 to 10 MB | negligible | |
 | Model weights | about 65 GB | **0 on the lab network** | Loaded from local NVMe in the GPU server. |
 | Cluster-internal traffic (gateway to GPU, database) | moderate | stays inside sw01 | Never touches the C9300/C9500X. |
 
-A 10G uplink carries about 1,250 MB/s. Twenty users chatting use well under 1% of it.
+A 10G uplink carries about 1,250 MB/s. Fifty users chatting use well under 1% of it.
 
 **Where capacity does matter:**
 
@@ -39,7 +39,7 @@ A 10G uplink carries about 1,250 MB/s. Twenty users chatting use well under 1% o
 ## 3. How our rack connects
 
 The lab is more likely to allow option B. The quote request ([08](08-quote-request-email.md)) prices
-option B as item 9, with option A as item 9-alt at the same budget.
+option B as items 6a-6e (optics, fiber, and the C9300-NM-8X module if needed). Option A is not priced.
 
 **Option A (if allowed): lab switch to the C9500X core, 2 x 100G.**
 
@@ -106,5 +106,5 @@ What to look for:
 2. From two or three workstations on different access switches at once, confirm each still gets close to
    its desk speed.
 3. Inside the rack (`validate/net-test.sh`): node to node should reach about 23 Gbps per 25G link.
-4. Load test: run `validate/llm-load-test.py --users 4`. Four parallel users is the 20-user peak from the BOM.
+4. Load test: run `validate/llm-load-test.py --users 10`. Ten parallel users is the 50-user peak from the BOM.
    Time-to-first-token should stay under about 2 s.
