@@ -18,6 +18,10 @@ Diagrams (open the SVG files for full size; they print well on 11x17):
 
 ![Rack elevation](diagrams/rack-elevation.svg)
 
+**Practice first:** [training/rack1-install-sim.html](../training/rack1-install-sim.html) walks through every
+step below in order, with the real part numbers, U positions, outlets, and ports. Open it in any browser.
+It needs no network.
+
 ## 0. Vendor guides and videos
 
 Use the vendor's own document for each step that touches their hardware. No official install videos
@@ -55,7 +59,7 @@ console (item 13). Use velcro, not zip ties.
 - [ ] Rack console (StarTech RKCONS1701) with its VGA/USB cable, rails, and cage nuts
 - [ ] Power cords: C13-to-C14 for service nodes and switches; C13-to-C14 or C19-to-C20 for the GPU server (no wall-plug cords)
 - [ ] 10 x 25G SFP28 DAC, 3 m (8 used now, 2 spare)
-- [ ] Uplink optics and fiber patch cords (option A or B from [03](03-network-and-switch-capacity.md))
+- [ ] Uplink optics (2 x Dell 407-BBOU, 2 x Cisco SFP-10G-SR-S) and fiber cords (2 long, sized to the path, plus 2 x 3 m spares)
 - [ ] Cat6 patch cables, 6 x 3 m (BMC and oob01 uplink)
 - [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
@@ -132,10 +136,12 @@ mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pai
 
    After power-on, the PDU display shows the current on each circuit. If one is much higher than the
    others, move a cord to a lighter circuit.
-4. Facilities removes the lockout. Switch the PDU circuit breakers on.
+4. Do the network cabling (section 5) now, while the rack is cold. Then facilities removes the lockout.
+   Switch the PDU circuit breakers on.
 5. Power on in this order: switches, then service nodes, then gpu01.
-6. **Feed test:** with everything running, facilities switches feed A **off** upstream. Everything must stay
-   up on PDU-B. Facilities switches A back on. Wait 2 minutes, then repeat with feed B off. Same result.
+6. **Feed test:** with everything running, facilities switches feed A **off** upstream. Everything with two
+   or more PSUs must stay up on PDU-B. oob01 and con01 have one cord each, so the one on feed A goes off.
+   That is expected. Facilities switches A back on. Wait 2 minutes, then repeat with feed B off. Same result.
    Record the current on each circuit from each PDU display. Only facilities switches the upstream feeds.
 7. Close the hot aisle containment doors when you finish. Cable work at the rear is done before power-on,
    because the contained aisle gets hot once the servers run.

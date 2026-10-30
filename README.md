@@ -20,6 +20,7 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 | 07 | [Open questions](docs/07-open-questions.md) | Everything still to confirm, with owners and defaults | Living |
 | 08 | [Quote request email](docs/08-quote-request-email.md) | **Send to purchasing.** Items, part numbers, links, amounts, vendor questions | Ready to send |
 | 09 | [Site visit checklist](docs/09-site-visit-checklist.md) | What to look at and ask in the server room | Ready |
+| | [Rack 1 install sim](training/rack1-install-sim.html) | **Installers.** Interactive practice run of doc 05: delivery check to sign-off. Open in a browser, works offline. | Ready |
 
 ## Diagrams
 
@@ -37,6 +38,7 @@ README.md                                      this page
 Metrics_Analysis_Pipeline_Hardware_BOM.xlsx    hardware BOM (Summary, BOM, Assumptions, Software tabs)
 metrics_architecture.html                      full pipeline architecture (interactive)
 docs/                                          numbered documents above, diagrams/
+training/                                      rack1-install-sim.html, interactive install practice
 delivery/                                      scripts that build the release bundle (connected side)
 delivery/intake/                               scripts that verify and install it (staging and lab)
 validate/                                      hardware, network, and load checks

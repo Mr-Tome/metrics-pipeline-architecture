@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rack 1 Install Sim</title>
+<style>
+/* Layout: installer's field tablet. Phase rail across the top, rack scene left, task card right, stacked on a phone.
+   No web fonts or CDNs: this file must work offline in the lab. */
+:root{
+  --bg:#e7ebe9; --surface:#ffffff; --surface-2:#f2f5f3; --ink:#192024; --muted:#56646d; --line:#c9d1ce;
+  --rack:#272c31; --rack-2:#353c43; --rail:#4d565e; --hole:#15191c; --chassis:#3f474f; --chassis-ink:#e9eef0;
+  --blank:#5a636b; --slot:#20252a; --slot-hover:#2f6f4f;
+  --cold:#dbe8f3; --hot:#f6e2d3;
+  --tape:#f1c232; --tape-ink:#1a1f23;
+  --feed-a:#2462c7; --feed-b:#c9741c;
+  --ok:#2b8553; --ok-bg:#e3f2e9; --bad:#bf3328; --bad-bg:#f8e4e1; --led-off:#6b737a;
+  --font-display: Bahnschrift, "DIN Alternate", "DIN 2014", "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#111518; --surface:#192025; --surface-2:#1f272d; --ink:#e4e9ec; --muted:#93a1aa; --line:#2e3940;
+  --rack:#0b0e10; --rack-2:#20262b; --rail:#3b444b; --hole:#06080a; --chassis:#353d45; --chassis-ink:#e9eef0;
+  --blank:#4a535b; --slot:#151a1e; --slot-hover:#2f6f4f;
+  --cold:#16222c; --hot:#2b1f18;
+  --feed-a:#5b8ff0; --feed-b:#e8973f;
+  --ok:#4cb87c; --ok-bg:#16291f; --bad:#ef6b5f; --bad-bg:#2f1714; --led-off:#4d555b;
+  color-scheme: dark; } }
+:root[data-theme="dark"]{
+  --bg:#111518; --surface:#192025; --surface-2:#1f272d; --ink:#e4e9ec; --muted:#93a1aa; --line:#2e3940;
+  --rack:#0b0e10; --rack-2:#20262b; --rail:#3b444b; --hole:#06080a; --chassis:#353d45; --chassis-ink:#e9eef0;
+  --blank:#4a535b; --slot:#151a1e; --slot-hover:#2f6f4f;
+  --cold:#16222c; --hot:#2b1f18;
+  --feed-a:#5b8ff0; --feed-b:#e8973f;
+  --ok:#4cb87c; --ok-bg:#16291f; --bad:#ef6b5f; --bad-bg:#2f1714; --led-off:#4d555b;
+  color-scheme: dark; }
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font:15px/1.5 var(--font-body);
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:16px 40px}
+button{font:inherit; color:inherit}
+code,.mono{font-family:var(--font-mono); font-size:.88em}
+a{color:var(--feed-a)}
+:focus-visible{outline:3px solid var(--feed-a); outline-offset:2px}
+
+header.top{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:flex-end; justify-content:space-between; max-width:1280px; margin:0 auto 12px}
+.brand h1{font:700 30px/1 var(--font-display); letter-spacing:.01em; margin:0; text-wrap:balance}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:13px}
+.stats{display:flex; gap:18px; font-family:var(--font-mono); font-size:13px; font-variant-numeric:tabular-nums}
+.stats b{display:block; font:700 22px/1 var(--font-display)}
+.stats .bad b{color:var(--bad)}
+
+.rail{max-width:1280px; margin:0 auto 16px; display:grid; grid-template-columns:repeat(9, minmax(0,1fr)); gap:4px}
+.rail div{font:600 11px/1.2 var(--font-display); text-transform:uppercase; letter-spacing:.06em; color:var(--muted);
+  border-top:4px solid var(--line); padding-top:6px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rail div.done{border-color:var(--ok); color:var(--ink)}
+.rail div.now{border-color:var(--tape); color:var(--ink)}
+.rail div span{font-family:var(--font-mono); margin-right:4px}
+
+main{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:minmax(0, 470px) minmax(0, 1fr); gap:20px; align-items:start}
+@media (max-width: 900px){ main{grid-template-columns:minmax(0,1fr)} .rail div{font-size:0; } .rail div span{font-size:11px} }
+
+.scene{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:12px; position:sticky; top:12px}
+@media (max-width: 900px){ .scene{position:static} }
+.scene-head{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+.scene-head h2{font:700 15px/1.2 var(--font-display); text-transform:uppercase; letter-spacing:.05em; margin:0}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.seg button{border:0; background:var(--surface-2); padding:4px 10px; font-size:12px; cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+.scene svg{display:block; width:100%; height:auto; max-height:78vh}
+.dims{display:grid; grid-template-columns:auto 1fr; gap:2px 10px; font-size:12px; color:var(--muted); margin-top:8px; font-variant-numeric:tabular-nums}
+.dims dt{font-family:var(--font-mono); color:var(--ink)}
+.dims dd{margin:0}
+
+.task{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:18px 20px; min-width:0}
+.eyebrow{font:600 12px/1 var(--font-display); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap}
+.eyebrow .ref{font-family:var(--font-mono); text-transform:none; letter-spacing:0}
+.task h2{font:700 26px/1.15 var(--font-display); margin:6px 0 10px; text-wrap:balance}
+.task p{margin:0 0 10px; max-width:68ch}
+.lead{color:var(--muted)}
+
+.opts{display:grid; gap:8px; margin:12px 0}
+.opt{display:flex; gap:10px; align-items:flex-start; text-align:left; background:var(--surface-2); border:1px solid var(--line); border-radius:5px; padding:10px 12px; cursor:pointer}
+.opt:hover{border-color:var(--ink)}
+.opt[disabled]{cursor:default; opacity:.55}
+.opt.right{border-color:var(--ok); background:var(--ok-bg); opacity:1}
+.opt .k{font:700 12px/1.6 var(--font-mono); color:var(--muted); min-width:1.4em}
+.opt.chk[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 3px 0 0 var(--ink)}
+
+.feedback{border-radius:5px; padding:10px 12px; margin:10px 0; font-size:14px; max-width:72ch}
+.feedback.bad{background:var(--bad-bg); border:1px solid var(--bad)}
+.feedback.ok{background:var(--ok-bg); border:1px solid var(--ok)}
+.feedback b{display:block; font:700 13px/1.3 var(--font-display); text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px}
+
+.primary{background:var(--ink); color:var(--surface); border:0; border-radius:4px; padding:9px 18px; font-weight:600; cursor:pointer}
+.primary[disabled]{opacity:.4; cursor:default}
+.ghost{background:transparent; border:1px solid var(--line); border-radius:4px; padding:7px 12px; cursor:pointer}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+
+.facts{margin-top:18px; border-top:1px dashed var(--line); padding-top:10px}
+.facts h3,.subh{font:700 12px/1 var(--font-display); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 6px}
+.facts ul{margin:0; padding-left:18px; font-size:13px; color:var(--muted)}
+.facts li{margin:2px 0}
+.facts li b{color:var(--ink); font-weight:600}
+
+.done-list{list-style:none; padding:0; margin:8px 0; display:grid; gap:4px}
+.done-list li{display:flex; gap:10px; font-size:14px; padding:6px 10px; background:var(--ok-bg); border-radius:4px}
+.done-list li span{font:700 13px/1.5 var(--font-mono); color:var(--ok)}
+
+.cartons{display:grid; gap:8px; margin:12px 0}
+.carton{border:1px solid var(--line); border-radius:5px; padding:10px 12px; background:var(--surface-2)}
+.carton.ok{border-color:var(--ok)} .carton.flag{border-color:var(--bad)}
+.carton h4{margin:0; font:700 15px/1.3 var(--font-display)}
+.carton .pn{font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.carton ul{margin:6px 0 8px; padding-left:18px; font-size:13px}
+.carton .row{margin-top:4px}
+.tag{display:inline-block; font:600 11px/1 var(--font-mono); padding:3px 6px; border-radius:3px; background:var(--tape); color:var(--tape-ink)}
+.tag.bad{background:var(--bad); color:#fff} .tag.ok{background:var(--ok); color:#fff}
+
+.tray{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0}
+.chip{border:1px solid var(--line); background:var(--surface-2); border-radius:4px; padding:6px 10px; cursor:pointer; text-align:left; font-size:13px; line-height:1.25}
+.chip small{display:block; color:var(--muted); font-family:var(--font-mono); font-size:11px}
+.chip[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 0 -3px 0 var(--tape)}
+.chip.used{opacity:.45; text-decoration:line-through; cursor:default}
+.chip.placed{border-color:var(--ok)}
+
+.pdus{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0}
+@media (max-width:560px){ .pdus{grid-template-columns:1fr} }
+.pdu{border:2px solid var(--feed-a); border-radius:6px; padding:8px}
+.pdu.B{border-color:var(--feed-b)}
+.pdu h4{margin:0 0 6px; font:700 14px/1 var(--font-display); text-transform:uppercase; letter-spacing:.05em}
+.circ{display:grid; grid-template-columns:auto 1fr; gap:6px; align-items:center; margin:6px 0}
+.circ > b{font:700 12px/1 var(--font-mono)}
+.outs{display:flex; flex-wrap:wrap; gap:4px}
+.out{border:1px solid var(--line); background:var(--surface-2); border-radius:3px; font:11px/1 var(--font-mono); padding:6px 4px; min-width:40px; cursor:pointer}
+.out.c19{min-width:58px; font-weight:700}
+.out.full{background:var(--ink); color:var(--surface); cursor:default}
+.labelprev{font-family:var(--font-mono); background:var(--tape); color:var(--tape-ink); padding:4px 8px; border-radius:3px; display:inline-block}
+
+table.amps{border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; margin:8px 0; width:100%; max-width:560px}
+table.amps th,table.amps td{border-bottom:1px solid var(--line); padding:4px 6px; text-align:right}
+table.amps th:first-child,table.amps td:first-child{text-align:left}
+.tablewrap{overflow-x:auto}
+
+.ports{overflow-x:auto; padding-bottom:4px; margin:8px 0}
+.portgrid{display:grid; grid-auto-flow:column; grid-template-rows:auto auto; gap:3px; width:max-content}
+.port{width:30px; height:28px; border:1px solid var(--line); background:var(--slot); color:#cfd6da; font:10px/1 var(--font-mono); border-radius:2px; cursor:pointer; padding:0}
+.port.opt{box-shadow:inset 0 -4px 0 #9aa5ad}
+.port.cab{background:var(--ok); color:#fff}
+.port.lab{background:var(--blank); cursor:not-allowed}
+.port.want{outline:2px dashed var(--tape); outline-offset:1px}
+.runs{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:6px; margin:8px 0}
+.run{border:1px solid var(--line); background:var(--surface-2); border-radius:4px; padding:6px 8px; text-align:left; cursor:pointer; font-size:12px; line-height:1.3}
+.run b{font-family:var(--font-mono)}
+.run[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 0 -3px 0 var(--tape)}
+.run.done{border-color:var(--ok); background:var(--ok-bg); cursor:default}
+.check{display:flex; gap:8px; align-items:center; font-size:14px; margin:6px 0}
+
+.intro-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:10px; margin:12px 0}
+.intro-grid div{background:var(--surface-2); border-radius:5px; padding:10px 12px; font-size:13px}
+.intro-grid b{display:block; font:700 13px/1.3 var(--font-display); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px}
+
+.misslog{font-size:13px; margin:8px 0; padding-left:18px}
+.misslog li{margin:4px 0}
+.grade{font:700 44px/1 var(--font-display)}
+
+/* SVG scene */
+.s-frame{fill:var(--rack)} .s-inner{fill:var(--rack-2)} .s-rail{fill:var(--rail)} .s-hole{fill:var(--hole)}
+.s-unum{fill:var(--muted); font:9px var(--font-mono)}
+.s-slot{fill:var(--slot); cursor:default} .s-slot.arm{cursor:pointer} .s-slot.arm:hover{fill:var(--slot-hover)}
+.s-res{fill:none; stroke:var(--muted); stroke-dasharray:3 3}
+.s-dev{fill:var(--chassis); stroke:#000; stroke-opacity:.35} .s-blank{fill:var(--blank)}
+.s-txt{fill:var(--chassis-ink); font:600 10px var(--font-body)} .s-sub{fill:var(--chassis-ink); opacity:.75; font:8px var(--font-mono)}
+.s-bay{fill:#1b2024} .s-psu{fill:#596570}
+.s-led{fill:var(--led-off)} .s-led.on{fill:#3fd07a}
+.s-pdu{fill:#1d2226; stroke:var(--feed-a); stroke-width:2} .s-pdu.B{stroke:var(--feed-b)} .s-pdu.off{opacity:.35}
+.s-out{fill:#4a5258} .s-out.A{fill:var(--feed-a)} .s-out.B{fill:var(--feed-b)}
+.s-pdul{fill:var(--ink); font:700 10px var(--font-display)}
+.s-cold{fill:var(--cold)} .s-hot{fill:var(--hot)}
+.s-zone{fill:var(--muted); font:600 10px var(--font-display); letter-spacing:.08em}
+.s-port{fill:#11161a} .s-port.on{fill:#3fd07a} .s-port.optic{fill:#9aa5ad}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Rack 1 Install Sim</h1>
+    <p>Two Vertiv VR3300 racks next to ACE 15 · 20-user build · follows <a href="../docs/05-rack-build-guide.md">05 Rack build guide</a></p>
+  </div>
+  <div class="stats" aria-live="polite">
+    <div>Step<b id="st-step">1/1</b></div>
+    <div class="bad">Mistakes<b id="st-miss">0</b></div>
+    <div>Time<b id="st-time">0:00</b></div>
+  </div>
+</header>
+<nav class="rail" id="rail" aria-label="Phases"></nav>
+<main>
+  <section class="scene" aria-label="Rack view">
+    <div class="scene-head">
+      <h2 id="scene-title">Rack 1</h2>
+      <div class="seg" role="group" aria-label="Rack side">
+        <button id="v-front" aria-pressed="true">Front</button><button id="v-rear" aria-pressed="false">Rear</button>
+      </div>
+    </div>
+    <div id="svg"></div>
+    <dl class="dims">
+      <dt>1U</dt><dd>1.75 in (44.45 mm). 42U = 73.5 in of mounting space</dd>
+      <dt>VR3300</dt><dd>600 mm wide × 1200 mm deep, square holes (cage nuts)</dd>
+      <dt>Rails</dt><dd>19 in (EIA-310), set 29 in (737 mm) front to rear at visit 1</dd>
+      <dt>Rack PDUs</dt><dd>Vertiv Geist, left and right, circuits 1–3, 208 V, one C19 per circuit</dd>
+    </dl>
+  </section>
+  <section class="task" id="task" aria-live="polite"></section>
+</main>
+
+<script>
+"use strict";
+/* ---------- data ---------- */
+const PHASES = ["Delivery","Rack prep","GPU install","Rack the gear","Power cords","Network","Power-on","First checks","Sign-off"];
+const DOC = { "01":"../docs/01-facility-requirements.md", "02":"../docs/02-budget-and-bom.md", "03":"../docs/03-network-and-switch-capacity.md",
+  "05":"../docs/05-rack-build-guide.md", "07":"../docs/07-open-questions.md", "08":"../docs/08-quote-request-email.md", "09":"../docs/09-site-visit-checklist.md" };
+
+const DEVS = {
+  gpu01:{u:[1,2], model:"Thinkmate GPX GE95-2206-41", short:"GPU server, 2U", psus:4, w:2100},
+  svc01:{u:[5], model:"Thinkmate RAX RE95-1104-01", short:"service node, 1U", psus:2, w:400},
+  svc02:{u:[6], model:"Thinkmate RAX RE95-1104-01", short:"service node, 1U", psus:2, w:400},
+  svc03:{u:[7], model:"Thinkmate RAX RE95-1104-01", short:"service node, 1U", psus:2, w:400},
+  con01:{u:[21], model:"StarTech RKCONS1701", short:"rack console, 1U", psus:1, w:13},
+  oob01:{u:[40], model:"Cisco C1300-24T-4X", short:"management switch, 1U", psus:1, w:30},
+  sw01:{u:[41], model:"Dell S5248F-ON", short:"25G switch, 1U", psus:2, w:250}
+};
+const CORDS = [];
+for (const d in DEVS){ const n = DEVS[d].psus;
+  if (n === 1) CORDS.push({id:d+"-PWR", dev:d, n:0});
+  else for (let i=1;i<=n;i++) CORDS.push({id:d+"-PSU"+i, dev:d, n:i}); }
+const C13_PER_CIRCUIT = 6; // sim value: count them on the real PDU (09, look list)
+const VOLTS = 208;
+
+const BIN = [
+  {id:"470-ACEU", name:"Dell 470-ACEU", desc:"25G SFP28 DAC, 3 m", qty:10},
+  {id:"407-BBOU", name:"Dell 407-BBOU", desc:"10GBASE-SR SFP+, Dell-coded", qty:2},
+  {id:"SFP-10G-SR-S", name:"Cisco SFP-10G-SR-S", desc:"10GBASE-SR SFP+, Cisco-coded", qty:2},
+  {id:"OM4-30", name:"OM4 LC-LC, ~30 m", desc:"aqua duplex, sized to the path", qty:2},
+  {id:"OM4-3", name:"OM4 LC-LC, 3 m", desc:"aqua duplex, spare", qty:2},
+  {id:"CAT6", name:"Cat6, 3 m", desc:"RJ45 patch cable", qty:6}
+];
+const RUNS = [
+  {id:"O1", grp:"O", label:"Optic, sw01 end of U01", dev:"sw01", port:47, part:"407-BBOU"},
+  {id:"O2", grp:"O", label:"Optic, sw01 end of U02", dev:"sw01", port:48, part:"407-BBOU"},
+  {id:"O3", grp:"O", label:"Optic, lab C9300 end of U01", dev:"c9300", port:5, part:"SFP-10G-SR-S"},
+  {id:"O4", grp:"O", label:"Optic, lab C9300 end of U02", dev:"c9300", port:6, part:"SFP-10G-SR-S"}
+];
+[["gpu01",1],["gpu01",2],["svc01",1],["svc01",2],["svc02",1],["svc02",2],["svc03",1],["svc03",2]].forEach(([d,p],i)=>
+  RUNS.push({id:"D0"+(i+1), grp:"D", label:d+" NIC port "+p, dev:"sw01", port:i+1, part:"470-ACEU"}));
+RUNS.push({id:"U01", grp:"U", label:"sw01 1/1/47 to lab C9300 Te1/1/5", dev:"sw01", port:47, part:"OM4-30", far:5});
+RUNS.push({id:"U02", grp:"U", label:"sw01 1/1/48 to lab C9300 Te1/1/6", dev:"sw01", port:48, part:"OM4-30", far:6});
+["gpu01 BMC","svc01 BMC","svc02 BMC","svc03 BMC","sw01 mgmt port"].forEach((l,i)=>
+  RUNS.push({id:"M0"+(i+1), grp:"M", label:l, dev:"oob01", port:i+1, part:"CAT6"}));
+const DEVPORTS = {
+  sw01:{title:"sw01 · Dell S5248F-ON · ethernet 1/1/1–1/1/48 (SFP28)", n:48, name:p=>"1/1/"+p},
+  oob01:{title:"oob01 · Cisco C1300-24T-4X · GE1–GE24 (RJ45)", n:24, name:p=>"GE"+p},
+  c9300:{title:"Lab C9300-48S · C9300-NM-8X module · Te1/1/1–Te1/1/8 (SFP+)", n:8, name:p=>"Te1/1/"+p, lab:[1,2,3,4]}
+};
+
+/* Delivery cartons. Each run, two of them arrive with a problem. */
+const CARTONS = [
+  {id:"gpu", name:"gpu01 · GPU server", pn:"Thinkmate GPX GE95-2206-41 · quote item 1", defect:"cords",
+   good:["2 × AMD EPYC 9115, 12 × 32 GB DDR5-6400","2 × 3.84 TB Micron 7600 PRO U.2 NVMe","Intel E810-XXVDA2 (2 × SFP28), TPM","4 × 2000 W PSU, rail kit","4 × power cord, C19 to C20 (or C13 to C14, per the PSU inlet)"],
+   bad:["2 × AMD EPYC 9115, 12 × 32 GB DDR5-6400","2 × 3.84 TB Micron 7600 PRO U.2 NVMe","Intel E810-XXVDA2 (2 × SFP28), TPM","4 × 2000 W PSU, rail kit","4 × power cord, NEMA 5-15P wall plug to C13"],
+   why:"NEMA 5-15P is a wall plug. It does not fit the 208 V Geist rack PDU. Flag it and get C19-to-C20 or C13-to-C14 cords to match the PSU inlets."},
+  {id:"gpus", name:"GPUs", pn:"NVIDIA RTX PRO 6000 Blackwell Server Edition · CDW 8426124 · item 2", good:["2 cards for rack 1 (the third is for staging)","Passive cooling, 96 GB, 16-pin 12V-2x6 power"]},
+  {id:"svc", name:"svc01–svc03 · service nodes", pn:"Thinkmate RAX RE95-1104-01 · item 3", good:["3 servers, each with Broadcom N225P OCP 3.0 (2 × SFP28)","2 × 1300 W PSU each, rail kits","6 × power cord, C13 to C14"]},
+  {id:"sw", name:"sw01 · 25G switch", pn:"Dell S5248F-ON · 210-APFB · item 4", defect:"airflow",
+   good:["48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD","2 PSUs, fans","Airflow label: PSU to I/O (port-side exhaust)","ReadyRails 1U kit, 2 × C13 to C14 cords"],
+   bad:["48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD","2 PSUs, fans","Airflow label: I/O to PSU (port-side intake)","ReadyRails 1U kit, 2 × C13 to C14 cords"],
+   why:"The ports face the hot aisle. Port-side intake pulls hot exhaust air into the switch. Stop and swap it for PSU to I/O. Don't install it."},
+  {id:"dac", name:"In-rack 25G cables", pn:"Dell 470-ACEU · item 5", defect:"dac", good:["10 × SFP28 DAC, 3 m (8 used, 2 spare)"], bad:["8 × SFP28 DAC, 3 m"],
+   why:"The order is 10 (8 used now, 2 spare). Flag the short count so the spares arrive."},
+  {id:"optics", name:"Uplink optics", pn:"Dell 407-BBOU ×2 · Cisco SFP-10G-SR-S ×2 · items 8a, 8b", defect:"optics",
+   good:["2 × Dell 407-BBOU 10GBASE-SR SFP+","2 × Cisco SFP-10G-SR-S 10GBASE-SR SFP+"], bad:["4 × Dell 407-BBOU 10GBASE-SR SFP+","0 × Cisco SFP-10G-SR-S"],
+   why:"Each end of a link needs an optic coded for its own switch. The lab C9300 may refuse Dell-coded optics. Flag it: 2 Cisco SFP-10G-SR-S are missing."},
+  {id:"fiber", name:"Fiber cords", pn:"LC-LC duplex OM4 · items 8c, 8d", defect:"fiber",
+   good:["2 × long cord, length per measured path (about 30 m)","2 × 3 m cord (spares)"], bad:["4 × 3 m cord"],
+   why:"There is no patch panel and the lab switch is not in sight. 3 m will not reach it. Flag it: the two long cords are missing."},
+  {id:"oob", name:"oob01 · management switch", pn:"Cisco C1300-24T-4X · CDW 8112270 · item 9", good:["24 × 1G RJ45, 4 × 10G SFP+","Rack ears, 1 × C13 to C14 cord"]},
+  {id:"cat6", name:"Cat6 patch cables", pn:"item 11", good:["6 × Cat6, 3 m (5 BMC/mgmt, 1 spare)"]},
+  {id:"blank", name:"Blanking panels", pn:"Vertiv VRA2000 (10-pack) × 8 · item 10", defect:"blanks",
+   good:["80 × 1U tool-less blanking panels"], bad:["4 boxes: 40 × 1U panels"],
+   why:"Rack 1 needs 34 and rack 2 needs 42. 40 panels leaves rack 2 open to the hot aisle. Flag it."},
+  {id:"con", name:"con01 · rack console", pn:"StarTech RKCONS1701 · item 13", good:["17 in LCD, keyboard, touchpad, 1U drawer","VGA/USB cable, rails, mounting hardware"]},
+  {id:"kit", name:"Setup kit", pn:"item 14", good:["Cord labels, label maker, velcro","M6 cage nuts and screws, cage nut tool","ESD wrist strap, one-click LC fiber cleaner","Console cables (RJ45 and USB-C serial), hand tools"]},
+  {id:"usb", name:"Transfer drives", pn:"Apricorn A25-3PL256-S4000F × 2 · item 12", good:["2 × 4 TB encrypted SSD, FIPS 140-2","Hand to the ISSM process unopened if the lab requires it"]}
+];
+const DEFECT_POOL = ["cords","airflow","dac","optics","fiber","blanks"];
+
+/* ---------- state ---------- */
+let S;
+function fresh(inlet){
+  const pool = DEFECT_POOL.slice(); const defects = [];
+  while (defects.length < 2) defects.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  return { inlet: inlet||"C20", step:0, started:false, t0:0, mistakes:[], fb:null, ss:{}, defects, view:"front",
+    rack:{}, blanks1:0, blanks2:0, cords:{}, outlets:{}, optics:{}, ports:{sw01:{},oob01:{},c9300:{}}, runsDone:{},
+    feed:{A:true,B:true}, breakers:false, powered:{}, inspected:{} };
+}
+S = fresh();
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function ss(){ return S.ss[S.step] || (S.ss[S.step] = {}); }
+function refLink(r){ if(!r) return ""; return `<a class="ref" href="${DOC[r[0]]}">doc ${r[0]} ${esc(r[1]||"")}</a>`; }
+function miss(text){ S.mistakes.push({step:STEPS[S.step].title, text}); S.fb = {kind:"bad", text}; render(); }
+function good(text){ S.fb = text ? {kind:"ok", text} : null; }
+function next(){ S.fb = null; S.step++; const st = STEPS[S.step]; if (st && st.view) S.view = st.view; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+function fbHTML(){ if(!S.fb) return ""; const t = S.fb.kind==="bad" ? "Not right" : "Correct";
+  return `<div class="feedback ${S.fb.kind}" role="status"><b>${t}</b>${S.fb.text}</div>`; }
+function factsHTML(st){ if(!st.facts) return ""; return `<div class="facts"><h3>On the spec sheet</h3><ul>${st.facts.map(f=>`<li>${f}</li>`).join("")}</ul></div>`; }
+const W = n => n.toLocaleString("en-US");
+const amps = w => (w / VOLTS).toFixed(1);
+
+/* Power: which devices are up and what each PDU circuit carries */
+function loads(){
+  const res = {}; for (const p of ["A","B"]) for (let c=1;c<=3;c++) res[p+c]=0;
+  const up = {};
+  for (const d in DEVS){
+    const live = CORDS.filter(x => x.dev===d && S.cords[x.id] && S.breakers && S.feed[S.cords[x.id].pdu]);
+    up[d] = !!S.powered[d] && live.length > 0;
+    if (up[d]) live.forEach(x => { const o = S.cords[x.id]; res[o.pdu+o.c] += DEVS[d].w / live.length; });
+  }
+  return {res, up};
+}
+function ampsTable(){
+  const {res, up} = loads();
+  const row = p => `<tr><td>PDU-${p}${S.feed[p] ? "" : " (feed off)"}</td>${[1,2,3].map(c=>`<td>${W(Math.round(res[p+c]))} W · ${amps(res[p+c])} A</td>`).join("")}<td>${W(Math.round(res[p+1]+res[p+2]+res[p+3]))} W</td></tr>`;
+  const down = Object.keys(DEVS).filter(d => S.powered[d] && !up[d]);
+  return `<div class="tablewrap"><table class="amps"><thead><tr><th>Display</th><th>Circuit 1</th><th>Circuit 2</th><th>Circuit 3</th><th>Total</th></tr></thead>
+    <tbody>${row("A")}${row("B")}</tbody></table></div>
+    <p class="lead" style="font-size:13px">Max draw at ${VOLTS} V. Each PDU must carry about 3.6 kW alone. ${down.length ? `<b style="color:var(--bad)">Down: ${down.join(", ")}</b> (one cord, on the dead feed)` : "All powered devices up."}</p>`;
+}
+
+/* ---------- steps ---------- */
+const STEPS = [
+ {ph:0, type:"intro", title:"Install day"},
+
+ {ph:0, type:"inspect", title:"Check every carton against the order", ref:["05","§1"],
+  lead:"Everything ships to the lab. Open each carton, compare it with the quote, and accept it or flag it. Two cartons in this delivery have a problem.",
+  facts:["<b>Quote:</b> doc 08 lists every part number and quantity","<b>Rule:</b> a wrong-airflow switch is never installed. Stop and swap it."]},
+
+ {ph:0, type:"choice", title:"Which airflow does sw01 need?", ref:["02","§4 item 3"],
+  q:"sw01 is mounted with its ports at the rear, inside the hot aisle containment. Its PSUs face the room. Which airflow option is right?",
+  opts:[["PSU to I/O (port-side exhaust): cool air in at the PSU end, out at the ports", true, "Cool room air enters at the PSU end and exhausts at the ports, into the hot aisle."],
+        ["I/O to PSU (port-side intake)", false, "That pulls air in at the ports, which sit in the hot aisle. The switch would breathe server exhaust."],
+        ["Either works, the containment sorts it out", false, "Containment only works if every device moves air front (room) to rear (hot aisle). The wrong switch fights it."]],
+  facts:["<b>Dell S5248F-ON:</b> 1U, 48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD, 2 PSUs","<b>Max draw:</b> 250 W"]},
+
+ {ph:1, type:"choice", title:"Which way does rack 1 face?", ref:["05","§2"], view:"front",
+  q:"You're at rack 1, next to ACE 15. The glass of the hot aisle containment closes off one side. Where do servers go in, and where do you do cables?",
+  opts:[["Front faces the room. Servers go in from the front. Cables and PDUs are done from the rear, inside the glass.", true, "Server intakes take room air. Exhaust and cabling sit in the contained hot aisle."],
+        ["Front faces the glass, so the hot aisle stays tidy", false, "Then the servers would pull hot exhaust into their intakes. Fronts face the room."],
+        ["Doesn't matter. The Liebert CRV cools both sides.", false, "The CRV cools the room side. Hot aisle containment only works if exhaust goes into the glass."]],
+  facts:["<b>Cooling:</b> Vertiv Liebert CRV (CR035RA…), 35 kW in-row, in the same row","<b>Our heat load:</b> about 12,200 BTU/hr (1.0 ton) at 20 users","<b>Intake air:</b> 18–27 °C (64.4–80.6 °F), ASHRAE recommended"]},
+
+ {ph:1, type:"choice", title:"Is the rack grounded?", ref:["05","§2 step 2"],
+  q:"The split rear doors have green bonding wires. You don't see a wire from the rack frame to a ground bar. What do you do?",
+  opts:[["Ask facilities to confirm the frame is bonded to facility ground (SL-11425 §4.9) before any power goes in", true, "The door wires only bond the doors to the frame. The frame needs its own bond to the facility ground."],
+        ["Nothing. The green door wires ground the rack.", false, "Those only bond the doors to the frame. The frame-to-facility bond still needs checking."],
+        ["Run a wire from the frame to the nearest metal conduit", false, "Grounding is facilities' job and must go to their ground bar or floor grid. Don't improvise it."]]},
+
+ {ph:1, type:"choice", title:"Set the rail depth", ref:["05","§2 step 3"],
+  q:"The VR3300 rails adjust front to rear and were measured at 29 in apart. Which device sets the rail depth?",
+  opts:[["The longest rail kit, the GPU server's. Set the rear rails to its rail kit's range.", true, "The 2U server's sliding rails are the longest. Set the rails so they fit, then everything shorter fits too."],
+        ["Leave them at 29 in and force the rail kits if needed", false, "Forcing a rail kit bends the rails. Confirm the kit range (quote question 4) and set the rails to it."],
+        ["Move the rails to the full 1200 mm cabinet depth", false, "1200 mm is the cabinet, not the rail spacing. No rail kit spans that."]],
+  facts:["<b>Cabinet:</b> 1200 mm deep","<b>Rails at visit 1:</b> 29 in (737 mm) front to rear","<b>Vendor question 4:</b> confirm the GPU server and service node rail kits fit a VR3300 at 29 in"]},
+
+ {ph:1, type:"choice", title:"Label the PDUs", ref:["05","§4"], view:"rear",
+  q:"Facilities tells you (sim answer) that the left PDU, seen from the rear, is fed from source A and the right one from source B. What do you write on them?",
+  opts:[["Left: PDU-A. Right: PDU-B. Label both before any cord goes in.", true, "Now every cord label can name its PDU, for example gpu01-PSU1 / A-C1-C19."],
+        ["Nothing, they're the same model", false, "Without labels nobody can tell which PDU a cord is on during a feed failure."],
+        ["Guess A and B, then check with a meter later", false, "Only facilities knows which upstream panel feeds each PDU. Use their answer."]],
+  facts:["<b>Geist PDUs:</b> circuits 1, 2, 3 each. Mostly C13 (slots vertical), one C19 per circuit (slots horizontal). 208 V.","<b>Sim value:</b> 6 C13 per circuit. Count yours on the next visit (doc 09)."]},
+
+ {ph:2, type:"order", title:"Install the GPUs", ref:["05","§3 GPU install"], view:"front",
+  lead:"If the GPUs come loose, install them before the server goes in the rack. Pick each action in order. Some actions are wrong.",
+  items:[["Put on the ESD wrist strap and clip it to bare chassis metal"],
+         ["Server unplugged, on a bench or out on its rails (two people to move it)"],
+         ["Find the slots the vendor marks for GPU 1 and GPU 2"],
+         ["Seat GPU 1 fully in its x16 slot and fasten the bracket"],
+         ["Push GPU 1's 16-pin power connector in until it clicks, with no gap"],
+         ["Seat GPU 2 and fasten its bracket"],
+         ["Push GPU 2's 16-pin connector in until it clicks, with no gap"],
+         ["Install the vendor's air shroud"],
+         ["Fit blank fillers in GPU slots 3 and 4"]],
+  bad:[["Use slots 3 and 4 now, so 1 and 2 are easy to reach later","Use the slots the vendor marks for GPUs 1 and 2. Slots 3 and 4 are for growth to 50 users."],
+       ["Leave the shroud off: the cards have their own fans","The RTX PRO 6000 Server Edition is passive. It has no fans and overheats without the shroud."],
+       ["Close up once the 16-pin connector is mostly in","A half-seated 16-pin connector is the most common failure on 600 W cards. Push until there is no gap."]],
+  facts:["<b>GPU:</b> NVIDIA RTX PRO 6000 Blackwell Server Edition, 96 GB, passive, PCIe Gen5 x16, dual slot","<b>Power:</b> 600 W max each, can be capped to 400 W with <code>nvidia-smi -pl 400</code>","<b>Chassis:</b> 7 PCIe x16 slots, 4 for GPUs. 2 filled now, 2 for growth."]},
+
+ {ph:3, type:"place", title:"Rack the gear, bottom up", ref:["05","§3"], view:"front",
+  lead:"Pick a device, then click its U in the rack. Heaviest first, at the bottom, so the rack can't tip. Then blank every empty U.",
+  facts:["<b>gpu01:</b> 2U, about 40–50 kg boxed. Two-person lift. No server lift on site.","<b>U3–U4:</b> held for gpu02","<b>Blanking:</b> Vertiv VRA2000, 1U tool-less, 80 ordered (rack 1 needs 34, rack 2 needs 42)"]},
+
+ {ph:4, type:"order", title:"Before any cord goes in", ref:["05","§4 step 0–1"], view:"rear",
+  lead:"Power work is at the rear, inside the glass. Put these in order.",
+  items:[["Facilities confirms the upstream feeds to both PDUs are off and locked out (or confirms in writing that live plug-in is their normal practice)"],
+         ["Switch every PDU circuit breaker off: A-C1, A-C2, A-C3, B-C1, B-C2, B-C3"],
+         ["Label every cord at both ends with device, PSU, PDU, circuit and outlet"]],
+  bad:[["Plug gpu01 in first to check its PSUs light up","Nothing gets plugged in until the feeds are locked out and every cord is labeled."],
+       ["Switch the PDU breakers on to check the displays work","Breakers stay off until every cord is in and facilities removes the lockout."],
+       ["Open the PDU input box and check the wiring yourself","Upstream wiring is facilities' work. You only touch the outlet side."]]},
+
+ {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"rear",
+  lead:"Pick a cord, then pick an outlet. Odd-numbered PSUs go to PDU-A, even to PDU-B. Spread the load across the three circuits.",
+  facts:["<b>Circuit plan, each PDU:</b> 1 = gpu01 PSU + svc01 · 2 = gpu01 PSU + svc02 · 3 = svc03 + sw01 + oob01 or con01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 2,100 W (4 PSUs) · svc 400 W each · sw01 250 W · oob01 30 W · con01 13 W"]},
+
+ {ph:4, type:"choice", title:"What does one circuit carry?", ref:["01","§3"],
+  q:"PDU-A circuit 1 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 2,100 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C1 carry now?",
+  opts:[["About 7.0 A (1,450 W at 208 V)", true, "With B gone, gpu01's 2,100 W splits over its 2 live PSUs (1,050 W) and svc01's 400 W lands on 1 (400 W). 1,450 W / 208 V = 7.0 A. Compare that with the circuit breaker rating on the PDU label."],
+        ["About 3.5 A (725 W), same as before", false, "3.5 A is with both feeds up. With B gone, each device's live PSUs take its whole load, so the current doubles."],
+        ["About 14 A (2,900 W)", false, "Only the PSUs on circuit A-C1 count: gpu01 half (1,050 W) plus svc01 all (400 W) = 1,450 W, about 7.0 A."]]},
+
+ {ph:5, type:"network", title:"Run the network cables", ref:["05","§5"], view:"rear",
+  lead:"Pick a run from the schedule, pick the part from the bin, then click the port. Optics go in before fiber. BMC Cat6 goes in last so it doesn't get buried.",
+  facts:["<b>DAC:</b> passive copper, 3 m, keep bends wider than about 5 cm radius","<b>10GBASE-SR on OM4:</b> up to 400 m. Distance is not the risk, cord length is.","<b>Fiber:</b> dust caps on until you plug in, clean every connector first"]},
+
+ {ph:5, type:"choice", title:"Dress the DACs", ref:["05","§5 steps"],
+  q:"Eight 3 m DACs run from the servers up to sw01 at U41. How do you dress them?",
+  opts:[["Velcro bundles along the side of the rack, no bend tighter than about 5 cm radius, clear of server exhaust", true, "Velcro can be re-opened without cutting, and a wide bend protects the copper pairs."],
+        ["Zip ties pulled tight every 20 cm", false, "Tight zip ties crush DACs and have to be cut for every change. Use velcro."],
+        ["Coil the slack behind gpu01 to keep it neat", false, "A coil behind the server blocks its exhaust into the hot aisle. Run slack along the side."]]},
+
+ {ph:6, type:"order", title:"Power on", ref:["05","§4 step 4–5"], view:"rear",
+  lead:"Rear cabling is done. The contained aisle gets hot once things run, so finish rear work first.",
+  items:[["Check no cable bundle blocks server exhaust and the rear doors close"],
+         ["Facilities removes the lockout", "unlock"],
+         ["Switch the PDU circuit breakers on", "breakers"],
+         ["Power on the switches: sw01 and oob01", "switches"],
+         ["Power on the service nodes: svc01, svc02, svc03 (and con01)", "svc"],
+         ["Power on gpu01", "gpu"]],
+  bad:[["Power on gpu01 first so it has the most time to post","Switches first, so the servers find their links and the BMCs get addresses. gpu01 last."],
+       ["Switch on the breakers yourself before facilities removes the lockout","The lockout is facilities'. They remove it, then you switch the PDU breakers."]]},
+
+ {ph:6, type:"order", title:"Feed test", ref:["05","§4 step 6"], view:"rear", amps:true,
+  lead:"Prove the rack survives losing either feed. Watch the PDU readings as you go.",
+  items:[["Facilities switches feed A off upstream", "Aoff"],
+         ["Check every two-PSU device is still up on PDU-B and read the PDU-B circuits"],
+         ["Facilities switches feed A back on", "Aon"],
+         ["Wait 2 minutes"],
+         ["Facilities switches feed B off upstream", "Boff"],
+         ["Check every two-PSU device is still up on PDU-A and read the PDU-A circuits"],
+         ["Facilities switches feed B back on", "Bon"],
+         ["Record the current on each circuit from each PDU display"],
+         ["Close the hot aisle containment doors"]],
+  bad:[["You switch feed A off at the panel to save time","Only facilities switches the upstream feeds."],
+       ["Pull the PDU-A input plug to simulate a failure","Never pull a live PDU input. Facilities switches the feed off upstream."]],
+  facts:["<b>Expected:</b> oob01 and con01 have one cord each, so whichever is on the dead feed goes dark. Everything with two or more PSUs stays up.","<b>Each PDU</b> must carry about 3.6 kW alone at 20 users"]},
+
+ {ph:7, type:"order", title:"First power-on checks", ref:["05","§6"], view:"front",
+  lead:"The rack console at U21 is your screen and keyboard. No laptop on the lab network, no internet.",
+  items:[["Console cable into sw01. Set its management IP."],
+         ["On sw01, run show interface status: ethernet 1/1/1–1/1/8 up at 25G, 1/1/47–48 up at 10G in the port-channel"],
+         ["At the rack console, give each BMC an IP, change the default password, and store it in the lab's password store"]],
+  bad:[["Leave the BMC default passwords until the software is installed","Change the default password at first login. Default BMC passwords are a known risk."],
+       ["Plug a laptop into the lab network to pull drivers","Assume no internet. Drivers come in on the approved transfer drives, through the ISSM process."]]},
+
+ {ph:7, type:"multi", title:"Set the gpu01 BIOS", ref:["05","§6 step 3"],
+  q:"Select every setting gpu01 needs before the OS goes on.",
+  opts:[["Above 4G decoding: on", true, "Large GPU memory windows need it."],["Resizable BAR: on", true, "Lets the CPU map all 96 GB of GPU memory."],
+        ["SR-IOV: on", true, "Needed for virtual functions on the NIC and GPUs."],["IOMMU: on", true, "Needed for device passthrough and isolation."],
+        ["Power profile: performance", true, "Energy-saving profiles slow the GPUs down under load."],["Boot mode: UEFI", true, "Legacy boot won't map the GPUs correctly."],
+        ["Boot mode: Legacy/CSM", false, "Use UEFI."],["IOMMU: off for speed", false, "IOMMU stays on."],
+        ["Secure Boot: off, without asking", false, "Secure Boot follows lab policy. If it's on, tell the software team so the NVIDIA driver is signed."]]},
+
+ {ph:7, type:"order", title:"Validate", ref:["05","§6 step 4–6"],
+  items:[["Install the OS from the transfer drive (Rocky Linux 9 unless the lab requires RHEL)"],
+         ["Run validate/hw-check.sh --gpus 2 on gpu01: GPU count, PCIe Gen5 x16, temperature, power limit, NVMe, NIC speed"],
+         ["Run validate/hw-check.sh --gpus 0 on svc01–svc03"],
+         ["Run validate/net-test.sh between the nodes"],
+         ["With ISSM approval, photograph the rack front, rear, and each PDU display under load for docs/photos/"]],
+  bad:[["Skip hw-check on gpu01 since the vendor tested it","Shipping can unseat a GPU or a 16-pin connector. hw-check proves Gen5 x16 and the power limit on site."]]},
+
+ {ph:8, type:"multi", title:"Sign-off", ref:["05","§7"],
+  q:"Tick only what is true for a finished rack 1.",
+  opts:[["Feed A and feed B tests passed", true],["All D-links up at 25G, uplinks up and in a port-channel", true],
+        ["hw-check.sh passed on every node", true],["All empty U blanked in both racks, doors on, intake in range", true],
+        ["Cable labels match the schedule", true],["Photos added to docs/photos/", true],
+        ["Rack 2 left open until gpu02 arrives", false, "Rack 2 gets 42 blanking panels now, or it leaks hot air out of the contained aisle."],
+        ["Uplinks running as two separate links (no port-channel)", false, "U01 and U02 are one LACP port-channel."]]},
+
+ {ph:9, type:"end", title:"Done"}
+];
+
+/* ---------- render ---------- */
+function render(){
+  const st = STEPS[S.step];
+  $("#st-step").textContent = Math.min(S.step+1, STEPS.length-1) + "/" + (STEPS.length-1);
+  $("#st-miss").textContent = S.mistakes.length;
+  $("#rail").innerHTML = PHASES.map((p,i)=>`<div class="${i<st.ph?"done":i===st.ph?"now":""}" title="${p}"><span>${i+1}</span>${p}</div>`).join("");
+  renderScene();
+  const el = $("#task");
+  const head = st.type==="intro"||st.type==="end" ? "" :
+    `<div class="eyebrow"><span>Phase ${st.ph+1} · ${PHASES[st.ph]}</span>${refLink(st.ref)}</div><h2>${esc(st.title)}</h2>`;
+  el.innerHTML = head + (R[st.type](st) || "") + factsHTML(st);
+  if (B[st.type]) B[st.type](st, el);
+}
+
+const R = {}, B = {};
+
+/* intro */
+R.intro = () => `<div class="eyebrow"><span>Briefing</span></div><h2>Build rack 1 next to ACE 15</h2>
+  <p>You have room access only. Ordering is done by another group, and the lab treats this rack as production from day 1. Assume no internet.
+  Every step follows <a href="${DOC["05"]}">doc 05</a>. Wrong choices count as mistakes and tell you why.</p>
+  <div class="intro-grid">
+    <div><b>Racks</b>2 × Vertiv VR3300, 42U, 600 × 1200 mm. Rack 1 now, rack 2 held for gpu02.</div>
+    <div><b>Power</b>Existing Geist PDUs, left and right, circuits 1–3, 208 V. About 3.6 kW at max.</div>
+    <div><b>Cooling</b>Liebert CRV in-row. Hot aisle containment: the rear is inside the glass.</div>
+    <div><b>Network</b>2 × 10G fiber from sw01 to the lab's C9300-48S. No patch panels.</div>
+  </div>
+  <p class="subh">GPU server PSU inlet</p>
+  <p class="lead" style="font-size:13px">Thinkmate hasn't answered quote question 1 yet. Pick what the cartons say.</p>
+  <div class="opts">
+    <button class="opt chk" id="in-c20" aria-pressed="${S.inlet==="C20"}"><span class="k">C20</span><span>C20 inlets, C19-to-C20 cords. Uses 2 of the 3 C19 outlets on each PDU.</span></button>
+    <button class="opt chk" id="in-c14" aria-pressed="${S.inlet==="C14"}"><span class="k">C14</span><span>C14 inlets, C13-to-C14 cords. All C19s stay free.</span></button>
+  </div>
+  <div class="row"><button class="primary" id="go">Start install</button></div>`;
+B.intro = () => {
+  $("#in-c20").onclick = () => { S.inlet="C20"; render(); };
+  $("#in-c14").onclick = () => { S.inlet="C14"; render(); };
+  $("#go").onclick = () => { S.started = true; S.t0 = Date.now(); next(); };
+};
+
+/* choice */
+R.choice = st => { const s = ss();
+  if (!s.order) s.order = shuffle(st.opts.map((_,i)=>i));
+  return `<p>${st.q}</p><div class="opts">${s.order.map((i,k)=>{ const o = st.opts[i];
+    return `<button class="opt${s.done&&o[1]?" right":""}" data-i="${i}" ${s.done||(s.tried||[]).includes(i)?"disabled":""}><span class="k">${"ABCD"[k]}</span><span>${o[0]}</span></button>`; }).join("")}</div>
+    ${fbHTML()}${s.done?`<div class="row"><button class="primary" id="nx">Next</button></div>`:""}`; };
+B.choice = (st, el) => {
+  el.querySelectorAll(".opt[data-i]").forEach(b => b.onclick = () => { const s = ss(), o = st.opts[+b.dataset.i];
+    if (o[1]) { s.done = true; good(o[2]); render(); } else { (s.tried ||= []).push(+b.dataset.i); miss(o[2]); } });
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+
+/* multi */
+R.multi = st => { const s = ss(); s.sel ||= {}; if (!s.order) s.order = shuffle(st.opts.map((_,i)=>i));
+  return `<p>${st.q}</p><div class="opts">${s.order.map(i=>`<button class="opt chk${s.done&&st.opts[i][1]?" right":""}" data-i="${i}" aria-pressed="${!!s.sel[i]}" ${s.done?"disabled":""}><span class="k">${s.sel[i]?"■":"□"}</span><span>${st.opts[i][0]}</span></button>`).join("")}</div>
+  ${fbHTML()}<div class="row">${s.done?`<button class="primary" id="nx">Next</button>`:`<button class="primary" id="chk">Check</button>`}</div>`; };
+B.multi = (st, el) => {
+  el.querySelectorAll(".opt[data-i]").forEach(b => b.onclick = () => { const s = ss(); s.sel[b.dataset.i] = !s.sel[b.dataset.i]; S.fb = null; render(); });
+  const c = el.querySelector("#chk"); if (c) c.onclick = () => { const s = ss();
+    const wrong = st.opts.map((o,i)=>[o,i]).filter(([o,i]) => !!s.sel[i] !== o[1]);
+    if (!wrong.length) { s.done = true; good("All set."); render(); return; }
+    miss(wrong.map(([o,i]) => o[1] ? `Missing: <b>${o[0]}</b>.` : `<b>${o[0]}</b>: ${o[2]}`).join("<br>")); };
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+
+/* order */
+const FX = {
+  unlock(){}, breakers(){ S.breakers = true; },
+  switches(){ S.powered.sw01 = S.powered.oob01 = true; },
+  svc(){ S.powered.svc01 = S.powered.svc02 = S.powered.svc03 = S.powered.con01 = true; },
+  gpu(){ S.powered.gpu01 = true; },
+  Aoff(){ S.feed.A = false; }, Aon(){ S.feed.A = true; }, Boff(){ S.feed.B = false; }, Bon(){ S.feed.B = true; }
+};
+R.order = st => { const s = ss(); s.done ||= [];
+  if (!s.pool) s.pool = shuffle([...st.items.map((_,i)=>"g"+i), ...(st.bad||[]).map((_,i)=>"b"+i)]);
+  const left = s.pool.filter(k => !s.done.includes(k) && !(s.badHit||[]).includes(k));
+  const fin = s.done.length === st.items.length;
+  return `${st.lead?`<p class="lead">${st.lead}</p>`:""}
+    <ol class="done-list">${s.done.map((k,n)=>`<li><span>${n+1}</span>${st.items[+k.slice(1)][0]}</li>`).join("")}</ol>
+    ${fin ? "" : `<p class="subh">${s.done.length ? "Then" : "First"}</p><div class="opts">${left.map(k=>{ const it = k[0]==="g" ? st.items[+k.slice(1)] : st.bad[+k.slice(1)];
+      return `<button class="opt" data-k="${k}"><span class="k">›</span><span>${it[0]}</span></button>`; }).join("")}</div>`}
+    ${st.amps ? `<p class="subh">PDU displays</p>${ampsTable()}` : ""}
+    ${fbHTML()}${fin?`<div class="row"><button class="primary" id="nx">Next</button></div>`:""}`; };
+B.order = (st, el) => {
+  el.querySelectorAll(".opt[data-k]").forEach(b => b.onclick = () => { const s = ss(), k = b.dataset.k;
+    if (k[0]==="b") { (s.badHit ||= []).push(k); miss(st.bad[+k.slice(1)][1]); return; }
+    const want = "g" + s.done.length;
+    if (k !== want) { miss(`Not yet. <b>${st.items[+k.slice(1)][0]}</b> comes later. Something else has to happen first.`); return; }
+    s.done.push(k); const fx = st.items[+k.slice(1)][1]; if (fx) FX[fx]();
+    good(s.done.length===st.items.length ? "Sequence complete." : null); render(); });
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+
+/* inspect */
+R.inspect = st => { const s = ss();
+  const all = CARTONS.every(c => S.inspected[c.id]);
+  return `<p class="lead">${st.lead}</p><div class="cartons">${CARTONS.map(c => { const bad = c.defect && S.defects.includes(c.defect);
+    const lines = bad ? c.bad : c.good, dec = S.inspected[c.id];
+    return `<div class="carton ${dec==="ok"?"ok":dec==="flag"?"flag":""}"><h4>${c.name} ${dec?`<span class="tag ${dec==="ok"?"ok":"bad"}">${dec==="ok"?"accepted":"flagged"}</span>`:""}</h4>
+      <div class="pn">${c.pn}</div><ul>${lines.map(l=>`<li>${l}</li>`).join("")}</ul>
+      ${dec ? "" : `<div class="row"><button class="ghost" data-c="${c.id}" data-d="ok">Matches the order</button><button class="ghost" data-c="${c.id}" data-d="flag">Flag a problem</button></div>`}</div>`; }).join("")}</div>
+    ${fbHTML()}${all?`<div class="row"><button class="primary" id="nx">Next</button></div>`:""}`; };
+B.inspect = (st, el) => {
+  el.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { const c = CARTONS.find(x=>x.id===b.dataset.c), d = b.dataset.d;
+    const bad = c.defect && S.defects.includes(c.defect);
+    if (d==="flag" && !bad) { miss(`${c.name} matches the quote (${c.pn}). Accept it.`); return; }
+    if (d==="ok" && bad) { miss(c.why); return; }
+    S.inspected[c.id] = d; good(d==="flag" ? c.why + " In the sim, the replacement arrives before install day." : null); render(); });
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+
+/* place */
+const PLACE = [
+  {id:"gpu01", ask:["How does gpu01 go in?", [["Rails mounted first, then two people slide it in until it latches", true],
+     ["One person, with a careful lift from the floor", false, "Never lift the GPU server alone. Two people."],
+     ["Rest it on svc01 below and slide it up", false, "It goes at the bottom, U1–U2, on its own rails."]]]},
+  {id:"svc01"},{id:"svc02"},{id:"svc03"},
+  {id:"con01", ask:["The rack has square holes. How do the console rails mount?", [["M6 cage nuts from the setup kit, then screws", true],
+     ["Screws straight into the square holes", false, "Square holes have no thread. Fit cage nuts first."],
+     ["Rest it on the blanking panels below", false, "The console drawer slides out under load. It needs its own rails."]]]},
+  {id:"oob01", ask:["Which way do oob01's ports face?", [["To the rear, inside the glass, where all cables are run", true],
+     ["To the front, so the port lights are easy to see", false, "Cabling is done from the rear. Ports face the rear."]]]},
+  {id:"sw01", ask:["How does sw01 go in?", [["Ports to the rear, PSUs to the front, on Dell ReadyRails (tool-less)", true],
+     ["Ports to the front so the cables are easy to reach", false, "Ports face the rear. With PSU-to-I/O airflow the switch then takes room air in at the PSU end."]]]}
+];
+const HEAVY = ["gpu01","svc01","svc02","svc03"];
+function rackFree(u){ return !S.rack[u]; }
+function freeRun(u){ let a=u, b=u; while (a>1 && rackFree(a-1)) a--; while (b<42 && rackFree(b+1)) b++; return [a,b]; }
+R.place = st => { const s = ss(); const placed = PLACE.filter(p => S.rack[DEVS[p.id].u[0]]===p.id);
+  const allDev = placed.length === PLACE.length, free = Array.from({length:42},(_,i)=>i+1).filter(rackFree).length;
+  const p = s.sel && PLACE.find(x=>x.id===s.sel); const askOpen = p && p.ask && !s.asked?.[p.id];
+  return `<p class="lead">${st.lead}</p>
+    <div class="tray">${PLACE.map(x=>{ const done = S.rack[DEVS[x.id].u[0]]===x.id;
+      return `<button class="chip ${done?"used":""}" data-p="${x.id}" aria-pressed="${s.sel===x.id}" ${done?"disabled":""}>${x.id}<small>${DEVS[x.id].model}</small></button>`; }).join("")}
+      <button class="chip" data-p="blank" aria-pressed="${s.sel==="blank"}" ${allDev&&free?"":"disabled"}>Blanking panels<small>VRA2000 · ${80 - S.blanks1 - S.blanks2} left</small></button></div>
+    ${askOpen ? `<p class="subh">Before you lift</p><p>${p.ask[0]}</p><div class="opts">${p.ask[1].map((o,i)=>`<button class="opt" data-a="${i}"><span class="k">${"ABC"[i]}</span><span>${o[0]}</span></button>`).join("")}</div>`
+      : s.sel ? `<p><span class="tag">armed</span> Click ${s.sel==="blank" ? "any empty U. One click fills that whole empty run." : `the U for <b>${s.sel}</b> in the rack.`}</p>` : `<p class="lead">Pick something from the tray.</p>`}
+    <p class="mono" style="font-size:13px">Rack 1: ${42-free}/42 U filled · ${S.blanks1} blanks · Rack 2: ${S.blanks2}/42 blanks</p>
+    ${fbHTML()}
+    <div class="row">${allDev && !free && !S.blanks2 ? `<button class="primary" id="r2">Fill rack 2 with 42 blanks</button>` : ""}
+    ${S.blanks2 ? `<button class="primary" id="nx">Next</button>` : ""}</div>`; };
+B.place = (st, el) => {
+  el.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { const s = ss(), id = b.dataset.p;
+    if (id !== "blank") { const nextHeavy = HEAVY.find(h => S.rack[DEVS[h].u[0]] !== h);
+      if (nextHeavy && id !== nextHeavy) { miss(`Bottom up, heaviest first. <b>${nextHeavy}</b> goes in before ${id}.`); return; } }
+    s.sel = id; S.fb = null; render(); });
+  el.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { const s = ss(), p = PLACE.find(x=>x.id===s.sel), o = p.ask[1][+b.dataset.a];
+    if (!o[1]) { miss(o[2]); return; } (s.asked ||= {})[p.id] = true; good(o[0] + "."); render(); });
+  const r2 = el.querySelector("#r2"); if (r2) r2.onclick = () => { S.blanks2 = 42; good(`Rack 2 sealed. ${80 - S.blanks1 - 42} panels left as spares.`); render(); };
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+function placeAt(u){
+  const s = ss(); if (!s.sel) { miss("Pick a device or the blanking panels from the tray first."); return; }
+  if (!rackFree(u)) return;
+  if (s.sel === "blank") { const [a,b] = freeRun(u); for (let i=a;i<=b;i++) S.rack[i] = "blank"; S.blanks1 += b-a+1;
+    good(`Blanked U${a}${b>a?"–U"+b:""}: ${b-a+1} panel${b>a?"s":""}.`); render(); return; }
+  const p = PLACE.find(x=>x.id===s.sel); if (p.ask && !s.asked?.[p.id]) { miss("Answer the question above first."); return; }
+  const d = DEVS[s.sel], want = d.u;
+  if (!want.includes(u)) { const why = {gpu01:"It's the heaviest, so it goes at the bottom.", con01:"U21 puts the screen at eye height for a seated or kneeling person.",
+      oob01:"The switches sit at the top, next to each other.", sw01:"The switches sit at the top. U42 above it stays blank for a future fiber panel."}[s.sel] || "Service nodes go just above the U3–U4 space held for gpu02.";
+    miss(`${s.sel} goes at U${want[0]}${want.length>1?"–U"+want[want.length-1]:""}. ${why}`); return; }
+  want.forEach(x => S.rack[x] = s.sel); good(`${s.sel} in at U${want.join("–U")}.`); s.sel = null; render();
+}
+
+/* power */
+function outletKey(p,c,o){ return p+"-"+c+"-"+o; }
+function checkCord(cord, pdu, c, o){
+  const d = DEVS[cord.dev], typ = o==="C19" ? "C19" : "C13", inlet = cord.dev==="gpu01" ? S.inlet : "C14";
+  if (d.psus > 1) { const want = cord.n % 2 ? "A" : "B";
+    if (pdu !== want) return `Odd-numbered PSUs go to PDU-A, even to PDU-B. <b>${cord.id}</b> goes to PDU-${want}. Never put both PSUs of one device on the same PDU.`; }
+  else { const other = S.cords[cord.dev==="oob01" ? "con01-PWR" : "oob01-PWR"];
+    if (other && other.pdu === pdu) return "oob01 and con01 have one cord each. Put them on different PDUs so one feed loss can't take out both."; }
+  if (inlet==="C20" && typ!=="C19") return "gpu01's PSUs have C20 inlets in this build. The C19-to-C20 cord needs a C19 outlet.";
+  if (inlet==="C14" && typ==="C19") return cord.dev==="gpu01" ? "gpu01's PSUs have C14 inlets in this build, so they take C13 outlets. Keep the C19s free."
+    : `Keep the C19 outlets for the GPU server. ${cord.id} has a C14 inlet: use a C13 outlet.`;
+  const plan = {svc01:1, svc02:2, svc03:3, sw01:3, oob01:3, con01:3};
+  if (cord.dev==="gpu01") { if (c===3) return "Circuit 3 carries svc03, sw01, and oob01 or con01. gpu01's PSUs go on circuits 1 and 2.";
+    const sib = CORDS.find(x => x.dev==="gpu01" && x!==cord && S.cords[x.id] && S.cords[x.id].pdu===pdu);
+    if (sib && S.cords[sib.id].c===c) return `${sib.id} is already on ${pdu}-C${c}. The other gpu01 PSU on this PDU goes on the other circuit.`; }
+  else if (plan[cord.dev] !== c) return `Circuit plan: 1 = gpu01 + svc01, 2 = gpu01 + svc02, 3 = svc03 + sw01 + oob01 or con01. <b>${cord.dev}</b> goes on circuit ${plan[cord.dev]}.`;
+  return null;
+}
+function cordLabel(cord, pdu, c, o){ return `${cord.id} / ${pdu}-C${c}-${o==="C19"?"C19":"C13."+o.slice(3)}`; }
+R.power = st => { const s = ss(); const sel = s.sel && CORDS.find(x=>x.id===s.sel);
+  const all = CORDS.every(x => S.cords[x.id]);
+  const inletOf = x => x.dev==="gpu01" ? S.inlet : "C14";
+  const pduHTML = p => `<div class="pdu ${p}"><h4>PDU-${p} · ${p==="A"?"left":"right"} (from the rear)</h4>${[1,2,3].map(c=>`<div class="circ"><b>C${c}</b><div class="outs">
+    ${["C19", ...Array.from({length:C13_PER_CIRCUIT},(_,i)=>"C13"+(i+1))].map(o=>{ const occ = S.outlets[outletKey(p,c,o)];
+      return `<button class="out ${o==="C19"?"c19":""} ${occ?"full":""}" data-o="${p}|${c}|${o}" ${occ?"disabled":""} title="${occ||o}">${occ ? occ.replace("-PSU",".").replace("-PWR","") : o==="C19"?"C19":"C13"}</button>`; }).join("")}</div></div>`).join("")}</div>`;
+  return `<p class="lead">${st.lead}</p>
+    <p class="subh">Cords (inlet type)</p>
+    <div class="tray">${CORDS.map(x=>{ const pl = S.cords[x.id];
+      return `<button class="chip ${pl?"placed":""}" data-cord="${x.id}" aria-pressed="${s.sel===x.id}" ${pl?"disabled":""}>${x.id}<small>${pl ? pl.label.split(" / ")[1] : inletOf(x)+" inlet"}</small></button>`; }).join("")}</div>
+    ${sel ? `<p>Label for <b>${sel.id}</b>: <span class="labelprev">${sel.id} / ?-C?-…</span> Pick an outlet.</p>` : ""}
+    <div class="pdus">${pduHTML("A")}${pduHTML("B")}</div>
+    <p class="lead" style="font-size:12px">Breakers on all six circuits are off. Outlet count per circuit is a sim value.</p>
+    ${fbHTML()}${all?`<div class="row"><button class="primary" id="nx">Next</button></div>`:""}`; };
+B.power = (st, el) => {
+  el.querySelectorAll("[data-cord]").forEach(b => b.onclick = () => { ss().sel = b.dataset.cord; S.fb = null; render(); });
+  el.querySelectorAll("[data-o]").forEach(b => b.onclick = () => { const s = ss();
+    if (!s.sel) { miss("Pick a cord first."); return; }
+    const [p, cs, o] = b.dataset.o.split("|"), c = +cs, cord = CORDS.find(x=>x.id===s.sel);
+    const err = checkCord(cord, p, c, o); if (err) { miss(err); return; }
+    const label = cordLabel(cord, p, c, o);
+    S.cords[cord.id] = {pdu:p, c, o, label}; S.outlets[outletKey(p,c,o)] = cord.id; s.sel = null;
+    good(`Labeled and plugged: <span class="labelprev">${label}</span>`); render(); });
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+
+/* network */
+function partById(id){ return BIN.find(b=>b.id===id); }
+function binLeft(id){ const used = RUNS.filter(r => S.runsDone[r.id] && r.part===id).length; return partById(id).qty - used; }
+R.network = st => { const s = ss(); const run = s.run && RUNS.find(r=>r.id===s.run);
+  const grpName = {O:"Optics", D:"Data, in-rack DAC", U:"Uplink fiber", M:"BMC / management"};
+  const all = RUNS.every(r => S.runsDone[r.id]);
+  const strip = dev => { const D = DEVPORTS[dev], n = D.n;
+    const cells = Array.from({length:n},(_,i)=>i+1).map(p=>{ const lab = (D.lab||[]).includes(p), cab = S.ports[dev][p], opt = S.optics[dev+":"+p];
+      const want = run && run.dev===dev && (run.grp!=="U" ? run.port===p : run.port===p);
+      return `<button class="port ${lab?"lab":""} ${cab?"cab":""} ${opt?"opt":""} ${want&&!cab?"want":""}" data-port="${dev}|${p}" title="${D.name(p)}${lab?" (in use by the lab)":""}${cab?" · "+cab:""}" ${lab?"disabled":""}>${dev==="c9300"?"Te"+p:p}</button>`; });
+    const grid = dev==="sw01" ? `<div class="portgrid">${cells.join("")}</div>` : dev==="oob01" ? `<div class="portgrid">${cells.join("")}</div>` : `<div class="portgrid" style="grid-template-rows:auto">${cells.join("")}</div>`;
+    return `<p class="subh">${D.title}</p><div class="ports">${grid}</div>`; };
+  return `<p class="lead">${st.lead}</p>
+    ${["O","D","U","M"].map(g=>`<p class="subh">${grpName[g]}</p><div class="runs">${RUNS.filter(r=>r.grp===g).map(r=>
+      `<button class="run ${S.runsDone[r.id]?"done":""}" data-run="${r.id}" aria-pressed="${s.run===r.id}" ${S.runsDone[r.id]?"disabled":""}><b>${r.id}</b> ${r.label}</button>`).join("")}</div>`).join("")}
+    ${run ? `<p class="subh">Bin</p><div class="tray">${BIN.map(b=>`<button class="chip" data-part="${b.id}" aria-pressed="${s.part===b.id}" ${binLeft(b.id)?"":"disabled"}>${b.name}<small>${b.desc} · ${binLeft(b.id)} left</small></button>`).join("")}</div>
+      ${run.grp==="U" ? `<label class="check"><input type="checkbox" id="clean" ${s.clean?"checked":""}> Both LC ends cleaned with the one-click cleaner, dust caps off just now</label>` : ""}
+      ${strip(run.dev)}${run.grp==="U" ? `<p class="lead" style="font-size:13px">Far end: lab C9300-48S Te1/1/${run.far}, about 30 m away along the tray or under the floor. Click the sw01 end.</p>` : ""}`
+      : `<p class="lead">Pick a run from the schedule.</p>`}
+    ${fbHTML()}${all?`<div class="row"><button class="primary" id="nx">Next</button></div>`:""}`; };
+B.network = (st, el) => {
+  el.querySelectorAll("[data-run]").forEach(b => b.onclick = () => { const s = ss(); s.run = b.dataset.run; s.part = null; s.clean = false; S.fb = null; render(); });
+  el.querySelectorAll("[data-part]").forEach(b => b.onclick = () => { ss().part = b.dataset.part; S.fb = null; render(); });
+  const cl = el.querySelector("#clean"); if (cl) cl.onchange = () => { ss().clean = cl.checked; };
+  el.querySelectorAll("[data-port]").forEach(b => b.onclick = () => { const s = ss(), run = RUNS.find(r=>r.id===s.run);
+    const [dev, ps] = b.dataset.port.split("|"), p = +ps;
+    if (!s.part) { miss("Pick the part from the bin first."); return; }
+    const err = checkRun(run, s.part, dev, p, s.clean); if (err) { miss(err); return; }
+    S.runsDone[run.id] = true;
+    if (run.grp==="O") S.optics[dev+":"+p] = s.part; else S.ports[dev][p] = run.id;
+    if (run.grp==="U") S.ports.c9300[run.far] = run.id;
+    good(`${run.id} done: ${run.label}.`); s.run = null; s.part = null; render(); });
+  const nx = el.querySelector("#nx"); if (nx) nx.onclick = next;
+};
+function checkRun(run, part, dev, p, clean){
+  if (run.grp==="M" && RUNS.some(r => (r.grp==="D"||r.grp==="U") && !S.runsDone[r.id]))
+    return "BMC Cat6 goes in last, so it doesn't get buried under the DACs and fiber. Finish the D and U runs first.";
+  if (part !== run.part) {
+    if (run.grp==="D") return "Server to sw01 inside the rack is 25G SFP28. Use a Dell 470-ACEU DAC, 3 m.";
+    if (run.grp==="O") return run.dev==="sw01" ? "Each end needs an optic coded for its own switch. The sw01 end takes the Dell 407-BBOU."
+      : (part==="407-BBOU" ? "The lab C9300 may refuse a Dell-coded optic. Its end takes the Cisco SFP-10G-SR-S." : "Insert the optic first. Cables come after.");
+    if (run.grp==="U") return part==="OM4-3" ? "3 m won't reach. The lab C9300-48S isn't in sight and there's no patch panel. Use the long cord sized to the path. The 3 m cords are spares."
+      : "The uplink is LC-LC OM4 fiber between the two 10GBASE-SR optics.";
+    if (run.grp==="M") return "BMC and management ports are 1G RJ45. Use Cat6, 3 m.";
+  }
+  if (dev !== run.dev || p !== run.port) return `The schedule puts <b>${run.id}</b> on ${DEVPORTS[run.dev].name(run.port)}. Label says ${run.id} at both ends.`;
+  if (run.grp==="U") {
+    if (!S.optics["sw01:"+run.port] || !S.optics["c9300:"+run.far]) return `Insert the optics at both ends first: sw01 ${DEVPORTS.sw01.name(run.port)} and C9300 Te1/1/${run.far}.`;
+    if (!clean) return "Clean both LC ends with the one-click cleaner first. A dirty connector is the most common cause of a flapping fiber link.";
+  }
+  return null;
+}
+
+/* end */
+R.end = () => { const n = S.mistakes.length, t = elapsed();
+  const grade = n===0 ? "Ready to build" : n<=5 ? "Ready, after a review" : "Run it again";
+  return `<div class="eyebrow"><span>Result</span></div><h2>Rack 1 signed off</h2>
+    <p class="grade">${grade}</p><p class="mono">${n} mistake${n===1?"":"s"} · ${t}</p>
+    ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 05 on install day anyway.</p>"}
+    <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (doc 09), fiber path length (question 7).</p>
+    <div class="row"><button class="primary" id="again">Run it again</button></div>`; };
+B.end = () => { $("#again").onclick = () => { const inlet = S.inlet; S = fresh(inlet); render(); }; };
+
+/* ---------- scene ---------- */
+const U_H = 18, TOP = 40, FX0 = 44, FX1 = 416, RL = 104, RR = 356;
+const yU = u => TOP + (42-u)*U_H;
+function renderScene(){
+  const v = S.view, {up} = loads();
+  $("#v-front").setAttribute("aria-pressed", v==="front"); $("#v-rear").setAttribute("aria-pressed", v==="rear");
+  $("#scene-title").textContent = v==="front" ? "Rack 1 · front (room side)" : "Rack 1 · rear (inside the glass)";
+  const H = TOP + 42*U_H + 34; let g = "";
+  g += `<rect x="0" y="0" width="460" height="${H}" class="${v==="front"?"s-cold":"s-hot"}"/>`;
+  g += `<text x="230" y="18" text-anchor="middle" class="s-zone">${v==="front" ? "ROOM · COLD SIDE · CRV SUPPLY AIR" : "HOT AISLE CONTAINMENT · EXHAUST"}</text>`;
+  g += `<rect x="${FX0}" y="${TOP-12}" width="${FX1-FX0}" height="${42*U_H+24}" rx="3" class="s-frame"/>`;
+  g += `<rect x="${FX0+8}" y="${TOP-4}" width="${FX1-FX0-16}" height="${42*U_H+8}" class="s-inner"/>`;
+  for (const x of [RL-12, RR]) { g += `<rect x="${x}" y="${TOP}" width="12" height="${42*U_H}" class="s-rail"/>`;
+    for (let u=1; u<=42; u++) for (const o of [3,8,13]) g += `<rect x="${x+4}" y="${yU(u)+o-1.5}" width="4" height="4" class="s-hole"/>`; }
+  for (let u=1; u<=42; u++) g += `<text x="${FX0-6}" y="${yU(u)+12}" text-anchor="end" class="s-unum">${u}</text>`;
+  const arm = STEPS[S.step].type==="place" && ss().sel && !(PLACE.find(p=>p.id===ss().sel)?.ask && !ss().asked?.[ss().sel]);
+  const drawn = {};
+  for (let u=1; u<=42; u++) { const it = S.rack[u], y = yU(u);
+    if (!it) { g += `<rect x="${RL}" y="${y+1}" width="${RR-RL}" height="${U_H-2}" class="s-slot ${arm?"arm":""}" data-u="${u}"><title>U${u}</title></rect>`;
+      if (u===3) g += `<rect x="${RL+2}" y="${yU(4)+2}" width="${RR-RL-4}" height="${2*U_H-4}" class="s-res" pointer-events="none"/><text x="230" y="${yU(4)+22}" text-anchor="middle" class="s-sub" style="fill:var(--muted)" pointer-events="none">U3–4 held for gpu02</text>`;
+      continue; }
+    if (it==="blank") { g += `<rect x="${RL}" y="${y+0.5}" width="${RR-RL}" height="${U_H-1}" class="s-blank"/>`; continue; }
+    if (drawn[it]) continue; drawn[it] = true;
+    const d = DEVS[it], h = d.u.length*U_H, yt = yU(d.u[d.u.length-1]);
+    g += `<rect x="${RL}" y="${yt+0.5}" width="${RR-RL}" height="${h-1}" rx="1.5" class="s-dev"/>`;
+    if (v==="front") {
+      if (it==="gpu01") for (let i=0;i<8;i++) g += `<rect x="${RL+120+i*14}" y="${yt+6}" width="11" height="${h-12}" class="s-bay"/>`;
+      if (it.startsWith("svc")) for (let i=0;i<4;i++) g += `<rect x="${RL+150+i*22}" y="${yt+3}" width="19" height="${h-6}" class="s-bay"/>`;
+      if (it==="sw01"||it==="oob01") for (let i=0;i<(it==="sw01"?2:1);i++) g += `<rect x="${RL+170+i*36}" y="${yt+3}" width="32" height="${h-6}" class="s-psu"/>`;
+      if (it==="con01") g += `<rect x="${RL+150}" y="${yt+6}" width="90" height="4" rx="2" class="s-psu"/>`;
+    } else {
+      const np = d.psus; for (let i=0;i<np;i++) g += `<rect x="${RR-24-i*22}" y="${yt+3}" width="18" height="${h-6}" class="s-psu"/>`;
+      if (it==="sw01") for (let p=1;p<=48;p++) { const col = Math.ceil(p/2)-1, row = (p-1)%2, k = "sw01:"+p;
+        g += `<rect x="${RL+64+col*4.6}" y="${yt+3+row*6}" width="3.6" height="5" class="s-port ${S.ports.sw01[p]?"on":S.optics[k]?"optic":""}"/>`; }
+      if (it==="oob01") for (let p=1;p<=24;p++) { const col = Math.ceil(p/2)-1, row = (p-1)%2;
+        g += `<rect x="${RL+64+col*7}" y="${yt+3+row*6}" width="5.5" height="5" class="s-port ${S.ports.oob01[p]?"on":""}"/>`; }
+    }
+    g += `<circle cx="${RL+8}" cy="${yt+h/2}" r="3" class="s-led ${up[it]?"on":""}"/>`;
+    g += `<text x="${RL+16}" y="${yt+h/2+(h>U_H?-1:3.5)}" class="s-txt">${it}</text>`;
+    if (h>U_H) g += `<text x="${RL+16}" y="${yt+h/2+11}" class="s-sub">${d.model}</text>`;
+  }
+  if (v==="rear") for (const [p, x] of [["A", FX0+12], ["B", RR+14]]) {
+    const off = !S.feed[p] || !S.breakers;
+    g += `<rect x="${x}" y="${TOP+6}" width="28" height="${42*U_H-12}" rx="3" class="s-pdu ${p==="B"?"B":""} ${!S.feed[p]?"off":""}"/>`;
+    g += `<text x="${x+14}" y="${TOP+20}" text-anchor="middle" class="s-pdul" style="fill:${p==="A"?"var(--feed-a)":"var(--feed-b)"}">${p}</text>`;
+    for (let c=1;c<=3;c++) { const cy = TOP + 34 + (c-1)*240;
+      g += `<text x="${x+14}" y="${cy+4}" text-anchor="middle" class="s-sub">C${c}</text>`;
+      const outs = ["C19", ...Array.from({length:C13_PER_CIRCUIT},(_,i)=>"C13"+(i+1))];
+      outs.forEach((o,i) => { const occ = S.outlets[outletKey(p,c,o)], yy = cy + 12 + i*28;
+        g += o==="C19" ? `<rect x="${x+5}" y="${yy}" width="18" height="12" rx="2" class="s-out ${occ?p:""}"><title>${p}-C${c} C19${occ?" · "+occ:""}</title></rect>`
+                       : `<rect x="${x+7}" y="${yy}" width="14" height="10" rx="2" class="s-out ${occ?p:""}"><title>${p}-C${c} C13${occ?" · "+occ:""}</title></rect>`; }); }
+    if (off) g += `<text x="${x+14}" y="${TOP+42*U_H-12}" text-anchor="middle" class="s-sub" style="fill:var(--bad)">${!S.feed[p]?"FEED":"BRKR"}</text><text x="${x+14}" y="${TOP+42*U_H-3}" text-anchor="middle" class="s-sub" style="fill:var(--bad)">OFF</text>`;
+  }
+  g += `<text x="230" y="${H-6}" text-anchor="middle" class="s-zone">${v==="front" ? "SERVERS IN FROM HERE" : "PDUs, POWER AND NETWORK CABLES WORKED FROM HERE"}</text>`;
+  $("#svg").innerHTML = `<svg viewBox="0 0 460 ${H}" role="img" aria-label="Rack 1 elevation, ${v}">${g}</svg>`;
+}
+$("#svg").addEventListener("click", e => { const t = e.target.closest("[data-u]"); if (!t || STEPS[S.step].type!=="place") return;
+  if (S.view !== "front") { S.view = "front"; render(); return; } placeAt(+t.dataset.u); });
+$("#v-front").onclick = () => { S.view = "front"; renderScene(); };
+$("#v-rear").onclick = () => { S.view = "rear"; renderScene(); };
+
+function elapsed(){ if (!S.started) return "0:00"; const s = Math.floor((Date.now()-S.t0)/1000); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
+setInterval(() => { if (STEPS[S.step].type !== "end") $("#st-time").textContent = elapsed(); }, 1000);
+render();
+</script>
+</body>
+</html>
