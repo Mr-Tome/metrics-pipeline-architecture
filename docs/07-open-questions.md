@@ -37,6 +37,7 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 | S6 | Are upstream (non-Iron Bank) images allowed in the lab for phase 1? | ISSM | Iron Bank where available, upstream otherwise | |
 | S7 | Where may the staging server live? | Program | | No staging server (decided 2026-10-30). The build workstation rehearses each bundle; see [04](04-prototype-plan.md). |
 | S8 | Is a laptop allowed in the room for first switch setup over a console cable? | ISSM | No; use the lab's approved device | |
+| S9 | Future phase: may a typed decision model (Cloudflare Clef, Qwen3.8-27B base, Apache 2.0) run in the lab? It ships a Python code file that runs at load time, and it needs its own model server (SGLang) and gateway route. | ISSM, Program | Deferred; not in phase 1 | Deferred 2026-10-30 |
 
 ## Lab IT (L)
 

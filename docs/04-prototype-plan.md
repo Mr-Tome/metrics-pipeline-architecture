@@ -83,6 +83,9 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 The platform is the same one the full architecture (`metrics_architecture.html`) uses. Big Bang (Harbor,
 GitLab, Argo CD, Keycloak, monitoring) and the metrics pipeline go on top of it. They do not replace it.
 
+The typed decision model (Clef) is part of this later phase, not phase 1. It needs architecture and
+cybersecurity review first ([06](06-software-delivery.md), section 6). The hardware already has room for it.
+
 ## 4. If rehearsal is not enough
 
 If GPU-side problems keep showing up first in the lab, add a single-GPU test machine on the unclassified

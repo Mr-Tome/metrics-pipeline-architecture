@@ -142,3 +142,4 @@ disp(r.choices(1).message.content)
 | Document search | PostgreSQL already has pgvector enabled. Add an embedding model to `models.txt` and an embedding deployment. |
 | Renovate | Points at `delivery/versions.env` to open update merge requests (Delivery view). |
 | Metrics pipeline | Runs on the same platform. See `metrics_architecture.html`. |
+| Typed decision model (Cloudflare Clef, https://huggingface.co/Cloudflare/clef) | **Deferred to a future phase (decided 2026-10-30).** The Tech stack names it for the typed decision API. It is a 27B model (about 55 GB, Apache 2.0) that needs its own GPU, so gpu01 would run 2 gpt-oss copies instead of 3 (`--llm-gpus 2`). Open before adding it: SGLang support for the RTX PRO 6000 (tested only on H200), routing `/v1/systemone` through the gateway with per-user keys and logging, ISSM review of the model's `joint_schema_model.py` code file, and model-origin approval (Qwen base). No hardware change. |
