@@ -84,56 +84,113 @@ def rack_svg():
 
 # ---------------------------------------------------------------- power
 def power_svg():
-    b = [text(30, 34, "Power wiring: A and B feeds", 20, weight="bold"),
-         text(30, 56, "Each device has two (or four) power supplies. Half go to PDU-A, half to PDU-B. Either feed alone carries the whole rack.", 12, fill="#444")]
-    b.append(rect(40, 90, 220, 70, "#ffebee", C["A"], 2, 6))
-    b.append(text(150, 118, "Facility feed A", 14, "middle", "bold", C["A"]))
-    b.append(text(150, 138, "208V, existing, upstream of the PDU", 11, "middle"))
-    b.append(text(150, 152, "facilities switches it, confirm source", 11, "middle"))
-    b.append(rect(740, 90, 220, 70, "#e3f2fd", C["B"], 2, 6))
-    b.append(text(850, 118, "Facility feed B", 14, "middle", "bold", C["B"]))
-    b.append(text(850, 138, "208V, existing, separate source", 11, "middle"))
-    b.append(text(850, 152, "facilities switches it, confirm source", 11, "middle"))
-    b.append(rect(40, 210, 220, 60, "#ffcdd2", C["A"], 2, 6))
-    b.append(text(150, 236, "PDU-A: existing Geist, rear left", 13, "middle", "bold"))
-    b.append(text(150, 254, "circuits 1-3, C13s + one C19 each", 11, "middle"))
-    b.append(rect(740, 210, 220, 60, "#bbdefb", C["B"], 2, 6))
-    b.append(text(850, 236, "PDU-B: existing Geist, rear right", 13, "middle", "bold"))
-    b.append(text(850, 254, "circuits 1-3, C13s + one C19 each", 11, "middle"))
-    b.append(line(150, 160, 150, 210, C["A"], 4))
-    b.append(line(850, 160, 850, 210, C["B"], 4))
-    devs = [("gpu01 GPU server", "PSU1 c1, PSU3 c2", "PSU2 c1, PSU4 c2", "C19-C20 or C13-C14 (confirm)", 3300),
-            ("svc01 service node", "PSU1 c1", "PSU2 c1", "C13 to C14", 400),
-            ("svc02 service node", "PSU1 c2", "PSU2 c2", "C13 to C14", 400),
-            ("svc03 service node", "PSU1 c3", "PSU2 c3", "C13 to C14", 400),
-            ("sw01 lab switch", "PSU1 c3", "PSU2 c3", "C13 to C14", 250),
-            ("con01 rack console", "", "only cord c3", "per vendor", 13),
-            ("oob01 mgmt switch", "only cord c3", "", "C13 to C14", 30)]
-    y = 320
-    labels = []
-    for name, a, bb, cord, wt in devs:
-        b.append(rect(380, y, 240, 44, "#f5f5f5", "#333", 1.5, 4))
-        b.append(text(500, y + 18, name, 13, "middle", "bold"))
-        b.append(text(500, y + 35, f"{cord}, up to {wt} W", 10.5, "middle", fill="#444"))
-        if a:
-            b.append(path(f"M260 {240} C 320 {240}, 320 {y+22}, 380 {y+22}", C["A"], 2))
-            labels.append(rect(374 - len(a) * 5.6 - 3, y + 29, len(a) * 5.6 + 4, 12, "#ffffff", "#ffffff", 0))
-            labels.append(text(374, y + 38, a, 10, "end", fill=C["A"]))
-        if bb:
-            b.append(path(f"M740 {240} C 680 {240}, 680 {y+22}, 620 {y+22}", C["B"], 2))
-            labels.append(rect(624, y + 29, len(bb) * 5.6 + 4, 12, "#ffffff", "#ffffff", 0))
-            labels.append(text(626, y + 38, bb, 10, "start", fill=C["B"]))
-        y += 62
-    b += labels
+    # Rear view of rack 1, drawn to the same U scale as the elevation. Cords run from each PSU to its outlet.
+    PU = 16
+    RX, RW, RY = 360, 280, 190            # rack opening, rear view
+    AX, BX, PW = 232, 722, 46             # PDU-A (rear left), PDU-B (rear right)
+    def uy(u): return RY + (42 - u) * PU  # top edge of U u
+    b = [text(30, 34, "Power wiring: rack 1 rear view (50-user build)", 20, weight="bold"),
+         text(30, 56, "Seen from the rear, inside the containment. Odd PSUs go to PDU-A, even PSUs to PDU-B. Either PDU alone carries the whole rack.", 12, fill="#444"),
+         text(30, 74, "Circuits shown with C1 at the bottom. Check the real PDU: if C1 is at the top, swap circuits 1 and 3 in this plan so gpu01 stays on the circuits nearest it.", 12, fill="#444")]
+    # facility feeds and PDU input cords
+    for x, p, col, fill, src in [(AX, "A", C["A"], "#ffebee", "existing"), (BX, "B", C["B"], "#e3f2fd", "separate source")]:
+        bx = 40 if p == "A" else 740
+        b.append(rect(bx, 92, 220, 56, fill, col, 2, 6))
+        b.append(text(bx + 110, 114, f"Facility feed {p}", 14, "middle", "bold", col))
+        b.append(text(bx + 110, 134, f"208V, {src}, facilities switches it", 11, "middle"))
+        b.append(path(f"M{bx + 110} 148 L{bx + 110} 158 L{x + PW / 2} 158 L{x + PW / 2} {RY}", col, 4))
+        b.append(text(x + PW / 2 + (-6 if p == "A" else 6), RY - 6, "PDU input cord", 10, "end" if p == "A" else "start", fill=col))
+    # rack frame
+    b.append(rect(RX - 20, RY - 8, RW + 40, 42 * PU + 16, "#455a64", "#263238", 2, 4))
+    b.append(rect(RX, RY, RW, 42 * PU, "#eceff1", "#263238"))
+    for u in range(1, 43):
+        b.append(text(RX - 6, uy(u) + 12, str(u), 9, "end", fill="#eceff1"))
+    # devices, rear view: (top U, height, name, PSU count, color)
+    devs = {"gpu01": (2, 2, "gpu01  GPU server, 3,300 W", 4, C["gpu"]),
+            "svc01": (5, 1, "svc01", 2, C["svc"]), "svc02": (6, 1, "svc02", 2, C["svc"]), "svc03": (7, 1, "svc03", 2, C["svc"]),
+            "con01": (21, 1, "con01  console, 1 cord", 1, C["patch"]),
+            "oob01": (40, 1, "oob01  1 cord", 1, C["oob"]), "sw01": (41, 1, "sw01", 2, C["sw"])}
+    b.append(rect(RX + 2, uy(4) + 1, RW - 4, 2 * PU - 2, C["gpur"], "#90a4ae"))
+    b.append(text(RX + RW / 2, uy(4) + 20, "U3-U4 held for gpu02", 10, "middle", fill="#607d8b"))
+    b.append(text(RX + RW / 2, uy(30) + 4, "blanking panels", 10.5, "middle", fill="#90a4ae"))
+    b.append(text(RX + RW / 2, uy(14) + 4, "blanking panels", 10.5, "middle", fill="#90a4ae"))
+    psu, front = {}, []   # front: PSUs and labels, drawn over the cords
+    for name, (top, h, lab, n, col) in devs.items():
+        y = uy(top)
+        b.append(rect(RX + 2, y + 1, RW - 4, h * PU - 2, col, "#37474f"))
+        front.append(f"<text x='{RX + 8}' y='{y + h * PU / 2 + 4}' font-size='10' fill='#111' stroke='{col}' "
+                     f"stroke-width='4' paint-order='stroke'>{lab}</text>")
+        # PSUs drawn left to right as PSU1..n (check the server's rear label)
+        for i in range(n):
+            px = RX + RW - 18 - (n - i) * 30 if n > 1 else RX + RW - 48
+            front.append(rect(px, y + 3, 26, h * PU - 6, "#263238", "#000", 1, 2))
+            front.append(text(px + 13, y + h * PU / 2 + 3, f"P{i + 1}" if n > 1 else "P", 8, "middle", fill="#ffffff"))
+            # a 2U server's cords leave at staggered heights so parallel runs stay apart
+            psu[(name, i + 1)] = (px + 13, y + h * PU / 2 + ((i - 1.5) * 5 if h > 1 else 0))
+    # PDUs: three circuits each, C1 at the bottom; one C19 and six C13 per circuit
+    SEC = (42 * PU - 30) / 3
+    outlet = {}
+    for x, p, col, fill in [(AX, "A", C["A"], "#ffcdd2"), (BX, "B", C["B"], "#bbdefb")]:
+        b.append(rect(x, RY, PW, 42 * PU, fill, col, 2, 4))
+        b.append(text(x + PW / 2, RY + 42 * PU + 16, f"PDU-{p}", 12, "middle", "bold", col))
+        for c in (1, 2, 3):
+            sy = RY + 10 + (3 - c) * SEC
+            if c < 3:
+                b.append(line(x + 3, sy + SEC, x + PW - 3, sy + SEC, col, 1.5, "4 3"))
+            b.append(rect(x + 8, sy + 4, PW - 16, 14, "#ffffff", col, 1, 2))
+            b.append(text(x + PW / 2, sy + 15, f"C{c}", 10, "middle", "bold", col))
+            b.append(text(x + PW / 2, sy + 30, "breaker", 7.5, "middle", fill="#555"))
+            slots = ["C19"] + [f"C13.{i}" for i in range(1, 7)]
+            for i, o in enumerate(slots):
+                oy = sy + 40 + i * 24
+                if o == "C19":
+                    b.append(rect(x + 9, oy, 28, 14, "#212121", "#000", 1, 2))
+                    b.append(text(x + PW / 2, oy + 10, "C19", 8, "middle", fill="#ffffff"))
+                else:
+                    b.append(rect(x + 14, oy, 18, 14, "#424242", "#000", 1, 2))
+                outlet[(p, c, o)] = (x + (PW if p == "A" else 0), oy + 7)
+    # cord plan: (device, PSU, PDU, circuit, outlet)
+    plan = [("gpu01", 1, "A", 1, "C19"), ("gpu01", 3, "A", 2, "C19"), ("gpu01", 2, "B", 1, "C19"), ("gpu01", 4, "B", 2, "C19"),
+            ("svc01", 1, "A", 1, "C13.1"), ("svc01", 2, "B", 1, "C13.1"),
+            ("svc02", 1, "A", 2, "C13.1"), ("svc02", 2, "B", 2, "C13.1"),
+            ("svc03", 1, "A", 3, "C13.6"), ("svc03", 2, "B", 3, "C13.6"),
+            ("con01", 1, "B", 3, "C13.5"),
+            ("sw01", 1, "A", 3, "C13.1"), ("sw01", 2, "B", 3, "C13.1"), ("oob01", 1, "A", 3, "C13.2")]
+    # Each cord runs across the device rear, then up or down a lane at the side of the rack, then into
+    # its outlet. Lanes are assigned by outlet height so cords on one side don't cross each other.
+    cords = []
+    for p in ("A", "B"):
+        mine = sorted([c for c in plan if c[2] == p], key=lambda c: outlet[(p, c[3], c[4])][1])
+        for k, (dev, n, _, c, o) in enumerate(mine):
+            sx, sy = psu[(dev, n)]
+            ox, oy = outlet[(p, c, o)]
+            col = C["A"] if p == "A" else C["B"]
+            lane = (RX - 30 - k * 6) if p == "A" else (RX + RW + 26 + k * 6)
+            cords.append(f"<polyline points='{sx},{sy} {lane},{sy} {lane},{oy} {ox},{oy}' fill='none' stroke='{col}' "
+                         f"stroke-width='2.2' stroke-linejoin='round' opacity='0.9'/>")
+            cords.append(f"<circle cx='{ox}' cy='{oy}' r='3' fill='{col}'/>")
+    b += cords + front
+    # load table
+    y = RY + 42 * PU + 50
+    b.append(text(40, y, "Load per circuit at max draw (same on both PDUs; oob01 is on A-C3, con01 on B-C3)", 13, weight="bold"))
+    rows = [("Circuit", "Cords on it", "Both feeds up", "Other feed down"),
+            ("C1", "gpu01 PSU (C19), svc01", "1,025 W, 4.9 A", "2,050 W, 9.9 A"),
+            ("C2", "gpu01 PSU (C19), svc02", "1,025 W, 4.9 A", "2,050 W, 9.9 A"),
+            ("C3", "svc03, sw01, oob01 or con01", "about 355 W, 1.7 A", "about 680 W, 3.3 A")]
+    for i, r in enumerate(rows):
+        for j, (cell, cx) in enumerate(zip(r, (40, 120, 400, 600))):
+            b.append(text(cx, y + 24 + i * 20, cell, 12, weight="bold" if i == 0 else "normal"))
+    y += 24 + len(rows) * 20 + 16
     rules = ["Rules",
-             "- Never plug both supplies of one device into the same PDU.",
-             "- Label each cord at both ends: device, PSU number, PDU outlet (example: gpu01-PSU1 / A-c1-C19).",
-             "- c1, c2, c3 = PDU circuit 1, 2, 3. Spread load across them; the PDU display shows current per circuit.",
-             "- Test: facilities switches feed A off upstream; everything with two or more PSUs stays up. Restore. Repeat with feed B.",
-             "- Each PDU must carry the whole rack alone: about 4.8 kW at 50 users. Confirm the PDU input rating on its label."]
+             "- Never plug both supplies of one device into the same PDU. Cords from a server's right-hand PSUs cross to the left PDU; that is expected.",
+             "- If gpu01 has C14 inlets: same circuits, C13 outlets instead of the C19s, and all C19s stay free.",
+             "- Label each cord at both ends: device, PSU, PDU, circuit, outlet (example: gpu01-PSU1 / A-C1-C19).",
+             "- All six PDU breakers off before the first cord goes in. Route cords along the sides, clear of server exhaust.",
+             "- Test: facilities switches feed A off; everything with two or more PSUs stays up, oob01 goes dark. Restore. Repeat with B (con01 goes dark).",
+             "- Each PDU must carry the whole rack alone: about 4.8 kW at 50 users. PSU positions and outlet counts: check the real labels."]
     for i, r in enumerate(rules):
-        b.append(text(40, y + 20 + i * 19, r, 13 if i == 0 else 12, weight="bold" if i == 0 else "normal"))
-    return svg(1000, y + 150, "".join(b), "Power wiring")
+        b.append(text(40, y + i * 19, r, 13 if i == 0 else 12, weight="bold" if i == 0 else "normal"))
+    return svg(1000, y + len(rules) * 19 + 20, "".join(b), "Power wiring")
 
 # ---------------------------------------------------------------- network
 def box(x, y, w, h, title, sub, fill):

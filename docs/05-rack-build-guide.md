@@ -122,6 +122,9 @@ panel and breaker feed each one. Ask them ([09](09-site-visit-checklist.md)), th
 
 **Circuits on each PDU.** Each PDU has circuits 1, 2, and 3. Each circuit has its own breaker on the PDU,
 mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pair.
+The plan below assumes circuit 1 is at the bottom of the PDU, nearest gpu01, and circuit 3 at the top,
+nearest the switches. Check the PDU's labels. If circuit 1 is at the top, swap circuits 1 and 3 in the
+plan, so gpu01's cords stay short. The loads are the same either way.
 
 0. **Before plugging anything in:** facilities confirms that the upstream feeds to both PDUs are off and
    locked out per the lab's lockout/tagout process, or confirms in writing that plugging in with the

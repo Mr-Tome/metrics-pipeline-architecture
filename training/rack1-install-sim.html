@@ -812,7 +812,7 @@ function renderScene(){
     const off = !S.feed[p] || !S.breakers;
     g += `<rect x="${x}" y="${TOP+6}" width="28" height="${42*U_H-12}" rx="3" class="s-pdu ${p==="B"?"B":""} ${!S.feed[p]?"off":""}"/>`;
     g += `<text x="${x+14}" y="${TOP+20}" text-anchor="middle" class="s-pdul" style="fill:${p==="A"?"var(--feed-a)":"var(--feed-b)"}">${p}</text>`;
-    for (let c=1;c<=3;c++) { const cy = TOP + 34 + (c-1)*240;
+    for (let c=1;c<=3;c++) { const cy = TOP + 34 + (3-c)*240; // C1 at the bottom, nearest gpu01
       g += `<text x="${x+14}" y="${cy+4}" text-anchor="middle" class="s-sub">C${c}</text>`;
       const outs = ["C19", ...Array.from({length:C13_PER_CIRCUIT},(_,i)=>"C13"+(i+1))];
       outs.forEach((o,i) => { const occ = S.outlets[outletKey(p,c,o)], yy = cy + 12 + i*28;
