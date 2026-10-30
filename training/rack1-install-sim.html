@@ -481,6 +481,7 @@ const STEPS = [
          ["Run validate/hw-check.sh --gpus 4 on gpu01: GPU count, PCIe Gen5 x16, temperature, power limit, NVMe, NIC speed"],
          ["Run validate/hw-check.sh --gpus 0 on svc01–svc03"],
          ["Run validate/net-test.sh between the nodes"],
+         ["Run validate/llm-load-test.py --users 10 (the 50-user peak): time to first token under about 2 s"],
          ["With ISSM approval, photograph the rack front, rear, and each PDU display under load for docs/photos/"]],
   bad:[["Skip hw-check on gpu01 since the vendor tested it","Shipping can unseat a GPU or a 16-pin connector. hw-check proves Gen5 x16 and the power limit on site."]]},
 
