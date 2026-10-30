@@ -37,7 +37,7 @@ Only if needed, not in the total:
 
 | ID | Item | Est. total | When |
 |---|---|---|---|
-| C1 | Red Hat Enterprise Linux Server subscriptions, 5 servers, 1 year | $7,000 per year | Only if the lab requires RHEL. Rocky Linux 9 is free. Not in the original BOM. |
+| C1 | Red Hat Enterprise Linux Server subscriptions, 5 servers (4 lab + 1 staging), 1 year | $7,000 per year | Only if the lab requires RHEL. Rocky Linux 9 is free. Not in the original BOM. |
 | C2 | Rack PDUs for staging (2) | $3,600 | Only if staging goes somewhere without rack PDUs |
 
 All items are estimates. Get quotes before you finalize.

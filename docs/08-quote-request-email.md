@@ -61,7 +61,7 @@ Government pricing (GSA, SEWP) is welcome.
 
 | # | Item | When | Qty | Est. total | Link |
 |---|---|---|---|---|---|
-| 15 | Red Hat Enterprise Linux Server, Standard, 1 year, 2 sockets, 1 physical node (RH00004) | If the OS must be RHEL (question 6). One per server. Can also be selected in the Thinkmate configurator ("Red Hat Enterprise Linux 9 Server (Standard) (1 Year)"). Rocky Linux 9 is free and needs none. | 5 | $7,000 per year | https://cdw.com/product/red-hat-enterprise-linux-server-standard-subscription-2-sockets-1-phys/6905904 |
+| 15 | Red Hat Enterprise Linux Server, Standard, 1 year, 2 sockets, 1 physical node (RH00004) | If the OS must be RHEL (question 6). One per server. Can also be selected in the Thinkmate configurator ("Red Hat Enterprise Linux 9 Server (Standard) (1 Year)"). One per server: gpu01, svc01-svc03 (lab) and the staging GPU server (item 6). Rocky Linux 9 is free and needs none. | 5 | $7,000 per year | https://cdw.com/product/red-hat-enterprise-linux-server-standard-subscription-2-sockets-1-phys/6905904 |
 | 16 | Rack PDU for staging, Vertiv Geist MNR3E1R6-12CF18-3TL21A0H10-S (208V 3-phase, L21-30P, 12 x C13/C19) | If staging goes somewhere without rack PDUs | 2 | $3,600 | https://icgsupply.com/products/geist-rpdu-mnr3e1r6-12cf18-3tl21a0h10-s-12-outlets-pdu |
 
 With both, the total is $242,020.
