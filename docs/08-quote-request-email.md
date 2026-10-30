@@ -71,10 +71,10 @@ With it, the total is $207,474.
 
 1. **GPU server power cords.** The server has 4 x 2000 W PSUs. Is the PSU inlet C14 or C20? The site's
    rack PDUs have mostly C13 outlets and three C19 outlets per PDU.
-   - If C14: we need 4 x C13-to-C14 cords per server, 6 ft. (Preferred, if offered.)
-   - If C20: we need 4 x C19-to-C20 cords per server, 6 ft.
+   - If C14: we need 4 x C13-to-C14 cords, 6 ft (1 server, 4 total). (Preferred, if offered.)
+   - If C20: we need 4 x C19-to-C20 cords, 6 ft (1 server, 4 total).
    - Do not ship NEMA 5-15P (wall plug) cords. The configurator only offers those.
-2. **Service node power cords.** 2 x C13-to-C14 cords per node, 6 ft, no NEMA 5-15P.
+2. **Service node power cords.** 2 x C13-to-C14 cords per node, 6 ft (3 nodes, 6 total), no NEMA 5-15P.
 3. **Factory install.** Please install all 4 GPUs (item 2) and the 25G NICs at the factory, and burn in the GPU server with all 4 GPUs loaded.
 4. **Rails.** The racks are Vertiv VR3300 with square holes, vertical rails adjustable, currently 29 in
    apart. Do the rail kits for items 1, 3, and 4 fit?
