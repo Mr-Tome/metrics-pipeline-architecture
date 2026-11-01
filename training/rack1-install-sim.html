@@ -380,7 +380,7 @@ const STEPS = [
 
  {ph:1, type:"choice", title:"Label the PDUs", ref:["05","§4"], view:"rear",
   q:"Facilities tells you (sim answer) that the left PDU, seen from the rear, is fed from source A and the right one from source B. What do you write on them?",
-  opts:[["Left: PDU-A. Right: PDU-B. Label both before any cord goes in.", true, "Now every cord label can name its PDU, for example gpu01-PSU1 / A-C1-C19."],
+  opts:[["Left: PDU-A. Right: PDU-B. Label both before any cord goes in.", true, "Now every cord label can name its PDU, for example gpu01-PSU1 / A-C3-C19."],
         ["Nothing, they're the same model", false, "Without labels nobody can tell which PDU a cord is on during a feed failure."],
         ["Guess A and B, then check with a meter later", false, "Only facilities knows which upstream panel feeds each PDU. Use their answer."]],
   facts:["<b>Geist PDUs:</b> circuits 1, 2, 3 each. Mostly C13 (slots vertical), one C19 per circuit (slots horizontal). 208 V.","<b>Sim value:</b> 6 C13 per circuit. Count yours on the next visit (doc 09)."]},
@@ -416,13 +416,13 @@ const STEPS = [
 
  {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"rear",
   lead:"Pick a cord, then pick an outlet. Odd-numbered PSUs go to PDU-A, even to PDU-B. Spread the load across the three circuits.",
-  facts:["<b>Circuit plan, each PDU:</b> 1 = gpu01 PSU + svc01 · 2 = gpu01 PSU + svc02 · 3 = svc03 + sw01 + oob01 or con01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 250 W · oob01 30 W · con01 13 W"]},
+  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 250 W · oob01 30 W · con01 13 W"]},
 
  {ph:4, type:"choice", title:"What does one circuit carry?", ref:["01","§3"],
-  q:"PDU-A circuit 1 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 3,300 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C1 carry now?",
+  q:"PDU-A circuit 3 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 3,300 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C3 carry now?",
   opts:[["About 9.9 A (2,050 W at 208 V)", true, "With B gone, gpu01's 3,300 W splits over its 2 live PSUs (1,650 W) and svc01's 400 W lands on 1 (400 W). 2,050 W / 208 V = 9.9 A. Compare that with the circuit breaker rating on the PDU label."],
         ["About 4.9 A (1,025 W), same as before", false, "4.9 A is with both feeds up. With B gone, each device's live PSUs take its whole load, so the current doubles."],
-        ["About 19.7 A (4,100 W)", false, "Only the PSUs on circuit A-C1 count: gpu01 half (1,650 W) plus svc01 all (400 W) = 2,050 W, about 9.9 A."]]},
+        ["About 19.7 A (4,100 W)", false, "Only the PSUs on circuit A-C3 count: gpu01 half (1,650 W) plus svc01 all (400 W) = 2,050 W, about 9.9 A."]]},
 
  {ph:5, type:"network", title:"Run the network cables", ref:["05","§5"], view:"rear",
   lead:"Pick a run from the schedule, pick the part from the bin, then click the port. Optics go in before fiber. BMC Cat6 goes in last so it doesn't get buried.",
@@ -670,11 +670,11 @@ function checkCord(cord, pdu, c, o){
   if (inlet==="C20" && typ!=="C19") return "gpu01's PSUs have C20 inlets in this build. The C19-to-C20 cord needs a C19 outlet.";
   if (inlet==="C14" && typ==="C19") return cord.dev==="gpu01" ? "gpu01's PSUs have C14 inlets in this build, so they take C13 outlets. Keep the C19s free."
     : `Keep the C19 outlets for the GPU server. ${cord.id} has a C14 inlet: use a C13 outlet.`;
-  const plan = {svc01:1, svc02:2, svc03:3, sw01:3, oob01:3, con01:3};
-  if (cord.dev==="gpu01") { if (c===3) return "Circuit 3 carries svc03, sw01, and oob01 or con01. gpu01's PSUs go on circuits 1 and 2.";
+  const plan = {svc01:3, svc02:2, svc03:1, sw01:1, oob01:1, con01:1};
+  if (cord.dev==="gpu01") { if (c===1) return "Circuit 1, at the top, carries svc03, sw01, and oob01 or con01. gpu01's PSUs go on circuits 2 and 3, nearest it.";
     const sib = CORDS.find(x => x.dev==="gpu01" && x!==cord && S.cords[x.id] && S.cords[x.id].pdu===pdu);
     if (sib && S.cords[sib.id].c===c) return `${sib.id} is already on ${pdu}-C${c}. The other gpu01 PSU on this PDU goes on the other circuit.`; }
-  else if (plan[cord.dev] !== c) return `Circuit plan: 1 = gpu01 + svc01, 2 = gpu01 + svc02, 3 = svc03 + sw01 + oob01 or con01. <b>${cord.dev}</b> goes on circuit ${plan[cord.dev]}.`;
+  else if (plan[cord.dev] !== c) return `Circuit plan: 1 (top) = svc03 + sw01 + oob01 or con01, 2 = gpu01 + svc02, 3 (bottom) = gpu01 + svc01. <b>${cord.dev}</b> goes on circuit ${plan[cord.dev]}.`;
   return null;
 }
 function cordLabel(cord, pdu, c, o){ return `${cord.id} / ${pdu}-C${c}-${o==="C19"?"C19":"C13."+o.slice(3)}`; }
@@ -812,7 +812,7 @@ function renderScene(){
     const off = !S.feed[p] || !S.breakers;
     g += `<rect x="${x}" y="${TOP+6}" width="28" height="${42*U_H-12}" rx="3" class="s-pdu ${p==="B"?"B":""} ${!S.feed[p]?"off":""}"/>`;
     g += `<text x="${x+14}" y="${TOP+20}" text-anchor="middle" class="s-pdul" style="fill:${p==="A"?"var(--feed-a)":"var(--feed-b)"}">${p}</text>`;
-    for (let c=1;c<=3;c++) { const cy = TOP + 34 + (3-c)*240; // C1 at the bottom, nearest gpu01
+    for (let c=1;c<=3;c++) { const cy = TOP + 34 + (c-1)*240; // C1 at the top, as on the real PDUs
       g += `<text x="${x+14}" y="${cy+4}" text-anchor="middle" class="s-sub">C${c}</text>`;
       const outs = ["C19", ...Array.from({length:C13_PER_CIRCUIT},(_,i)=>"C13"+(i+1))];
       outs.forEach((o,i) => { const occ = S.outlets[outletKey(p,c,o)], yy = cy + 12 + i*28;

@@ -122,20 +122,19 @@ panel and breaker feed each one. Ask them ([09](09-site-visit-checklist.md)), th
 
 **Circuits on each PDU.** Each PDU has circuits 1, 2, and 3. Each circuit has its own breaker on the PDU,
 mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pair.
-The plan below assumes circuit 1 is at the bottom of the PDU, nearest gpu01, and circuit 3 at the top,
-nearest the switches. Check the PDU's labels. If circuit 1 is at the top, swap circuits 1 and 3 in the
-plan, so gpu01's cords stay short. The loads are the same either way.
+On the site's PDUs, circuit 1 is at the top, nearest the switches, and circuit 3 is at the bottom, nearest
+gpu01. The plan keeps every cord on the circuit closest to its device, so the 6 ft cords reach.
 
 0. **Before plugging anything in:** facilities confirms that the upstream feeds to both PDUs are off and
    locked out per the lab's lockout/tagout process, or confirms in writing that plugging in with the
    PDUs live is their normal practice. Check every PDU circuit breaker is switched off.
-1. Label every cord at both ends **before** plugging in: `gpu01-PSU1 / A-C1-C19`, and so on.
+1. Label every cord at both ends **before** plugging in: `gpu01-PSU1 / A-C3-C19`, and so on.
 2. Plug every device's odd-numbered PSU into PDU-A and its even-numbered PSU into PDU-B. **Never put
    both PSUs of one device on the same PDU.** The GPU server has 4 PSUs: PSU1 and PSU3 to A, PSU2 and PSU4 to B.
 3. Spread the load across the PDU's three circuits. Plan for each PDU:
-   - Circuit 1: gpu01 PSU (C19 if C20 cords, else a C13), svc01
-   - Circuit 2: gpu01 PSU (C19 if C20 cords, else a C13), svc02
-   - Circuit 3: svc03, sw01, and oob01 or the console (one on each PDU)
+   - Circuit 1 (top): svc03, sw01, and oob01 or the console (one on each PDU)
+   - Circuit 2 (middle): gpu01 PSU (C19 if C20 cords, else a C13), svc02
+   - Circuit 3 (bottom): gpu01 PSU (C19 if C20 cords, else a C13), svc01
 
    After power-on, the PDU display shows the current on each circuit. If one is much higher than the
    others, move a cord to a lighter circuit.

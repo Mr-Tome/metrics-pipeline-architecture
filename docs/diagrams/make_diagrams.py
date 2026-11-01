@@ -63,6 +63,14 @@ def rack(x0, y0, title, rear=False):
         b.append(rect(x0 + w + 38, y0 + 30, 14, 42 * U - 60, C["B"], "#000"))
         b.append(text(x0 - 45, y0 + 22, "PDU-A", 11, "middle", "bold", C["A"]))
         b.append(text(x0 + w + 45, y0 + 22, "PDU-B", 11, "middle", "bold", C["B"]))
+        # circuits along each PDU: C1 at the top, C3 at the bottom
+        sec = (42 * U - 60) / 3
+        for px in (x0 - 52, x0 + w + 38):
+            for c in (1, 2, 3):
+                sy = y0 + 30 + (c - 1) * sec
+                if c > 1:
+                    b.append(line(px, sy, px + 14, sy, "#ffffff", 1.5))
+                b.append(text(px + 7, sy + 16, f"C{c}", 8, "middle", "bold", "#ffffff"))
     return "".join(b), w
 
 def rack_svg():
@@ -75,7 +83,7 @@ def rack_svg():
     notes = [
         "1. Order the S5248F-ON and the OOB switch with PSU-to-port airflow (\"port-side exhaust\"). Their ports sit at the rear, so air must exit at the rear.",
         "2. Fill every open U with a blanking panel. Gaps let hot air leak out of the containment. Rack 2 gets a full set too.",
-        "3. The Geist PDUs are already installed at the rear, left and right. Facilities says which side is feed A.",
+        "3. The Geist PDUs are already installed at the rear, left and right, circuit C1 at the top. Facilities says which side is feed A.",
         "4. U3-U4 is held for a second GPU server (needs C14 inlets, since each PDU has 3 C19). Otherwise it goes in rack 2.",
     ]
     for i, n in enumerate(notes):
@@ -91,7 +99,7 @@ def power_svg():
     def uy(u): return RY + (42 - u) * PU  # top edge of U u
     b = [text(30, 34, "Power wiring: rack 1 rear view (50-user build)", 20, weight="bold"),
          text(30, 56, "Seen from the rear, inside the containment. Odd PSUs go to PDU-A, even PSUs to PDU-B. Either PDU alone carries the whole rack.", 12, fill="#444"),
-         text(30, 74, "Circuits shown with C1 at the bottom. Check the real PDU: if C1 is at the top, swap circuits 1 and 3 in this plan so gpu01 stays on the circuits nearest it.", 12, fill="#444")]
+         text(30, 74, "C1 is at the top of each PDU, C3 at the bottom. Each cord goes to the circuit nearest its device, so the 6 ft cords reach.", 12, fill="#444")]
     # facility feeds and PDU input cords
     for x, p, col, fill, src in [(AX, "A", C["A"], "#ffebee", "existing"), (BX, "B", C["B"], "#e3f2fd", "separate source")]:
         bx = 40 if p == "A" else 740
@@ -127,14 +135,14 @@ def power_svg():
             front.append(text(px + 13, y + h * PU / 2 + 3, f"P{i + 1}" if n > 1 else "P", 8, "middle", fill="#ffffff"))
             # a 2U server's cords leave at staggered heights so parallel runs stay apart
             psu[(name, i + 1)] = (px + 13, y + h * PU / 2 + ((i - 1.5) * 5 if h > 1 else 0))
-    # PDUs: three circuits each, C1 at the bottom; one C19 and six C13 per circuit
+    # PDUs: three circuits each, C1 at the top (as on the site's PDUs); one C19 and six C13 per circuit
     SEC = (42 * PU - 30) / 3
     outlet = {}
     for x, p, col, fill in [(AX, "A", C["A"], "#ffcdd2"), (BX, "B", C["B"], "#bbdefb")]:
         b.append(rect(x, RY, PW, 42 * PU, fill, col, 2, 4))
         b.append(text(x + PW / 2, RY + 42 * PU + 16, f"PDU-{p}", 12, "middle", "bold", col))
         for c in (1, 2, 3):
-            sy = RY + 10 + (3 - c) * SEC
+            sy = RY + 10 + (c - 1) * SEC
             if c < 3:
                 b.append(line(x + 3, sy + SEC, x + PW - 3, sy + SEC, col, 1.5, "4 3"))
             b.append(rect(x + 8, sy + 4, PW - 16, 14, "#ffffff", col, 1, 2))
@@ -150,12 +158,12 @@ def power_svg():
                     b.append(rect(x + 14, oy, 18, 14, "#424242", "#000", 1, 2))
                 outlet[(p, c, o)] = (x + (PW if p == "A" else 0), oy + 7)
     # cord plan: (device, PSU, PDU, circuit, outlet)
-    plan = [("gpu01", 1, "A", 1, "C19"), ("gpu01", 3, "A", 2, "C19"), ("gpu01", 2, "B", 1, "C19"), ("gpu01", 4, "B", 2, "C19"),
-            ("svc01", 1, "A", 1, "C13.1"), ("svc01", 2, "B", 1, "C13.1"),
+    plan = [("gpu01", 1, "A", 3, "C19"), ("gpu01", 3, "A", 2, "C19"), ("gpu01", 2, "B", 3, "C19"), ("gpu01", 4, "B", 2, "C19"),
+            ("svc01", 1, "A", 3, "C13.1"), ("svc01", 2, "B", 3, "C13.1"),
             ("svc02", 1, "A", 2, "C13.1"), ("svc02", 2, "B", 2, "C13.1"),
-            ("svc03", 1, "A", 3, "C13.6"), ("svc03", 2, "B", 3, "C13.6"),
-            ("con01", 1, "B", 3, "C13.5"),
-            ("sw01", 1, "A", 3, "C13.1"), ("sw01", 2, "B", 3, "C13.1"), ("oob01", 1, "A", 3, "C13.2")]
+            ("svc03", 1, "A", 1, "C13.6"), ("svc03", 2, "B", 1, "C13.6"),
+            ("con01", 1, "B", 1, "C13.5"),
+            ("sw01", 1, "A", 1, "C13.1"), ("sw01", 2, "B", 1, "C13.1"), ("oob01", 1, "A", 1, "C13.2")]
     # Each cord runs across the device rear, then up or down a lane at the side of the rack, then into
     # its outlet. Lanes are assigned by outlet height so cords on one side don't cross each other.
     cords = []
@@ -172,19 +180,19 @@ def power_svg():
     b += cords + front
     # load table
     y = RY + 42 * PU + 50
-    b.append(text(40, y, "Load per circuit at max draw (same on both PDUs; oob01 is on A-C3, con01 on B-C3)", 13, weight="bold"))
+    b.append(text(40, y, "Load per circuit at max draw (same on both PDUs; oob01 is on A-C1, con01 on B-C1)", 13, weight="bold"))
     rows = [("Circuit", "Cords on it", "Both feeds up", "Other feed down"),
-            ("C1", "gpu01 PSU (C19), svc01", "1,025 W, 4.9 A", "2,050 W, 9.9 A"),
+            ("C1 (top)", "svc03, sw01, oob01 or con01", "about 355 W, 1.7 A", "about 680 W, 3.3 A"),
             ("C2", "gpu01 PSU (C19), svc02", "1,025 W, 4.9 A", "2,050 W, 9.9 A"),
-            ("C3", "svc03, sw01, oob01 or con01", "about 355 W, 1.7 A", "about 680 W, 3.3 A")]
+            ("C3 (bottom)", "gpu01 PSU (C19), svc01", "1,025 W, 4.9 A", "2,050 W, 9.9 A")]
     for i, r in enumerate(rows):
-        for j, (cell, cx) in enumerate(zip(r, (40, 120, 400, 600))):
+        for j, (cell, cx) in enumerate(zip(r, (40, 140, 400, 600))):
             b.append(text(cx, y + 24 + i * 20, cell, 12, weight="bold" if i == 0 else "normal"))
     y += 24 + len(rows) * 20 + 16
     rules = ["Rules",
              "- Never plug both supplies of one device into the same PDU. Cords from a server's right-hand PSUs cross to the left PDU; that is expected.",
              "- If gpu01 has C14 inlets: same circuits, C13 outlets instead of the C19s, and all C19s stay free.",
-             "- Label each cord at both ends: device, PSU, PDU, circuit, outlet (example: gpu01-PSU1 / A-C1-C19).",
+             "- Label each cord at both ends: device, PSU, PDU, circuit, outlet (example: gpu01-PSU1 / A-C3-C19).",
              "- All six PDU breakers off before the first cord goes in. Route cords along the sides, clear of server exhaust.",
              "- Test: facilities switches feed A off; everything with two or more PSUs stays up, oob01 goes dark. Restore. Repeat with B (con01 goes dark).",
              "- Each PDU must carry the whole rack alone: about 4.8 kW at 50 users. PSU positions and outlet counts: check the real labels."]
