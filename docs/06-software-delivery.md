@@ -60,7 +60,7 @@ cd delivery
 Useful variations:
 
 ```bash
-BUNDLE_DIR=/mnt/xfer/ai-2026-11 ./pull-all.sh    # write straight to the transfer drive
+BUNDLE_DIR=/mnt/xfer/si-2026-11 ./pull-all.sh    # write straight to the transfer drive
 SKIP="30" ./pull-all.sh                         # skip the model (already pulled)
 COSIGN_KEY=~/keys/cosign.key ./90-seal.sh        # re-seal with a signature
 ```
@@ -92,7 +92,7 @@ Then, as root ([`delivery/intake/deploy.sh`](../delivery/intake/deploy.sh) has t
 | gpu01 | `RKE2_TOKEN=<token> ./intake/deploy.sh agent-join <svc01-ip>` |
 | gpu01 | `./intake/deploy.sh driver`, then `./intake/deploy.sh models` |
 | svc01 | `./intake/deploy.sh platform` |
-| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --api-host api.<lab-domain> --tls-cert ai.crt --tls-key ai.key` (3 language model copies by default; `--llm-gpus N` to change) |
+| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --api-host api.<lab-domain> --tls-cert si.crt --tls-key si.key` (3 language model copies by default; `--llm-gpus N` to change) |
 | svc01 | `./intake/deploy.sh gateway-key` |
 | svc01 | `./intake/deploy.sh status` |
 

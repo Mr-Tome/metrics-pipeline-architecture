@@ -90,10 +90,10 @@ platform)
     log "labels: service nodes run the database and gateway"
     nodes=$(kubectl get nodes -o name)
     if [[ $(wc -l <<<"${nodes}") -eq 1 ]]; then
-        kubectl label ${nodes} node-role.ai/service=true --overwrite
+        kubectl label ${nodes} node-role.si/service=true --overwrite
     else
         for n in ${SERVICE_NODES:-$(grep -o 'svc[0-9]*' <<<"${nodes}")}; do
-            kubectl label "node/${n}" node-role.ai/service=true --overwrite
+            kubectl label "node/${n}" node-role.si/service=true --overwrite
         done
     fi
     log "zarf init (in-cluster registry and image agent)"
@@ -115,10 +115,10 @@ apps)
     done
     [[ -n "${chat}" && -n "${api}" && -f "${cert}" && -f "${key}" ]] \
         || die "need --chat-host, --api-host, --tls-cert, --tls-key (certificate from the lab CA)"
-    kubectl create namespace ai --dry-run=client -o yaml | kubectl apply -f -
-    kubectl -n ai create secret tls ai-tls --cert "${cert}" --key "${key}" --dry-run=client -o yaml | kubectl apply -f -
-    kubectl -n ai get secret litellm-masterkey >/dev/null 2>&1 \
-        || kubectl -n ai create secret generic litellm-masterkey --from-literal=masterkey="sk-$(openssl rand -hex 24)"
+    kubectl create namespace si --dry-run=client -o yaml | kubectl apply -f -
+    kubectl -n si create secret tls si-tls --cert "${cert}" --key "${key}" --dry-run=client -o yaml | kubectl apply -f -
+    kubectl -n si get secret litellm-masterkey >/dev/null 2>&1 \
+        || kubectl -n si create secret generic litellm-masterkey --from-literal=masterkey="sk-$(openssl rand -hex 24)"
     pkg=$(ls "${BUNDLE}"/package/zarf-package-*.tar.zst | head -1)
     pg=3 components="transcription"
     if [[ ${single} -eq 1 ]]; then pg=1 llm=1 components=""; fi  # one GPU: no room for whisper
@@ -130,16 +130,16 @@ apps)
     ;;
 gateway-key|user-key)
     alias="open-webui"; [[ "${cmd}" == user-key ]] && alias="${1:?usage: $0 user-key <name>}"
-    mk=$(kubectl -n ai get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
-    kubectl -n ai port-forward svc/litellm 14000:4000 >/dev/null 2>&1 &
+    mk=$(kubectl -n si get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
+    kubectl -n si port-forward svc/litellm 14000:4000 >/dev/null 2>&1 &
     pf=$!; trap 'kill ${pf} 2>/dev/null || true' EXIT; sleep 3
     newkey=$(curl -fsS http://127.0.0.1:14000/key/generate \
         -H "Authorization: Bearer ${mk}" -H 'Content-Type: application/json' \
         -d "{\"key_alias\": \"${alias}\"}" | json_field key)
     if [[ "${cmd}" == gateway-key ]]; then
-        kubectl -n ai create secret generic open-webui-gateway-key --from-literal=key="${newkey}" \
+        kubectl -n si create secret generic open-webui-gateway-key --from-literal=key="${newkey}" \
             --dry-run=client -o yaml | kubectl apply -f -
-        kubectl -n ai rollout restart statefulset/open-webui
+        kubectl -n si rollout restart statefulset/open-webui
         log "chat page now uses its own gateway key"
     else
         log "key for ${alias} (give it to them over an approved channel; it is shown once):"
@@ -149,7 +149,7 @@ gateway-key|user-key)
 status)
     kubectl get nodes -o wide
     kubectl get pods -A -o wide | grep -vE 'Running|Completed' || log "all pods running"
-    kubectl -n ai get pods,svc,ingress
+    kubectl -n si get pods,svc,ingress
     command -v nvidia-smi >/dev/null && nvidia-smi --query-gpu=index,name,temperature.gpu,power.draw,memory.used --format=csv
     ;;
 *)

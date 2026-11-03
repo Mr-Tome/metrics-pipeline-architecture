@@ -7,11 +7,11 @@ masterkeySecretName: litellm-masterkey
 db:
   useExisting: true
   deployStandalone: false
-  endpoint: ai-postgres-rw.ai.svc
+  endpoint: si-postgres-rw.si.svc
   database: litellm
   url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
   secret:
-    name: ai-postgres-app
+    name: si-postgres-app
     usernameKey: username
     passwordKey: password
 proxy_config:
@@ -19,11 +19,11 @@ proxy_config:
     - model_name: gpt-oss-120b
       litellm_params:
         model: hosted_vllm/gpt-oss-120b
-        api_base: http://vllm.ai.svc:8000/v1
+        api_base: http://vllm.si.svc:8000/v1
     - model_name: whisper
       litellm_params:
         model: openai/Systran/faster-whisper-large-v3
-        api_base: http://whisper.ai.svc:8000/v1
+        api_base: http://whisper.si.svc:8000/v1
       model_info:
         mode: audio_transcription
   general_settings:
@@ -39,6 +39,6 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: ai-tls
+    - secretName: si-tls
       hosts:
         - "###ZARF_VAR_API_HOST###"

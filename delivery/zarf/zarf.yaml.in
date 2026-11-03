@@ -1,9 +1,9 @@
-# Zarf package for the AI phase. Rendered by 20-build-zarf-package.sh, not used directly.
+# Zarf package for the SI phase. Rendered by 20-build-zarf-package.sh, not used directly.
 # Placeholders are filled from versions.env; image list lines are filled from build/images/<COMPONENT>.txt.
 kind: ZarfPackageConfig
 metadata:
   name: ${RELEASE_NAME}
-  description: AI service phase 1 - GPU operator, model server, gateway, chat page, database
+  description: SI service phase 1 - GPU operator, model server, gateway, chat page, database
   version: "${RELEASE_VERSION}"
   architecture: ${ARCH}
 
@@ -47,8 +47,8 @@ components:
         valuesFiles:
           - values/cnpg.yaml
     manifests:
-      - name: ai-postgres
-        namespace: ai
+      - name: si-postgres
+        namespace: si
         files:
           - manifests/namespace.yaml
           - manifests/pg-cluster.yaml
@@ -62,8 +62,8 @@ components:
             wait:
               cluster:
                 kind: clusters.postgresql.cnpg.io
-                name: ai-postgres
-                namespace: ai
+                name: si-postgres
+                namespace: si
                 condition: Ready
 
   - name: model-server
@@ -71,7 +71,7 @@ components:
     required: true
     manifests:
       - name: vllm
-        namespace: ai
+        namespace: si
         files:
           - manifests/vllm.yaml
     images:
@@ -82,7 +82,7 @@ components:
     required: false
     manifests:
       - name: whisper
-        namespace: ai
+        namespace: si
         files:
           - manifests/whisper.yaml
     images:
@@ -95,7 +95,7 @@ components:
       - name: litellm
         url: oci://ghcr.io/berriai/litellm-helm
         version: ${LITELLM_CHART_VERSION}
-        namespace: ai
+        namespace: si
         valuesFiles:
           - values/litellm.yaml
     images:
@@ -108,7 +108,7 @@ components:
       - name: open-webui
         url: https://helm.openwebui.com
         version: ${OPEN_WEBUI_CHART_VERSION}
-        namespace: ai
+        namespace: si
         valuesFiles:
           - values/open-webui.yaml
     images:

@@ -8,7 +8,7 @@
 - One C9300-48S is in the analysts' building. The other is in the building with the racks.
 - Analyst traffic path: analyst desk, analysts' C9300-48S, C9500X core, rack building C9300-48S, our switch.
 
-## 2. Is 10G enough? For the AI phase, yes, by a wide margin
+## 2. Is 10G enough? For the SI phase, yes, by a wide margin
 
 The language model runs on our GPU server, in our rack. What crosses the lab network is text going in and
 text coming out. Rough numbers:
@@ -44,7 +44,7 @@ option B as items 6a-6e (optics, fiber, and the C9300-NM-8X module if needed). O
 **Option A (if allowed): lab switch to the C9500X core, 2 x 100G.**
 
 We do not buy a C9500X. The lab owns it. We buy only the optics that plug into its ports. 100G is 10 times
-10G per link, but the AI phase does not need it (section 2).
+10G per link, but the SI phase does not need it (section 2).
 
 - The C9500X-28C8D has 28 x 100G QSFP28 and 8 x 400G QSFP-DD ports. If two 100G ports are free,
   this is the cleanest design. It does not touch the access layer, and it is ready for the later pipeline.
@@ -62,7 +62,7 @@ We do not buy a C9500X. The lab owns it. We buy only the optics that plug into i
   8 x 10G SFP+). If it has none, the quote includes one.
 - sw01's 25G SFP28 ports accept 10G SFP+ optics. No extra hardware is needed on our side beyond
   10GBASE-SR (multimode) or -LR (single-mode) optics.
-- This is enough for the whole AI phase (section 2). Later pipeline phases may need Option A.
+- This is enough for the whole SI phase (section 2). Later pipeline phases may need Option A.
 
 **Not recommended:** plugging the GPU server straight into a C9300 user port. The service nodes then
 reach the GPU over the access layer, and the network team has to support our east-west traffic.

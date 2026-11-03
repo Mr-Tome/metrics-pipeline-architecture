@@ -3,8 +3,8 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: ai-postgres
-  namespace: ai
+  name: si-postgres
+  namespace: si
 spec:
   instances: ###ZARF_VAR_PG_INSTANCES###
   imageName: ${POSTGRES_IMAGE}
@@ -18,4 +18,4 @@ spec:
         - CREATE EXTENSION IF NOT EXISTS vector;
   affinity:
     nodeSelector:
-      node-role.ai/service: "true"
+      node-role.si/service: "true"

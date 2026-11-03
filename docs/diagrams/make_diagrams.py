@@ -209,7 +209,7 @@ def box(x, y, w, h, title, sub, fill):
 
 def network_svg():
     b = [text(30, 34, "Network cabling: lab", 20, weight="bold"),
-         text(30, 56, "Our switch connects to the C9300-48S in the rack building. Users reach the AI service through their normal switches. The existing network does not change.", 12, fill="#444")]
+         text(30, 56, "Our switch connects to the C9300-48S in the rack building. Users reach the SI service through their normal switches. The existing network does not change.", 12, fill="#444")]
     b.append(box(80, 80, 250, 62, "Analyst workstations", ["Jupyter, VS Code, MATLAB, browser"], "#f3e5f5"))
     b.append(box(80, 180, 250, 62, "Cisco C9300-48S", ["existing, analysts' building"], "#e0e0e0"))
     b.append(box(80, 280, 250, 62, "Cisco C9500X core", ["existing"], "#e0e0e0"))

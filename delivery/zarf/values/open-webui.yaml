@@ -6,7 +6,7 @@ ollama:
   enabled: false
 pipelines:
   enabled: false
-openaiBaseApiUrl: http://litellm.ai.svc:4000/v1
+openaiBaseApiUrl: http://litellm.si.svc:4000/v1
 extraEnvVars:
   - name: OPENAI_API_KEY
     valueFrom:
@@ -32,4 +32,4 @@ ingress:
   class: nginx
   host: "###ZARF_VAR_CHAT_HOST###"
   tls: true
-  existingSecret: ai-tls
+  existingSecret: si-tls

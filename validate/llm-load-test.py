@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load test for the AI gateway. Python standard library only, so it runs on any lab machine.
+"""Load test for the SI gateway. Python standard library only, so it runs on any lab machine.
 
 Sends N users' worth of streaming chat requests at once and reports time-to-first-token and
 tokens per second. The BOM plans for 10 simultaneous requests at 50 users (Assumptions C8).

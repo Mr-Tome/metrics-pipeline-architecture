@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Zarf package: every Helm chart and container image the AI phase needs, in one archive.
+# Builds the Zarf package: every Helm chart and container image the SI phase needs, in one archive.
 #
 # 1. Renders the chart values and manifests with the pins from versions.env.
 # 2. Runs `helm template` on each chart and lists every image it would pull,
@@ -46,9 +46,9 @@ scan GPU_OPERATOR gpu-operator gpu-operator "${GPU_OPERATOR_VERSION}" gpu-operat
 scan DATABASE cnpg cloudnative-pg "${CNPG_CHART_VERSION}" cnpg.yaml \
      --repo https://cloudnative-pg.github.io/charts --namespace cnpg-system
 echo "${POSTGRES_IMAGE}" >> "${build}/images/DATABASE.txt"
-scan GATEWAY litellm oci://ghcr.io/berriai/litellm-helm "${LITELLM_CHART_VERSION}" litellm.yaml --namespace ai
+scan GATEWAY litellm oci://ghcr.io/berriai/litellm-helm "${LITELLM_CHART_VERSION}" litellm.yaml --namespace si
 scan CHAT open-webui open-webui "${OPEN_WEBUI_CHART_VERSION}" open-webui.yaml \
-     --repo https://helm.openwebui.com --namespace ai
+     --repo https://helm.openwebui.com --namespace si
 
 for list in "${build}"/images/*.txt; do
     extra="${DELIVERY_DIR}/zarf/extra-images/$(basename "${list}")"

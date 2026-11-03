@@ -1,7 +1,7 @@
-# Metrics Analysis Pipeline: hardware and AI bring-up
+# Metrics Analysis Pipeline: hardware and SI bring-up
 
 Hardware, facility, and delivery plan for the GPU servers behind the metrics analysis pipeline. The first
-goal is getting the AI service (language model, gateway, chat page, and access from Jupyter, VS Code,
+goal is getting the SI service (language model, gateway, chat page, and access from Jupyter, VS Code,
 and MATLAB) running in the lab. The rest of the pipeline follows on the same platform.
 
 - **Budget:** $250,000.00. The 50-user build (one GPU server with 4 GPUs, no staging) plus the install items comes to $201,874, with $48,126 left ([02](docs/02-budget-and-bom.md)).

@@ -4,8 +4,8 @@
 
 ## 1. The short answer
 
-**The prototype is the lab rack, and it is treated as production from day 1.** Users already have AI on
-the unclassified side, so the goal is AI inside the lab. A separate group orders the equipment, and the
+**The prototype is the lab rack, and it is treated as production from day 1.** Users already have SI on
+the unclassified side, so the goal is SI inside the lab. A separate group orders the equipment, and the
 work happens in the server room.
 
 **No staging server** (decided 2026-10-30). The money it would have cost bought gpu01's third and
