@@ -26,6 +26,10 @@ Government pricing (GSA, SEWP) is welcome.
 
 **Network, rack, and setup items**
 
+Items 6a-6e assume the uplink goes to the lab's C9300-48S. The lab is installing a new C9500X-28C8D
+core switch and patch panels above rows 2 and 3. If our racks end up in one of those rows, these items
+will change (see questions 7 and 8). Please hold 6a-6e until we confirm.
+
 | # | Item | Part / model | Qty | Est. each | Est. total | Link |
 |---|---|---|---|---|---|---|
 | 6a | 10G optic, lab end of the uplink: goes in the lab C9300-48S (C9300-NM-8X port) | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
@@ -82,7 +86,17 @@ With it, the total is $207,474.
 6. **Operating system.** Does the lab require a specific server OS (for example RHEL 9 with STIG)? If it
    must be RHEL, each server needs a Red Hat subscription (item 13, about $1,400 per server per year),
    which is not in the original BOM. If the lab allows it, Rocky Linux 9 is compatible and free.
-7. **Fiber to the lab switch.** There are no fiber patch panels in the racks, and the lab's C9300-48S is
-   not in our row. Where is that switch, and how long is the cable path to our racks (overhead tray or
-   under the raised floor)? Will the lab run the fiber, or should we order long cords (item 6c)? Does the
-   lab require plenum or riser rated cable?
+7. **Fiber to the lab switch.** The lab is installing a C9500X-28C8D core switch and fiber patch panels
+   above rows 2 and 3. Which rows are our racks in? If they are in row 2 or 3, our switch would connect
+   through a patch panel to the C9500X-28C8D, using short patch cords instead of the long cords in 6c.
+   Please tell us:
+   - Where the patch panels go (in each rack, top of rack, or overhead) and which racks they reach.
+   - Fiber type: OM4 multimode or single-mode; connector: MPO-12 or LC; MPO polarity (Type A, B, or C).
+   - If our racks stay where they are: where is the C9300-48S, how long is the cable path to our racks
+     (overhead tray or under the raised floor), will the lab run the fiber, and does the lab require
+     plenum or riser rated cable?
+8. **Optics for the new core switch.** Does the lab supply the optics for its C9500X-28C8D ports, or
+   should we? If we do, which type (Cisco QSFP-100G-SR4-S for MPO multimode, or -LR4/CWDM4 for
+   single-mode)? Is a 2 x 100G uplink allowed, or must it stay at 10G? If the answer is 100G: we replace
+   6a with 2 x Cisco 100G optics and 6b with 2 x Dell-compatible 100G QSFP28 optics of the same type,
+   drop 6c and 6e, and change 6d to match the panel connector.

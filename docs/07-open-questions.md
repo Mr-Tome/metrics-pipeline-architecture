@@ -12,18 +12,22 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 | F3 | Are the existing left and right Geist PDUs fed from separate sources (A and B)? What is each PDU's input rating? | Facilities | Separate sources, each able to carry 4.8 kW | PDUs present: circuits 1-3 each, mostly C13, one C19 per circuit, 208V. Not marked A or B. Source and rating open. |
 | F4 | Is the rack frame bonded to facility ground? | Facilities | Yes | Door bonding straps seen; frame bond not seen. Open. |
 | F5 | Rack PDU brand | Facilities | | Vertiv Geist, already installed. Nothing to buy. |
+| F6 | Which row are the two racks next to ACE 15 in? Can we have two adjacent empty racks in row 2 or row 3 instead, where the new C9500X-28C8D and patch panels are going (see N2)? | Facilities, lab network team | Stay next to ACE 15 | Asked 2026-11-03. Open. |
+| F7 | If we move to row 2 or 3: do those racks match what we planned for? Vertiv VR3300 (42U, 1200 mm deep, square holes), two Geist PDUs on separate A and B feeds that can each carry 4.8 kW alone, three C19 outlets per PDU, in-row CRV cooling, and hot aisle containment. | Facilities | Same as the ACE 15 racks | Yes, all the same (confirmed 2026-11-03). Moving to row 2 or 3 changes nothing for rack, power, or cooling. |
 
 ## Network (N)
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| N1 | Exact access switch model | Lab network team | | C9300-48S (confirmed). One in the analysts' building, one in the rack building, both uplinked to the C9500X. |
-| N2 | May our switch connect directly to the C9500X core, or only to the C9300-48S in the rack building? Free 10G ports on that C9300-48S? (The network team runs `show interfaces status`; we have no access to their switches.) | Lab network team | Through the C9300-48S, 2 x 10G (option B, quote items 6a-6e) | Likely not direct to the core. Open. |
-| N3 | Fiber type between that switch and our rack: multimode or single-mode, LC or MPO? | Lab network team | OM4 multimode, LC | |
-| N4 | Load on the existing 10G links between the C9300s and the core | Lab network team | Under 50% | Low priority. Our racks are empty, but these links already carry other traffic. Ask only if we connect through them. |
+| N1 | Exact access switch model | Lab network team | | C9300-48S (confirmed). One in the analysts' building, one in the rack building, both uplinked to the C9500X. **New 2026-11-03:** the lab is installing a C9500X-28C8D above rows 2 and 3, plus patch panels. |
+| N2 | May our switch connect directly to the new C9500X-28C8D above rows 2 and 3, with 2 free 100G QSFP28 ports for a 2 x 100G LACP port-channel (option A)? If not, does the C9300-48S in the rack building have 2 free 10G ports (option B)? (The network team runs `show interfaces status`; we have no access to their switches.) | Lab network team | Through the C9300-48S, 2 x 10G (option B, quote items 6a-6e) | Was "likely not direct to the core". The new core above rows 2 and 3 makes option A likely if our racks are in one of those rows (F6). Open. |
+| N3 | The new patch panels: where do they go (in each rack, at the top of the rack, or overhead) and which racks do they reach? Multimode (OM4) or single-mode? MPO-12 or LC? For MPO, which polarity (Type A, B, or C)? | Lab network team | OM4 multimode, MPO-12, Type B (fits 100GBASE-SR4) | Panels announced 2026-11-03. Details open. |
+| N4 | Load on the existing 10G links between the C9300s and the core | Lab network team | Under 50% | Low priority. Our racks are empty, but these links already carry other traffic. Ask only if we connect through them (option B). Not needed for option A. |
 | N5 | IP subnets for servers (/27) and BMC (/28), plus DNS names for the chat and API endpoints | Lab network team | Assigned at install | Not needed for purchasing. Ask after the order. |
 | N6 | DNS, NTP, and the internal CA (for the HTTPS certificate) | Lab network team | Lab provides all three | Not needed for purchasing. Ask after the order. |
 | N7 | Where does the management switch uplink go? | Lab network team | Lab management VLAN | Not needed for purchasing. Ask after the order. |
+| N8 | Who supplies the optics for the C9500X-28C8D ports, the lab or us? If we do: Cisco-coded, what type (QSFP-100G-SR4-S, -LR4, or CWDM4), and which IOS-XE version should we check against the Cisco compatibility matrix? | Lab network team | We buy 2 x Cisco QSFP-100G-SR4-S (replaces quote items 6a and 6e) | Open. |
+| N9 | Will the lab allow a 2 x 100G uplink to the core, or must it stay at 10G (QSA adapters in the 100G ports)? | Lab network team | 2 x 100G | Open. 10G is enough for the SI phase (doc 03, section 2); 100G is for later pipeline phases. |
 
 ## Security (S)
 

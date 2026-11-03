@@ -6,6 +6,8 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 
 - **Budget:** $250,000.00. The 50-user build (one GPU server with 4 GPUs, no staging) plus the install items comes to $201,874, with $48,126 left ([02](docs/02-budget-and-bom.md)).
 - **Site:** existing Vertiv racks (empty) with Liebert CRV in-row cooling; Cisco C9300 access and C9500X core.
+  The lab is adding a C9500X-28C8D core and fiber patch panels above rows 2 and 3. Which row our racks go
+  in, and how our switch uplinks, is open ([07](docs/07-open-questions.md), F6 and N2).
 
 ## Start here
 
@@ -13,7 +15,7 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 |---|---|---|---|
 | 01 | [Facility requirements](docs/01-facility-requirements.md) | **Send to the lab now.** Power, cooling, connectors, space, network ports. | Ready to send |
 | 02 | [Budget and BOM](docs/02-budget-and-bom.md) | Which tier fits $250k, what the BOM leaves out, corrections | Ready |
-| 03 | [Network and switch capacity](docs/03-network-and-switch-capacity.md) | Is 10G enough, how our rack connects, what to ask the network team | Ready |
+| 03 | [Network and switch capacity](docs/03-network-and-switch-capacity.md) | Is 10G enough, how our rack connects, what to ask the network team | Uplink under review (new core above rows 2 and 3) |
 | 04 | [Prototype plan](docs/04-prototype-plan.md) | Lab rack as production from day 1, build without internet, rehearsing each release without a staging server | Ready |
 | 05 | [Rack build guide](docs/05-rack-build-guide.md) | Step-by-step install, cable schedule, wiring diagrams, vendor guides | Ready |
 | 06 | [Software delivery](docs/06-software-delivery.md) | Pull scripts, release bundle, install, connecting users | Ready, versions to bump |
