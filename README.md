@@ -23,6 +23,7 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 | 08a | [Quote request: servers and GPUs](docs/08a-quote-servers-submitted.md) | Items 1-3 and the vendor questions for them | Submitted 2026-11-04 |
 | 08b | [Quote request: network, rack, setup](docs/08b-quote-network-and-rack.md) | **Send to purchasing** once the uplink is settled. Switch, cables, optics, rack items | Being revised |
 | 09 | [Site visit checklist](docs/09-site-visit-checklist.md) | What to look at and ask in the server room | Ready |
+| 10 | [Email to the lab network team](docs/10-lab-network-team-email.md) | **Send to the lab network team.** Patch panels, optic brand, which racks, management uplink (P1-P4) | Ready to send |
 | | [Rack 1 install sim](training/rack1-install-sim.html) | **Installers.** Interactive practice run of doc 05: delivery check to sign-off. Open in a browser, works offline. | Ready |
 
 ## Diagrams

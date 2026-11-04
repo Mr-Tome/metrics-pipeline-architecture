@@ -11,7 +11,7 @@ Item numbers are kept from the original single request so references in other do
 Settled 2026-11-04: our switch connects to the new C9500X-28C8D above rows 2 and 3 at 100G, that
 switch's own uplink to the core is 10G, and we supply the optics for both ends. The items below decide
 which optics and cords to order (6a-6e) and whether the management switch needs an optic pair (7).
-Tracked in [07](07-open-questions.md).
+Tracked in [07](07-open-questions.md). The email asking them is [10](10-lab-network-team-email.md).
 
 | # | Question | Why it blocks the order | 07 ID |
 |---|---|---|---|
