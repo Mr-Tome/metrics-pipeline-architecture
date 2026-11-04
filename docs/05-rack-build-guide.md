@@ -44,7 +44,7 @@ work fine for the sliding-rail steps, which are the same on almost every 2U serv
 
 ## 1. Before you start
 
-**Tools:** the setup kit in the quote request ([08](08-quote-request-email.md), item 12) and the rack
+**Tools:** the setup kit in the quote request ([08b](08b-quote-network-and-rack.md), item 12) and the rack
 console (item 11). Use velcro, not zip ties.
 
 **People:** two people for the GPU server. Never lift it alone.

@@ -9,10 +9,10 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 |---|---|---|---|---|
 | F1 | Rack model, depth, hole type | Site visit | | Vertiv VR3300, 42U, 600 x 1200 mm, square holes, rails adjustable (29 in apart now). The CR035RA1A7X is the Liebert CRV in-row cooler. |
 | F2 | Which racks will we get? | Facilities | | Two racks next to ACE 15: rack 1 now, rack 2 held for growth. Hot aisle containment (glass closes off the rear). |
-| F3 | Are the existing left and right Geist PDUs fed from separate sources (A and B)? What is each PDU's input rating? | Facilities | Separate sources, each able to carry 4.8 kW | PDUs present: circuits 1-3 each, mostly C13, one C19 per circuit, 208V. Not marked A or B. Source and rating open. |
+| F3 | Are the existing left and right Geist PDUs fed from separate sources (A and B)? What is each PDU's input rating? | Facilities | Separate sources, each able to carry 4.8 kW | PDUs present: circuits 1-3 each, mostly C13, one C19 per circuit, 208V. Not marked A or B. Source and rating open. Lab is asking facilities (2026-11-04). |
 | F4 | Is the rack frame bonded to facility ground? | Facilities | Yes | Door bonding straps seen; frame bond not seen. Open. |
 | F5 | Rack PDU brand | Facilities | | Vertiv Geist, already installed. Nothing to buy. |
-| F6 | Which row are the two racks next to ACE 15 in? Can we have two adjacent empty racks in row 2 or row 3 instead, where the new C9500X-28C8D and patch panels are going (see N2)? | Facilities, lab network team | Stay next to ACE 15 | Asked 2026-11-03. Open. |
+| F6 | Which two adjacent racks in row 2 or row 3 are ours? (The new C9500X-28C8D and patch panels are above rows 2 and 3.) | Facilities, lab network team | Stay next to ACE 15 | 2026-11-04: our switch will connect to the C9500X-28C8D, so rows 2 or 3. Exact racks open. Blocks the network order ([08b](08b-quote-network-and-rack.md), P3). |
 | F7 | If we move to row 2 or 3: do those racks match what we planned for? Vertiv VR3300 (42U, 1200 mm deep, square holes), two Geist PDUs on separate A and B feeds that can each carry 4.8 kW alone, three C19 outlets per PDU, in-row CRV cooling, and hot aisle containment. | Facilities | Same as the ACE 15 racks | Yes, all the same (confirmed 2026-11-03). Moving to row 2 or 3 changes nothing for rack, power, or cooling. |
 
 ## Network (N)
@@ -20,14 +20,15 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
 | N1 | Exact access switch model | Lab network team | | C9300-48S (confirmed). One in the analysts' building, one in the rack building, both uplinked to the C9500X. **New 2026-11-03:** the lab is installing a C9500X-28C8D above rows 2 and 3, plus patch panels. |
-| N2 | May our switch connect directly to the new C9500X-28C8D above rows 2 and 3, with 2 free 100G QSFP28 ports for a 2 x 100G LACP port-channel (option A)? If not, does the C9300-48S in the rack building have 2 free 10G ports (option B)? (The network team runs `show interfaces status`; we have no access to their switches.) | Lab network team | Through the C9300-48S, 2 x 10G (option B, quote items 6a-6e) | Was "likely not direct to the core". The new core above rows 2 and 3 makes option A likely if our racks are in one of those rows (F6). Open. |
-| N3 | The new patch panels: where do they go (in each rack, at the top of the rack, or overhead) and which racks do they reach? Multimode (OM4) or single-mode? MPO-12 or LC? For MPO, which polarity (Type A, B, or C)? | Lab network team | OM4 multimode, MPO-12, Type B (fits 100GBASE-SR4) | Panels announced 2026-11-03. Details open. |
-| N4 | Load on the existing 10G links between the C9300s and the core | Lab network team | Under 50% | Low priority. Our racks are empty, but these links already carry other traffic. Ask only if we connect through them (option B). Not needed for option A. |
+| N2 | May our switch connect directly to the new C9500X-28C8D above rows 2 and 3? | Lab network team | | **Yes (2026-11-04).** 100G from the C9500X-28C8D to our switch. That switch's uplink to the core is 10G. Option B (C9300-48S) is no longer the plan. |
+| N3 | The new patch panels: where do they go (in each rack, at the top of the rack, or overhead) and which racks do they reach? Multimode (OM4) or single-mode? MPO-12 or LC? For MPO, which polarity (Type A, B, or C)? | Lab network team | OM4 multimode, MPO-12, Type B (fits 100GBASE-SR4) | Panels announced 2026-11-03. **Not asked yet.** Blocks the network order ([08b](08b-quote-network-and-rack.md), P1). |
+| N4 | The C9500X-28C8D uplink to the core is 10G: is it one link or two, and what else shares it? | Lab network team | Shared 10G, under 50% load | Low priority. SI traffic is under 10 Mbps at 50 users. Matters only for later bulk data. |
 | N5 | IP subnets for servers (/27) and BMC (/28), plus DNS names for the chat and API endpoints | Lab network team | Assigned at install | Not needed for purchasing. Ask after the order. |
 | N6 | DNS, NTP, and the internal CA (for the HTTPS certificate) | Lab network team | Lab provides all three | Not needed for purchasing. Ask after the order. |
-| N7 | Where does the management switch uplink go? | Lab network team | Lab management VLAN | Not needed for purchasing. Ask after the order. |
-| N8 | Who supplies the optics for the C9500X-28C8D ports, the lab or us? If we do: Cisco-coded, what type (QSFP-100G-SR4-S, -LR4, or CWDM4), and which IOS-XE version should we check against the Cisco compatibility matrix? | Lab network team | We buy 2 x Cisco QSFP-100G-SR4-S (replaces quote items 6a and 6e) | Open. |
-| N9 | Will the lab allow a 2 x 100G uplink to the core, or must it stay at 10G (QSA adapters in the 100G ports)? | Lab network team | 2 x 100G | Open. 10G is enough for the SI phase (doc 03, section 2); 100G is for later pipeline phases. |
+| N7 | Where does the management switch uplink go: the C9500X-28C8D or a separate lab management switch? Fiber or copper? | Lab network team | Lab management VLAN over copper | Now blocks the network order: one more optic pair if it goes to the C9500X-28C8D ([08b](08b-quote-network-and-rack.md), P4). |
+| N8 | Who supplies the optics for the C9500X-28C8D ports? | Lab network team | | **We do (2026-11-04)**, both ends. Type depends on N3. |
+| N9 | 100G or 10G between the C9500X-28C8D and our switch? | Lab network team | | **100G allowed (2026-11-04).** Plan: 2 x 100G LACP. |
+| N10 | Must the optics in the C9500X-28C8D be Cisco-branded, or are Cisco-compatible third-party optics allowed? Which IOS-XE version does it run? | Lab network team | Cisco-branded | Open. Blocks the network order ([08b](08b-quote-network-and-rack.md), P2). |
 
 ## Security (S)
 
@@ -47,7 +48,7 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 
 | ID | Question | Ask | Default if no answer | Answer |
 |---|---|---|---|---|
-| L1 | Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? Is there a package mirror? Asked in the quote email ([08](08-quote-request-email.md), question 6). | Lab IT, ISSM | Rocky Linux 9 (free); RHEL 9 if required, at about $1,400 per server per year | Our choice unless accreditation says otherwise. It matters for two reasons: the NVIDIA driver is built against the OS kernel, so the driver package must match it; and RHEL needs paid subscriptions (not in the BOM), while Rocky Linux 9 is free and compatible. |
+| L1 | Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? Is there a package mirror? Asked in the quote email ([08a](08a-quote-servers-submitted.md), question 6). | Lab IT, ISSM | Rocky Linux 9 (free); RHEL 9 if required, at about $1,400 per server per year | Our choice unless accreditation says otherwise. It matters for two reasons: the NVIDIA driver is built against the OS kernel, so the driver package must match it; and RHEL needs paid subscriptions (not in the BOM), while Rocky Linux 9 is free and compatible. |
 | L2 | Does the lab already run Kubernetes? | Lab IT | | No. We bring our own (RKE2). |
 | L3 | Python versions on analyst machines, and Windows or Linux? | Lab IT | | Many versions, mostly Windows, some Linux. Client packages must cover Python 3.9 to 3.13 on both. |
 | L5 | Internet access during the initial build and debug? | ISSM | No. All software arrives on transfer media. | |

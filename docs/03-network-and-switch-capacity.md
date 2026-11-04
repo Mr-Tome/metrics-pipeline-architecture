@@ -38,7 +38,7 @@ A 10G uplink carries about 1,250 MB/s. Fifty users chatting use well under 1% of
 
 ## 3. How our rack connects
 
-The lab is more likely to allow option B. The quote request ([08](08-quote-request-email.md)) prices
+The lab is more likely to allow option B. The network quote request ([08b](08b-quote-network-and-rack.md)) prices
 option B as items 6a-6e (optics, fiber, and the C9300-NM-8X module if needed). Option A is not priced.
 
 **Option A (if allowed): lab switch to the C9500X core, 2 x 100G.**

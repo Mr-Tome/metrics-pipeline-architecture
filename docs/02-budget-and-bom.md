@@ -32,7 +32,7 @@ The site visit confirmed the lab supplies racks (Vertiv VR3300), rack PDUs (Vert
 and cooling (Liebert CRV). The items below are still on us. Without them the rack can't be connected
 or set up.
 
-Part numbers and links are in the quote request, [08-quote-request-email.md](08-quote-request-email.md).
+Part numbers and links are in the quote request, [08a](08a-quote-servers-submitted.md) and [08b](08b-quote-network-and-rack.md).
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|

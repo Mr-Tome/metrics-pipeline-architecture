@@ -36,7 +36,8 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 
 - [ ] Send [01-facility-requirements.md](01-facility-requirements.md) to the lab. If an earlier version was
       sent, send this one: the peak draw is now about 4.8 kW, not 3.6 kW.
-- [ ] Send [08-quote-request-email.md](08-quote-request-email.md) to purchasing. GPU lead times can run long.
+- [x] Send [08a](08a-quote-servers-submitted.md) (servers and GPUs) to purchasing. Submitted 2026-11-04.
+- [ ] Send [08b](08b-quote-network-and-rack.md) (network, rack, setup) to purchasing once the uplink design is settled.
 - [ ] Pick a build workstation on the unclassified side: Linux x86_64, internet access, about 2 TB
       free disk, 32 GB RAM or more (for the rehearsal VM). An existing machine is fine.
 - [ ] Get a Platform One account (Iron Bank images need one; BOM `Software` tab).
