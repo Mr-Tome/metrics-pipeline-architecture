@@ -88,11 +88,11 @@ See [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md) for t
 
 | Need | Preferred | Fallback |
 |---|---|---|
-| Uplink from our lab switch | 2 free 10G SFP+ ports on the C9300-48S in the rack building (C9300-NM-8X module), LACP | 2 free 100G QSFP28 ports on the C9500X core, if allowed |
-| Fiber between that switch and our rack | 2 x LC OM4 multimode pairs (10G-SR), or whatever the lab plant already uses | MPO-12 OM4 (100G-SR4) for the core option |
+| Uplink from our lab switch | 2 free 100G QSFP28 ports on the C9500X-28C8D, LACP. We supply the optics (Cisco QSFP-100G-CWDM4-S). | |
+| Fiber between that switch and our rack | 2 x 20 m LC-LC single-mode cords, run directly (no patch panel). We supply them. | |
 | IP space | One /27 for servers, one /28 for BMC (out-of-band) | |
 | Services | DNS, NTP, and the lab's internal CA certificate (for HTTPS on the chat page) | |
-| Management | Where the management switch uplink should land | |
+| Management | A management VLAN carried over the same 100G links. oob01 uplinks to sw01 inside the rack. | |
 
 The last three rows are not needed for purchasing.
 

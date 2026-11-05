@@ -36,7 +36,7 @@ Part numbers and links are in the quote request, [08a](08a-quote-servers-submitt
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
-| A1 | Uplink lot: 10G optics at both ends, two long fiber cords to the lab switch (the racks have no patch panels), spare short cords, and a C9300-NM-8X module if the lab switch has no free 10G ports | 1 lot | $3,110 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
+| A1 | Uplink lot: 2 x 100G CWDM4 optics at each end (Cisco in the lab C9500X-28C8D, Dell in sw01), 3 x 20 m single-mode cords (1 spare), and the in-rack 10G link from oob01 to sw01 | 1 lot | $3,110 (placeholder) | Our switch to the lab network. The 100G parts are out for quote; the old 10G lot price stays in the totals until then. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
 | A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
 | A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $824 | The racks have none, and hot aisle containment does not work with open U spaces |
 | A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
@@ -60,7 +60,7 @@ All items are estimates. Get quotes before you finalize.
   light for a fiber cable. One goes in each end of the link. Each end must be coded for its own switch
   brand, so the Dell switch end uses a Dell-coded optic and the Cisco end uses a Cisco-coded optic.
   Switches often refuse other brands.
-- **Patch cords:** short fiber cables from the optic to the fiber panel, or optic to optic.
+- **Patch cords:** fiber cables from optic to optic. Ours run straight from sw01 to the lab C9500X-28C8D (20 m).
 - **Management switch:** a small separate switch for each server's BMC port, the built-in remote
   console used for power and BIOS control.
 - **Blanking panels:** flat plates that cover empty rack spaces. They stop hot exhaust air from

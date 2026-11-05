@@ -59,7 +59,8 @@ console (item 11). Use velcro, not zip ties.
 - [ ] Rack console (StarTech RKCONS1701) with its VGA/USB cable, rails, and cage nuts
 - [ ] Power cords: C13-to-C14 for service nodes and switches; C13-to-C14 or C19-to-C20 for the GPU server (no wall-plug cords)
 - [ ] 10 x 25G SFP28 DAC, 3 m (8 used now, 2 spare)
-- [ ] Uplink optics (2 x Dell 407-BBOU, 2 x Cisco SFP-10G-SR-S) and fiber cords (2 long, sized to the path, plus 2 x 3 m spares)
+- [ ] 100G uplink: 2 x Cisco QSFP-100G-CWDM4-S (lab end), 2 x Dell 100GBASE-CWDM4 QSFP28 (sw01 end), 3 x 20 m LC-LC single-mode (OS2, yellow) cords (1 spare)
+- [ ] oob01 uplink: 1 x Cisco SFP-10G-SR-S (oob01 end), 1 x Dell 407-BBOU (sw01 end), 1 x 3 m LC-LC OM4 cord
 - [ ] Cat6 patch cables, 10 ft (3 m), 2 ten-packs (BMC and oob01 uplink, rest spare)
 - [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
@@ -91,7 +92,7 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 22-39 | blanking | |
 | 40 | oob01 | Ports to the rear |
 | 41 | sw01 | Ports to the rear, PSUs to the front. Dell ReadyRails, tool-less. |
-| 42 | blanking (fiber patch panel later, only if the lab installs fiber to our rack) | The racks have no patch panels. For now the uplink fiber runs straight to sw01. |
+| 42 | blanking | No patch panel in our racks. The uplink fiber runs straight from sw01 to the lab C9500X-28C8D. |
 
 **Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak hot air from
 the contained aisle.
@@ -167,14 +168,14 @@ Label each cable at both ends with its ID.
 | D07 | svc03 NIC port 1 | sw01 1/1/7 | 25G SFP28 DAC 3 m | data |
 | D08 | svc03 NIC port 2 | sw01 1/1/8 | 25G SFP28 DAC 3 m | data |
 | (D09-D10) | reserved gpu02 | sw01 1/1/9-10 | | future |
-| U01 | sw01 port 1/1/47 (Dell 407-BBOU) | lab C9300-48S, NM-8X port (Cisco SFP-10G-SR-S) | LC-LC OM4 fiber, length per path | uplink, bond member 1 |
-| U02 | sw01 port 1/1/48 (Dell 407-BBOU) | lab C9300-48S, NM-8X port (Cisco SFP-10G-SR-S) | LC-LC OM4 fiber, length per path | uplink, bond member 2 |
+| U01 | sw01 QSFP28 uplink 1 (Dell 100GBASE-CWDM4) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-100G-CWDM4-S) | LC-LC OS2 single-mode, 20 m | uplink, bond member 1 |
+| U02 | sw01 QSFP28 uplink 2 (Dell 100GBASE-CWDM4) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-100G-CWDM4-S) | LC-LC OS2 single-mode, 20 m | uplink, bond member 2 |
 | M01 | gpu01 BMC | oob01 port 1 | Cat6 3 m | management |
 | M02 | svc01 BMC | oob01 port 2 | Cat6 3 m | management |
 | M03 | svc02 BMC | oob01 port 3 | Cat6 3 m | management |
 | M04 | svc03 BMC | oob01 port 4 | Cat6 3 m | management |
 | M05 | sw01 mgmt port | oob01 port 5 | Cat6 3 m | management |
-| M06 | oob01 uplink | lab management network | per lab | management |
+| M06 | oob01 SFP+ port 1 (Cisco SFP-10G-SR-S) | sw01 1/1/48 (Dell 407-BBOU) | LC-LC OM4, 3 m | management uplink (management VLAN) |
 
 Check sw01 port numbering on the faceplate. The Dell OS10 names are `ethernet 1/1/1` to `1/1/48` for
 SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface status` to see them.
@@ -183,14 +184,17 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
 
 1. Run DACs along the side of the rack in velcro bundles. Don't bend them tighter than about a 5 cm radius.
 2. Fiber: keep the dust caps on until you plug in. Clean each connector with a one-click cleaner first.
-   For MPO (100G-SR4), check polarity with the network team (usually Type B trunk).
+   The two 20 m uplink cords are single-mode (yellow) and run from row 4 to the C9500X-28C8D above rows
+   2 and 3, along the route the lab network team gives. Leave the coil of spare length at our end.
+   M06 is the short aqua (multimode) cord, inside the rack only.
 3. Plug BMC Cat6 last so it doesn't get buried.
 4. Install the rear door. Check that no cable bundle blocks server exhaust.
 
 ## 6. First power-on checks
 
 1. **Switch:** console in, set the management IP, then confirm `show interface status` shows each D-cable
-   link up at 25G.
+   link up at 25G. Put the two QSFP28 uplinks in one LACP port-channel trunking the data and management
+   VLANs (IDs from the lab), and set 1/1/48 as an access port in the management VLAN for oob01.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
 3. **BIOS settings on gpu01**:
@@ -214,7 +218,7 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
 ## 7. Sign-off
 
 - [ ] Feed A / feed B test passed
-- [ ] All D-links up at 25G, uplinks up and in a port-channel
+- [ ] All D-links up at 25G, both 100G uplinks up and in a port-channel, oob01 uplink (M06) up at 10G
 - [ ] `hw-check.sh` passed on every node
 - [ ] All empty U blanked, rear door on, cold-aisle intake in range
 - [ ] Cable labels match this schedule

@@ -46,15 +46,14 @@ What this changed:
 
 ### Network
 
-- [ ] Where the C9300-48S for this building sits, and how far it is from our racks
-- [ ] On that switch: is there an uplink module on the right side with 8 SFP+ ports (C9300-NM-8X)?
-      Are any of those ports empty?
-- [ ] Fiber in our racks: no patch panels (visit 1). Any fiber panel elsewhere in the row or in a network rack?
-- [ ] The cable path from our racks to the C9300-48S: overhead tray or under the raised floor? Pace it out: ____ m
+- [ ] Confirm our racks next to ACE 15 are in row 4
+- [ ] Where the C9500X-28C8D sits above rows 2 and 3 (which rack, what height)
+- [ ] The cable path from our racks to the C9500X-28C8D: overhead tray or under the raised floor? Pace it
+      out: ____ m (we ordered 20 m cords; 10 m is expected to be too short)
+- [ ] Fiber in our racks: no patch panels (visit 1; the lab confirmed only the middle racks of rows 2 and 3 get one)
 - [ ] If there is fiber anywhere nearby, note:
   - Connector: LC (small, in pairs) or MPO (wide, flat)
   - Cable color: aqua or violet means multimode, yellow means single-mode
-- [ ] A copper Ethernet drop for the management switch?
 
 ## 3. Ask
 
@@ -69,12 +68,12 @@ What this changed:
 
 ### Network team
 
-1. Can our switch connect directly to the C9500X core, or must it go through the C9300-48S in this building?
-2. Does that C9300-48S have free 10G SFP+ ports (C9300-NM-8X module)? Could you send `show inventory` and
-   `show interfaces status` for it?
-3. What fiber runs between that switch and our racks: multimode or single-mode, LC or MPO? Do you supply
-   the optics on your side, or should we?
-4. Where should our management switch connect?
+Answered 2026-11-04 and 2026-11-05 (see [07](07-open-questions.md)): direct 100G to the C9500X-28C8D, we
+supply the optics, single-mode LC, IOS XE 17.15.06. Still to confirm on site:
+
+1. Which route should our 20 m cords take to the C9500X-28C8D, and who runs them?
+2. Which two ports on the C9500X-28C8D are ours?
+3. VLAN IDs and subnets for data and management (carried over the same two 100G links).
 
 ### Security (ISSM)
 
