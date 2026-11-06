@@ -27,7 +27,7 @@ C = dict(gpu="#c8e6c9", gpur="#eeeeee", svc="#bbdefb", sw="#ffe0b2", oob="#fff9c
 U = 16
 LAYOUT = {  # top U of each item: (height in U, label, color)
     42: (1, "Blanking (no patch panel; uplink fiber runs straight to sw01)", C["blank"]),
-    41: (1, "sw01  Lab switch, Dell S5248F-ON (ports face rear)", C["sw"]),
+    41: (1, "sw01  Lab switch, Cisco Nexus N93180YC-FX3 (ports face rear)", C["sw"]),
     40: (1, "oob01  1G management switch (ports face rear)", C["oob"]),
     21: (1, "con01  Rack console, 1U LCD and keyboard (pull out to use)", C["patch"]),
     7: (1, "svc03  Service node, 1U", C["svc"]),
@@ -81,7 +81,7 @@ def rack_svg():
     b += [f, r]
     y = 100 + 42 * U + 40
     notes = [
-        "1. Order the S5248F-ON and the OOB switch with PSU-to-port airflow (\"port-side exhaust\"). Their ports sit at the rear, so air must exit at the rear.",
+        "1. Order sw01 (Nexus, -PE power supplies and fans) and the OOB switch with port-side exhaust airflow. Their ports sit at the rear, so air must exit at the rear.",
         "2. Fill every open U with a blanking panel. Gaps let hot air leak out of the containment. Rack 2 gets a full set too.",
         "3. The Geist PDUs are already installed at the rear, left and right, circuit C1 at the top. Facilities says which side is feed A.",
         "4. U3-U4 is held for a second GPU server (needs C14 inlets, since each PDU has 3 C19). Otherwise it goes in rack 2.",
@@ -182,7 +182,7 @@ def power_svg():
     y = RY + 42 * PU + 50
     b.append(text(40, y, "Load per circuit at max draw (same on both PDUs; oob01 is on A-C1, con01 on B-C1)", 13, weight="bold"))
     rows = [("Circuit", "Cords on it", "Both feeds up", "Other feed down"),
-            ("C1 (top)", "svc03, sw01, oob01 or con01", "about 355 W, 1.7 A", "about 680 W, 3.3 A"),
+            ("C1 (top)", "svc03, sw01, oob01 or con01", "about 530 W, 2.5 A", "about 1,030 W, 5.0 A"),
             ("C2", "gpu01 PSU (C19), svc02", "1,025 W, 4.9 A", "2,050 W, 9.9 A"),
             ("C3 (bottom)", "gpu01 PSU (C19), svc01", "1,025 W, 4.9 A", "2,050 W, 9.9 A")]
     for i, r in enumerate(rows):
@@ -195,7 +195,7 @@ def power_svg():
              "- Label each cord at both ends: device, PSU, PDU, circuit, outlet (example: gpu01-PSU1 / A-C3-C19).",
              "- All six PDU breakers off before the first cord goes in. Route cords along the sides, clear of server exhaust.",
              "- Test: facilities switches feed A off; everything with two or more PSUs stays up, oob01 goes dark. Restore. Repeat with B (con01 goes dark).",
-             "- Each PDU must carry the whole rack alone: about 4.8 kW at 50 users. PSU positions and outlet counts: check the real labels."]
+             "- Each PDU must carry the whole rack alone: about 5.1 kW at 50 users. PSU positions and outlet counts: check the real labels."]
     for i, r in enumerate(rules):
         b.append(text(40, y + i * 19, r, 13 if i == 0 else 12, weight="bold" if i == 0 else "normal"))
     return svg(1000, y + len(rules) * 19 + 20, "".join(b), "Power wiring")
@@ -209,23 +209,23 @@ def box(x, y, w, h, title, sub, fill):
 
 def network_svg():
     b = [text(30, 34, "Network cabling: lab", 20, weight="bold"),
-         text(30, 56, "Our switch connects to the lab's C9500X-28C8D with 2 x 100G. Management (BMC) traffic rides the same links as its own VLAN.", 12, fill="#444")]
+         text(30, 56, "sw01 connects to the lab's C9500X-28C8D with 2 x 100G. oob01 has its own 10G link, so management does not depend on the data side.", 12, fill="#444")]
     b.append(box(80, 80, 250, 62, "Analyst workstations", ["Jupyter, VS Code, MATLAB, browser"], "#f3e5f5"))
     b.append(box(80, 180, 250, 62, "Lab network", ["existing"], "#e0e0e0"))
-    b.append(box(80, 380, 250, 70, "Cisco C9500X-28C8D", ["lab core, above rows 2 and 3", "28 x 100G QSFP28, IOS XE 17.15"], "#e0e0e0"))
+    b.append(box(80, 380, 250, 70, "Cisco C9500X-28C8D", ["lab core, above rows 2 and 3", "3 ports for us, IOS XE 17.15"], "#e0e0e0"))
     b.append(line(205, 142, 205, 180, C["cu"], 2))
     b.append(text(215, 166, "1G (existing)", 10.5, fill=C["cu"]))
     b.append(line(205, 242, 205, 380, C["fiber"], 3))
     b.append(text(215, 316, "10G uplink (existing)", 10.5, fill=C["fiber"]))
-    b.append(box(540, 380, 500, 70, "sw01 Lab switch, Dell S5248F-ON", ["48 x 25G SFP28, 4 x 100G QSFP28", "new, in lab rack 1 (next to ACE 15, row 4)"], C["sw"]))
+    b.append(box(540, 380, 500, 70, "sw01 Lab switch, Cisco Nexus N93180YC-FX3", ["48 x 25G SFP28, 6 x 40/100G QSFP28", "new, in lab rack 1 (next to ACE 15)"], C["sw"]))
     b.append(path("M330 405 L540 405", C["fiber"], 4))
     b.append(path("M330 425 L540 425", C["fiber"], 4))
-    b.append(text(435, 397, "2 x 100G single-mode (LACP)", 11, "middle", "bold", C["fiber"]))
-    b.append(text(435, 442, "Cisco QSFP-100G-CWDM4-S to Dell CWDM4", 10, "middle", fill=C["fiber"]))
-    b.append(text(435, 456, "LC-LC OS2 cord, 20 m each, no patch panel", 10, "middle", fill="#444"))
-    b.append(text(435, 370, "carries data + management VLANs", 10, "middle", fill="#444"))
-    b.append(path("M300 660 L300 480 L560 480 L560 450", C["fiber"], 2))
-    b.append(text(310, 496, "M06: oob01 to sw01 1/1/48, 10G, 3 m OM4", 10, fill=C["fiber"]))
+    b.append(text(435, 397, "2 x 100G multimode (LACP)", 11, "middle", "bold", C["fiber"]))
+    b.append(text(435, 442, "Cisco QSFP-40/100-SRBD at both ends", 10, "middle", fill=C["fiber"]))
+    b.append(text(435, 456, "LC-LC OM4 cord, 8 m or 15 m, no patch panel", 10, "middle", fill="#444"))
+    b.append(text(435, 370, "data only", 10, "middle", fill="#444"))
+    b.append(path("M120 660 L120 450", C["fiber"], 2))
+    b.append(text(128, 560, "M06: 10G management, OM4 LC", 10, fill=C["fiber"])); b.append(text(128, 574, "QSA adapter + SFP-10G-SR-S", 10, fill=C["fiber"]))
     nodes = [("gpu01", "1/1/1-2", C["gpu"]), ("svc01", "1/1/3-4", C["svc"]), ("svc02", "1/1/5-6", C["svc"]),
              ("svc03", "1/1/7-8", C["svc"]), ("gpu02", "future, 1/1/9-10", C["gpur"])]
     x = 545
@@ -234,13 +234,13 @@ def network_svg():
         b.append(line(x + 38, 450, x + 38, 560, C["dac"], 2))
         b.append(line(x + 54, 450, x + 54, 560, C["dac"], 2))
         x += 102
-    b.append(text(530, 530, "25G SFP28 passive DAC, 3 m", 11, "end", fill=C["dac"])); b.append(text(530, 545, "two per node, bonded (LACP)", 11, "end", fill=C["dac"]))
+    b.append(text(530, 530, "Cisco SFP-H25G-CU3M DAC, 3 m", 11, "end", fill=C["dac"])); b.append(text(530, 545, "two per node, bonded (LACP)", 11, "end", fill=C["dac"]))
     b.append(box(80, 660, 250, 62, "oob01 1G management switch", ["BMC / IPMI ports only", "separate VLAN, no user access"], C["oob"]))
     x = 545
     for n, _, _ in nodes[:4]:
         b.append(path(f"M330 690 C 360 690, {x+20} 680, {x+20} 624", C["mgmt"], 1.5, "3 3"))
         x += 102
-    b.append(text(340, 740, "Cat6 from each server BMC port to oob01. oob01 uplinks to sw01 (M06); the management VLAN rides the 100G links.", 11, fill=C["mgmt"]))
+    b.append(text(340, 740, "Cat6 from each server BMC port to oob01. oob01 uplinks to its own C9500X-28C8D port (M06).", 11, fill=C["mgmt"]))
     leg = [(C["fiber"], "Fiber (optics + patch cord)", None), (C["dac"], "Direct-attach copper (DAC)", None),
            (C["cu"], "Existing user links", None), (C["mgmt"], "Management (BMC) Cat6", "3 3")]
     y = 780
@@ -265,7 +265,7 @@ def proto_svg():
     b.append(text(60, 278, "GPU driver and model problems first show up in the lab. The 4-GPU rolling update keeps users served while a new version proves itself.", 11))
     b.append(rect(30, 340, 1040, 200, "#ffebee", "#b71c1c", 2, 8))
     b.append(text(46, 362, "LAB (AIR-GAPPED)", 13, weight="bold", fill="#b71c1c"))
-    b.append(box(60, 390, 300, 96, "Rack 1, production", ["gpu01: 4 x RTX PRO 6000", "svc01-03: RKE2, gateway, database", "sw01 2 x 100G to the lab C9500X-28C8D"], C["gpu"]))
+    b.append(box(60, 390, 300, 96, "Rack 1, production", ["gpu01: 4 x RTX PRO 6000", "svc01-03: RKE2, gateway, database", "sw01 2 x 100G + oob01 10G to the lab C9500X"], C["gpu"]))
     b.append(box(460, 390, 240, 96, "Update, one GPU at a time", ["vLLM replicas 3 -> new version on 1", "other 2 keep serving", "stalls if the new one fails"], C["svc"]))
     b.append(box(800, 390, 240, 96, "Lab users", ["browser, Jupyter, VS Code, MATLAB", "https://api.&lt;lab-domain&gt;/v1", "per-user gateway keys"], "#f3e5f5"))
     b.append(path("M920 226 L920 300 L210 300 L210 390", "#795548", 2, "6 4"))

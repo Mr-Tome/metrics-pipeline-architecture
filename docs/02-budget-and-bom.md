@@ -36,7 +36,7 @@ Part numbers and links are in the quote request, [08a](08a-quote-servers-submitt
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
-| A1 | Uplink lot: 2 x 100G CWDM4 optics at each end (Cisco in the lab C9500X-28C8D, Dell in sw01), 3 x 20 m single-mode cords (1 spare), and the in-rack 10G link from oob01 to sw01 | 1 lot | $3,110 (placeholder) | Our switch to the lab network. The 100G parts are out for quote; the old 10G lot price stays in the totals until then. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
+| A1 | Uplink lot: 4 x Cisco QSFP-40/100-SRBD (2 per end), OM4 multimode LC cords in two lengths, and a separate 10G management link (QSA adapter, 2 x Cisco SFP-10G-SR-S) | 1 lot | $3,110 (placeholder) | Our switch to the lab network. The 100G parts are out for quote; the old 10G lot price stays in the totals until then. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
 | A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
 | A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $824 | The racks have none, and hot aisle containment does not work with open U spaces |
 | A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
@@ -58,9 +58,9 @@ All items are estimates. Get quotes before you finalize.
   strips on the left and right. Each server cord plugs into one of their outlets.
 - **Uplink optics:** the transceiver modules that plug into a switch port and turn the signal into
   light for a fiber cable. One goes in each end of the link. Each end must be coded for its own switch
-  brand, so the Dell switch end uses a Dell-coded optic and the Cisco end uses a Cisco-coded optic.
-  Switches often refuse other brands.
-- **Patch cords:** fiber cables from optic to optic. Ours run straight from sw01 to the lab C9500X-28C8D (20 m).
+  brand. Both our switch and the lab's are Cisco, so every optic is a Cisco part, checked in Cisco's
+  compatibility matrix for the switch it goes in.
+- **Patch cords:** fiber cables from optic to optic. Ours run straight from sw01 and oob01 to the lab C9500X-28C8D (8 m or 15 m).
 - **Management switch:** a small separate switch for each server's BMC port, the built-in remote
   console used for power and BIOS control.
 - **Blanking panels:** flat plates that cover empty rack spaces. They stop hot exhaust air from
@@ -99,9 +99,12 @@ These are corrections, not new scope:
 2. **GPU server network card.** The service node line says "2 x 25 GbE", but the GPU server line does not
    name a NIC. The base system has only 10GbE RJ45 onboard. Add the Intel E810-XXVDA2 (2 x SFP28, offered
    in the Thinkmate configurator). The chassis has 7 PCIe x16 slots, so there is room next to 4 GPUs.
-3. **Switch airflow.** Order the S5248F-ON with **PSU-to-port airflow ("port-side exhaust")**. The switch
-   ports face the hot aisle (see [05-rack-build-guide.md](05-rack-build-guide.md)). The wrong airflow pulls
-   hot air in.
+3. **Switch.** Replace the Dell S5248F-ON ($3,515 in the BOM) with a **Cisco Nexus N93180YC-FX3**
+   (48 x 1/10/25G SFP28, 6 x 40/100G QSFP28), ordered **port-side exhaust** (NXA-PAC-650W-PE power supplies,
+   NXA-FAN-35CFM-PE fans). Reason: every optic between it and the lab's Cisco C9500X-28C8D is then listed in
+   Cisco's compatibility matrix, and the lab already runs this model. Price by quote, including the NX-OS
+   license subscription Cisco sells with it. The totals rise by (quote minus $3,515). Its ports face the hot
+   aisle (see [05-rack-build-guide.md](05-rack-build-guide.md)); the wrong airflow pulls hot air in.
 4. **Power cord type** for the GPU server PSUs (C19/C20 vs C13/C14). Ask Thinkmate when you request the
    quote. The configurator's cord options are NEMA 5-15P wall plugs, which do not fit a 208V rack PDU.
 5. **Cell B21 on the BOM tab** ("Additional Research area under Cables and Optics: Infiniband"). It is

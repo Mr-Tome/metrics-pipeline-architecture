@@ -1,6 +1,6 @@
 # 10. Emails to the lab network team
 
-**Current: [round 3 email](#round-3-email-connecting-to-the-n93180yc-fx3) (2026-11-06), 5 purchase questions, ready to send.**
+**Current: answered 2026-11-06 (see the last section). Nothing more is needed for purchasing.**
 The earlier emails are kept as a record.
 
 Copy everything below the line into the email. These are the questions that block the network order
@@ -212,3 +212,74 @@ separately.
 
 Thanks,
 
+## Answers received 2026-11-06 (round 3)
+
+The engineer corrected the earlier answer: he had taken the Dell for a server.
+
+1. Connect directly to the C9500X. (The N93180YC-FX3 answer was a mix-up.)
+2. 2 x 100G on the C9500X. A third port for management was confirmed later the same day.
+3. 6-8 m should be enough: about 12 ft between racks.
+4. Multimode, LC. Version: second-latest Cisco MD release, currently 17.15.06.
+5. Management ideally separate, so it does not depend on the data side. He recommends connecting the C1300
+   directly to the C9500X, which needs a 10G SFP in a QSFP port.
+
+What we did with it ([03](03-network-and-switch-capacity.md), section 3):
+
+- Our switch is now a Cisco Nexus N93180YC-FX3, so the 100G links use QSFP-40/100-SRBD (multimode LC, as he
+  said) at both ends, listed for both switches in Cisco's matrix. (A Dell switch had no confirmed match.)
+- Cords in 8 m and 15 m, because "about 12 ft" is an estimate.
+- Management on its own link, with the QSA adapter (CVR-QSFP-SFP10G), which Cisco's matrix supports for
+  SFP-10G-SR-S on this switch.
+
+The final layout:
+
+```
+LAB
+  C9500X-28C8D (lab core), 3 ports for us
+     |-- 2 x 100G data, multimode LC fiber, bonded (LACP) ------> sw01
+     |-- 1 x 10G management, multimode LC fiber (QSA adapter) --> oob01
+OUR RACK (next to ACE 15)
+  sw01  Cisco Nexus N93180YC-FX3 (data switch)
+     |-- gpu01   2 x 25G data
+     |-- svc01   2 x 25G data
+     |-- svc02   2 x 25G data
+     |-- svc03   2 x 25G data
+  oob01  Cisco C1300-24T-4X (management switch)
+     |-- gpu01 BMC   1G copper
+     |-- svc01 BMC   1G copper
+     |-- svc02 BMC   1G copper
+     |-- svc03 BMC   1G copper
+     |-- sw01 management port
+```
+
+In plain words:
+
+1. Our rack connects to the lab's C9500X-28C8D with three links: two for data, one for management.
+2. The two 100G data links come from sw01's 100G ports. Every server's data ports go to sw01's 25G ports.
+3. The 10G management link comes from oob01. Every server's BMC port (its built-in remote management:
+   power, screen, reinstall) goes to oob01.
+4. Because management has its own link, remote management still works if sw01 or the data links go down.
+5. Every optic is Cisco and listed in Cisco's compatibility matrix for the switch it goes in. We supply all
+   optics and cords, both ends.
+
+## Short note to send: our switch is a Nexus
+
+He mentioned the N93180YC-FX3 is rated for 25G. Copy below the line.
+
+---
+
+**Subject:** RE: SI racks: our switch will be an N93180YC-FX3
+
+Hi,
+
+Thanks, that settles the connection. One change on our side: to keep every optic on Cisco's compatibility
+list, our top-of-rack switch will be a Cisco Nexus N93180YC-FX3 instead of the Dell.
+
+Agreed that its 48 server ports are 25G. It also has six 40/100G QSFP28 ports, and we will use two of them
+for the 2 x 100G links to your C9500X-28C8D, with Cisco QSFP-40/100-SRBD at both ends (multimode, LC, as you
+said; Cisco lists it for both switches). The management link stays as discussed: our C1300 to a third
+C9500X port with a CVR-QSFP-SFP10G adapter and SFP-10G-SR-S, which we supply.
+
+Is your team comfortable with us running an N93180YC-FX3 as our top-of-rack switch?
+
+Thanks,

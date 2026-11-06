@@ -49,7 +49,7 @@ What this changed:
 - [ ] Confirm our racks next to ACE 15 are in row 4
 - [ ] Where the C9500X-28C8D sits above rows 2 and 3 (which rack, what height)
 - [ ] The cable path from our racks to the C9500X-28C8D: overhead tray or under the raised floor? Pace it
-      out: ____ m (we ordered 20 m cords; 10 m is expected to be too short)
+      out: ____ m (we ordered 8 m and 15 m cords; the network team estimates about 12 ft between racks)
 - [ ] Fiber in our racks: no patch panels (visit 1; the lab confirmed only the middle racks of rows 2 and 3 get one)
 - [ ] If there is fiber anywhere nearby, note:
   - Connector: LC (small, in pairs) or MPO (wide, flat)
@@ -61,7 +61,7 @@ What this changed:
 
 1. Are the left and right PDUs in each rack fed from separate sources (A and B), for example different
    panels or UPS paths? If yes, which side is A?
-2. What is each PDU's input rating? We need each PDU to carry about 4.8 kW by itself (one side down).
+2. What is each PDU's input rating? We need each PDU to carry about 5.1 kW by itself (one side down).
 3. Who switches the PDU circuits off and on upstream, and what is the lockout/tagout process?
 4. Is the rack frame bonded to the facility ground? The door straps are, but we didn't see the frame wire.
 5. Please hold the two racks next to ACE 15 for us.
@@ -69,11 +69,11 @@ What this changed:
 ### Network team
 
 Answered 2026-11-04 and 2026-11-05 (see [07](07-open-questions.md)): direct 100G to the C9500X-28C8D, we
-supply the optics, single-mode LC, IOS XE 17.15.06. Still to confirm on site:
+supply the optics, IOS XE 17.15.06, a third port for management (2026-11-06). Still to confirm on site:
 
-1. Which route should our 20 m cords take to the C9500X-28C8D, and who runs them?
-2. Which two ports on the C9500X-28C8D are ours?
-3. VLAN IDs and subnets for data and management (carried over the same two 100G links).
+1. Which route should our cords take to the C9500X-28C8D, and who runs them?
+2. Which three ports on the C9500X-28C8D are ours (two 100G data, one 10G management with our QSA adapter)?
+3. VLAN IDs and subnets for data and management.
 
 ### Security (ISSM)
 

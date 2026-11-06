@@ -7,6 +7,10 @@ and it is sized so the rack does not need new power when it grows to 100 users.
 **Changed 2026-10-30:** the build is now 50 users with no staging server. Rack 1 peak draw went from
 about 3.6 kW to about 4.8 kW, and heat from about 12,200 to about 16,400 BTU/hr. Nothing else changed.
 
+**Changed 2026-11-06:** our switch (sw01) is now a Cisco Nexus N93180YC-FX3 instead of the Dell S5248F-ON.
+It draws up to about 600 W instead of 250 W. Rack 1 peak draw goes from about 4.8 kW to about 5.1 kW, and
+heat from about 16,400 to about 17,500 BTU/hr. If facilities already has the earlier numbers, send them this.
+
 Status of each number:
 
 - **Firm**: from the BOM, a vendor spec, or the site visit.
@@ -20,10 +24,10 @@ Status of each number:
 | Power | The existing Vertiv Geist rack PDUs: two per rack, left and right, each with circuits 1, 2, and 3 at 208V |
 | A and B | Please confirm the left and right PDUs are fed from separate sources (A and B) |
 | Outlets used, rack 1 | Per PDU: up to 2 x C19 (GPU server, if C20 inlets) and about 6 x C13 |
-| Peak draw, 50 users | about 4.8 kW in rack 1, and each PDU must carry it alone if the other feed fails |
-| Peak draw, 100 users (future) | about 8.3 kW across both racks |
-| Heat load, 50 users | about 16,400 BTU/hr (about 1.4 tons) |
-| Heat load, 100 users | about 28,300 BTU/hr (about 2.4 tons) |
+| Peak draw, 50 users | about 5.1 kW in rack 1, and each PDU must carry it alone if the other feed fails |
+| Peak draw, 100 users (future) | about 8.7 kW across both racks |
+| Heat load, 50 users | about 17,500 BTU/hr (about 1.5 tons) |
+| Heat load, 100 users | about 29,500 BTU/hr (about 2.5 tons) |
 | Airflow | Front to back. Fronts face the room, exhaust goes into the hot aisle containment. |
 | Intake air | 18 to 27 C (64.4 to 80.6 F), the ASHRAE recommended range |
 | Weight | under 200 kg (440 lb) of equipment in rack 1 |
@@ -40,7 +44,7 @@ The lab asked us not to question facility capacity, so this section only states 
 
 1. **Redundancy.** Every device has two or more power supplies. Half go to the left PDU and half to the
    right PDU. If one side is lost, the other carries the whole rack, so **each PDU must be able to carry
-   about 4.8 kW by itself** at 50 users.
+   about 5.1 kW by itself** at 50 users.
 2. **Spread across circuits.** Each PDU has circuits 1, 2, and 3. We spread our cords across all three,
    so no single circuit carries much more than a third of the load.
    The busiest circuit, with one feed down, carries about 2,050 W (9.9 A at 208V): half of gpu01 plus
@@ -60,10 +64,10 @@ runs well below this.
 |---|---|---|---|---|---|---|
 | gpu01 | Thinkmate GPX GE95-2206-41, 2U, 4 x RTX PRO 6000 Server Edition | 1 | 3,300 (900 platform + 4 x 600 GPU) | 4 x 2000 W PSUs, 200-240V AC | C20 to C19, or C14 to C13. Depends on the PSU inlet. | **Confirm** with Thinkmate |
 | svc01-03 | Thinkmate RAX RE95-1104-01, 1U | 3 | 400 | 2 x 1300 W PSUs (redundant), 100-240V AC | C14 to C13 | Confirm |
-| sw01 | Dell S5248F-ON 25G switch | 1 | 250 | 2 PSUs, 100-240V AC | C14 to C13 | Firm (BOM) |
+| sw01 | Cisco Nexus N93180YC-FX3 25G/100G switch | 1 | 600 | 2 x 650 W PSUs (NXA-PAC-650W-PE), 100-240V AC | C14 to C13 | Confirm (reseller datasheets say 600 W max) |
 | oob01 | Cisco C1300-24T-4X management switch | 1 | 30 | 100-240V AC | C14 to C13 | Confirm |
 | con01 | StarTech RKCONS1701 rack console | 1 | 13 | 100-240V AC | per vendor | Confirm |
-| | **Lab total** | | **about 4,800 W** | | | |
+| | **Lab total** | | **about 5,150 W** | | | |
 
 **GPU power cap.** NVIDIA rates the RTX PRO 6000 Server Edition at 600 W, and the limit can be set
 down to 400 W. If power ever becomes tight, we can cap the GPUs with `nvidia-smi -pl 400` and lose
@@ -79,7 +83,7 @@ some throughput instead of tripping a breaker.
   face the room and exhaust into the contained hot aisle. Switch ports are at the rear, so the switches
   are ordered with port-side exhaust.
 - We will install blanking panels in every empty U, in both racks. Containment does not work without them.
-- Approximate airflow: about 760 CFM at 50 users, about 1,300 CFM at 100 users.
+- Approximate airflow: about 810 CFM at 50 users, about 1,370 CFM at 100 users.
   This uses CFM = 3.16 x W / delta-T(F), with an assumed 20 F rise.
 
 ## 5. Network ports needed from the lab network team
@@ -88,11 +92,11 @@ See [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md) for t
 
 | Need | Preferred | Fallback |
 |---|---|---|
-| Uplink from our lab switch | 2 free 100G QSFP28 ports on the C9500X-28C8D, LACP. We supply the optics (Cisco QSFP-100G-CWDM4-S). | |
-| Fiber between that switch and our rack | 2 x 20 m LC-LC single-mode cords, run directly (no patch panel). We supply them. | |
+| Uplink from our lab switch | 2 x 100G QSFP28 ports on the C9500X-28C8D, LACP. We supply the optics (Cisco QSFP-40/100-SRBD). Confirmed 2026-11-06. | |
+| Fiber between that switch and our rack | LC-LC OM4 multimode cords, run directly (no patch panel), 8 m or 15 m. We supply them. | |
 | IP space | One /27 for servers, one /28 for BMC (out-of-band) | |
 | Services | DNS, NTP, and the lab's internal CA certificate (for HTTPS on the chat page) | |
-| Management | A management VLAN carried over the same 100G links. oob01 uplinks to sw01 inside the rack. | |
+| Management | A third C9500X-28C8D port (10G via a QSA adapter we supply) for oob01. Confirmed 2026-11-06. | |
 
 The last three rows are not needed for purchasing.
 

@@ -6,8 +6,8 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 
 - **Budget:** $250,000.00. The 50-user build (one GPU server with 4 GPUs, no staging) plus the install items comes to $201,874, with $48,126 left ([02](docs/02-budget-and-bom.md)).
 - **Site:** existing Vertiv racks (empty, next to ACE 15) with Liebert CRV in-row cooling.
-  Our switch uplinks to the lab's Cisco N93180YC-FX3 access switch (100G or 25G, not yet settled). The
-  C9500X is their core. Questions are out ([10](docs/10-lab-network-team-email.md), round 3).
+  Our switch, a Cisco Nexus N93180YC-FX3, connects directly to the lab's C9500X-28C8D: 2 x 100G for data,
+  plus a separate 10G link from our management switch ([03](docs/03-network-and-switch-capacity.md), section 3).
 
 ## Start here
 
@@ -15,15 +15,15 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 |---|---|---|---|
 | 01 | [Facility requirements](docs/01-facility-requirements.md) | **Send to the lab now.** Power, cooling, connectors, space, network ports. | Ready to send |
 | 02 | [Budget and BOM](docs/02-budget-and-bom.md) | Which tier fits $250k, what the BOM leaves out, corrections | Ready |
-| 03 | [Network and switch capacity](docs/03-network-and-switch-capacity.md) | Is 10G enough, how our rack connects, what to ask the network team | Uplink on hold: N93180YC-FX3 access switch |
+| 03 | [Network and switch capacity](docs/03-network-and-switch-capacity.md) | Is 10G enough, how our rack connects, what to ask the network team | Decided: Cisco Nexus sw01, 2 x 100G data + 10G management to the C9500X-28C8D |
 | 04 | [Prototype plan](docs/04-prototype-plan.md) | Lab rack as production from day 1, build without internet, rehearsing each release without a staging server | Ready |
 | 05 | [Rack build guide](docs/05-rack-build-guide.md) | Step-by-step install, cable schedule, wiring diagrams, vendor guides | Ready |
 | 06 | [Software delivery](docs/06-software-delivery.md) | Pull scripts, release bundle, install, connecting users | Ready, versions to bump |
 | 07 | [Open questions](docs/07-open-questions.md) | Everything still to confirm, with owners and defaults | Living |
 | 08a | [Quote request: servers and GPUs](docs/08a-quote-servers-submitted.md) | Items 1-3 and the vendor questions for them | Submitted 2026-11-04 |
-| 08b | [Quote request: network, rack, setup](docs/08b-quote-network-and-rack.md) | **Send to purchasing** once round 3 is answered. Switch, cables, optics, rack items | On hold (6a-6g) |
+| 08b | [Quote request: network, rack, setup](docs/08b-quote-network-and-rack.md) | **Send to purchasing.** Switch, cables, optics, rack items | Ready to send |
 | 09 | [Site visit checklist](docs/09-site-visit-checklist.md) | What to look at and ask in the server room | Ready |
-| 10 | [Email to the lab network team](docs/10-lab-network-team-email.md) | **Send to the lab network team.** Round 3: our plan and 5 purchase questions for the N93180YC-FX3 connection | Round 3 ready to send |
+| 10 | [Email to the lab network team](docs/10-lab-network-team-email.md) | Lab network team emails and answers. **Send the short Nexus note** (last section) | Note ready to send |
 | | [Rack 1 install sim](training/rack1-install-sim.html) | **Installers.** Interactive practice run of doc 05: delivery check to sign-off. Open in a browser, works offline. | Ready |
 
 ## Diagrams

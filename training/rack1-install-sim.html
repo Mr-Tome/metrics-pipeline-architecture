@@ -231,7 +231,7 @@ const DEVS = {
   svc03:{u:[7], model:"Thinkmate RAX RE95-1104-01", short:"service node, 1U", psus:2, w:400},
   con01:{u:[21], model:"StarTech RKCONS1701", short:"rack console, 1U", psus:1, w:13},
   oob01:{u:[40], model:"Cisco C1300-24T-4X", short:"management switch, 1U", psus:1, w:30},
-  sw01:{u:[41], model:"Dell S5248F-ON", short:"25G switch, 1U", psus:2, w:250}
+  sw01:{u:[41], model:"Cisco Nexus N93180YC-FX3", short:"25G/100G switch, 1U", psus:2, w:600}
 };
 const CORDS = [];
 for (const d in DEVS){ const n = DEVS[d].psus;
@@ -241,47 +241,44 @@ const C13_PER_CIRCUIT = 6; // sim value: count them on the real PDU (09, look li
 const VOLTS = 208;
 
 const BIN = [
-  {id:"470-ACEU", name:"Dell 470-ACEU", desc:"25G SFP28 DAC, 3 m", qty:10},
-  {id:"DELL-CWDM4", name:"Dell 100GBASE-CWDM4", desc:"100G QSFP28, single-mode LC, Dell-coded", qty:2},
-  {id:"QSFP-100G-CWDM4-S", name:"Cisco QSFP-100G-CWDM4-S", desc:"100G QSFP28, single-mode LC, Cisco-coded", qty:2},
-  {id:"407-BBOU", name:"Dell 407-BBOU", desc:"10GBASE-SR SFP+, multimode, Dell-coded", qty:1},
-  {id:"SFP-10G-SR-S", name:"Cisco SFP-10G-SR-S", desc:"10GBASE-SR SFP+, multimode, Cisco-coded", qty:1},
-  {id:"OS2-20", name:"OS2 LC-LC, 20 m", desc:"yellow single-mode duplex", qty:3},
-  {id:"OM4-3", name:"OM4 LC-LC, 3 m", desc:"aqua multimode duplex", qty:1},
+  {id:"SFP-H25G-CU3M", name:"Cisco SFP-H25G-CU3M", desc:"25G SFP28 passive DAC, 3 m", qty:10},
+  {id:"SRBD", name:"Cisco QSFP-40/100-SRBD", desc:"100G QSFP28 BiDi, multimode LC duplex", qty:4},
+  {id:"SR4", name:"Cisco QSFP-100G-SR4-S", desc:"100G QSFP28, multimode MPO-12 (not ordered: wrong connector)", qty:2},
+  {id:"SFP-10G-SR-S", name:"Cisco SFP-10G-SR-S", desc:"10GBASE-SR SFP+, multimode LC", qty:1},
+  {id:"QSA-SR", name:"Cisco CVR-QSFP-SFP10G + SFP-10G-SR-S", desc:"QSA adapter with a 10G SR optic seated in it", qty:1},
+  {id:"OM4-8", name:"OM4 LC-LC, 8 m", desc:"aqua multimode duplex", qty:3},
+  {id:"OM4-15", name:"OM4 LC-LC, 15 m", desc:"aqua multimode duplex", qty:3},
   {id:"CAT6", name:"Cat6, 10 ft (3 m)", desc:"RJ45 patch cable", qty:20}
 ];
-const OPTICS = ["DELL-CWDM4","QSFP-100G-CWDM4-S","407-BBOU","SFP-10G-SR-S"];
-/* sw01 ports 49-52 are the QSFP28 uplinks Q1-Q4; oob01 ports 25-28 are its SFP+ ports X1-X4. */
+const OPTICS = ["SRBD","SR4","SFP-10G-SR-S","QSA-SR"];
+/* sw01 ports 49-54 are the QSFP28 uplinks Ethernet1/49-1/54; oob01 ports 25-28 are its SFP+ ports X1-X4. */
+const SRBDWHY = "Both ends of a data link take the same Cisco QSFP-40/100-SRBD (100G BiDi, multimode LC). Cisco lists it for both the Nexus and the C9500X-28C8D.";
 const RUNS = [
-  {id:"O1", grp:"O", label:"Optic, sw01 end of U01", dev:"sw01", port:49, part:"DELL-CWDM4",
-   why:"sw01's 100G uplink ports take the Dell 100GBASE-CWDM4 (QSFP28, single-mode, Dell-coded)."},
-  {id:"O2", grp:"O", label:"Optic, sw01 end of U02", dev:"sw01", port:50, part:"DELL-CWDM4",
-   why:"sw01's 100G uplink ports take the Dell 100GBASE-CWDM4 (QSFP28, single-mode, Dell-coded)."},
-  {id:"O3", grp:"O", label:"Optic, lab C9500X end of U01", dev:"c9500", port:11, part:"QSFP-100G-CWDM4-S",
-   why:"Each end needs an optic coded for its own switch. The lab's C9500X-28C8D takes the Cisco QSFP-100G-CWDM4-S. It may refuse a Dell-coded optic."},
-  {id:"O4", grp:"O", label:"Optic, lab C9500X end of U02", dev:"c9500", port:12, part:"QSFP-100G-CWDM4-S",
-   why:"Each end needs an optic coded for its own switch. The lab's C9500X-28C8D takes the Cisco QSFP-100G-CWDM4-S. It may refuse a Dell-coded optic."},
-  {id:"O5", grp:"O", label:"Optic, oob01 end of M06", dev:"oob01", port:25, part:"SFP-10G-SR-S",
-   why:"oob01 is a Cisco switch with 10G SFP+ ports. It takes the Cisco SFP-10G-SR-S."},
-  {id:"O6", grp:"O", label:"Optic, sw01 end of M06", dev:"sw01", port:48, part:"407-BBOU",
-   why:"sw01 1/1/48 is the 10G link to oob01. It takes the Dell 407-BBOU (10GBASE-SR, Dell-coded). The SFP28 port runs it at 10G."}
+  {id:"O1", grp:"O", label:"Optic, sw01 end of U01", dev:"sw01", port:49, part:"SRBD", why:SRBDWHY},
+  {id:"O2", grp:"O", label:"Optic, sw01 end of U02", dev:"sw01", port:50, part:"SRBD", why:SRBDWHY},
+  {id:"O3", grp:"O", label:"Optic, lab C9500X end of U01", dev:"c9500", port:11, part:"SRBD", why:SRBDWHY},
+  {id:"O4", grp:"O", label:"Optic, lab C9500X end of U02", dev:"c9500", port:12, part:"SRBD", why:SRBDWHY},
+  {id:"O5", grp:"O", label:"Optic, oob01 end of M06", dev:"oob01", port:25, part:"SFP-10G-SR-S", why:"oob01 is a Cisco switch with 10G SFP+ ports. It takes the Cisco SFP-10G-SR-S on its own."},
+  {id:"O6", grp:"O", label:"Optic, lab C9500X end of M06", dev:"c9500", port:13, part:"QSA-SR", why:"The C9500X-28C8D has only QSFP28 ports. A 10G SFP+ optic needs the CVR-QSFP-SFP10G (QSA) adapter around it. Cisco lists it for this switch."}
 ];
 [["gpu01",1],["gpu01",2],["svc01",1],["svc01",2],["svc02",1],["svc02",2],["svc03",1],["svc03",2]].forEach(([d,p],i)=>
-  RUNS.push({id:"D0"+(i+1), grp:"D", label:d+" NIC port "+p, dev:"sw01", port:i+1, part:"470-ACEU"}));
-RUNS.push({id:"U01", grp:"U", label:"sw01 Q1 to lab C9500X-28C8D Hu1/0/11", dev:"sw01", port:49, part:"OS2-20", farDev:"c9500", far:11,
-  farText:"Far end: lab C9500X-28C8D Hu1/0/11, above rows 2 and 3, about 20 m along the lab's route. Click the sw01 end."});
-RUNS.push({id:"U02", grp:"U", label:"sw01 Q2 to lab C9500X-28C8D Hu1/0/12", dev:"sw01", port:50, part:"OS2-20", farDev:"c9500", far:12,
-  farText:"Far end: lab C9500X-28C8D Hu1/0/12, above rows 2 and 3, about 20 m along the lab's route. Click the sw01 end."});
-RUNS.push({id:"M06", grp:"U", label:"oob01 X1 to sw01 1/1/48 (management uplink)", dev:"oob01", port:25, part:"OM4-3", farDev:"sw01", far:48,
-  farText:"Far end: sw01 1/1/48, one U above oob01. Click the oob01 end."});
-["gpu01 BMC","svc01 BMC","svc02 BMC","svc03 BMC","sw01 mgmt port"].forEach((l,i)=>
+  RUNS.push({id:"D0"+(i+1), grp:"D", label:d+" NIC port "+p, dev:"sw01", port:i+1, part:"SFP-H25G-CU3M"}));
+const ROUTE = "about 12 ft away along the lab's route. The 8 m cord reaches with slack; the 15 m cords are the spare length.";
+RUNS.push({id:"U01", grp:"U", label:"sw01 Eth1/49 to lab C9500X-28C8D Hu1/0/11 (data)", dev:"sw01", port:49, part:["OM4-8","OM4-15"], farDev:"c9500", far:11,
+  farText:"Far end: lab C9500X-28C8D Hu1/0/11, "+ROUTE+" Click the sw01 end."});
+RUNS.push({id:"U02", grp:"U", label:"sw01 Eth1/50 to lab C9500X-28C8D Hu1/0/12 (data)", dev:"sw01", port:50, part:["OM4-8","OM4-15"], farDev:"c9500", far:12,
+  farText:"Far end: lab C9500X-28C8D Hu1/0/12, "+ROUTE+" Click the sw01 end."});
+RUNS.push({id:"M06", grp:"U", label:"oob01 X1 to lab C9500X-28C8D Hu1/0/13 (management)", dev:"oob01", port:25, part:["OM4-8","OM4-15"], farDev:"c9500", far:13,
+  farText:"Far end: lab C9500X-28C8D Hu1/0/13 (QSA adapter), "+ROUTE+" Click the oob01 end."});
+["gpu01 BMC","svc01 BMC","svc02 BMC","svc03 BMC","sw01 mgmt0 port"].forEach((l,i)=>
   RUNS.push({id:"M0"+(i+1), grp:"M", label:l, dev:"oob01", port:i+1, part:"CAT6"}));
+const partOK = (run, part) => [].concat(run.part).includes(part);
 const DEVPORTS = {
-  sw01:{title:"sw01 · Dell S5248F-ON · ethernet 1/1/1–1/1/48 (25G SFP28) · Q1–Q4 (100G QSFP28)", n:52,
-        name:p=>p<=48?"1/1/"+p:"Q"+(p-48)+" (QSFP28)", cell:p=>p<=48?p:"Q"+(p-48)},
+  sw01:{title:"sw01 · Cisco Nexus N93180YC-FX3 · Ethernet1/1–1/48 (25G SFP28) · Ethernet1/49–1/54 (100G QSFP28)", n:54,
+        name:p=>"Ethernet1/"+p+(p>48?" (QSFP28)":""), cell:p=>p},
   oob01:{title:"oob01 · Cisco C1300-24T-4X · GE1–GE24 (1G RJ45) · X1–X4 (10G SFP+)", n:28,
         name:p=>p<=24?"GE"+p:"X"+(p-24)+" (SFP+)", cell:p=>p<=24?p:"X"+(p-24)},
-  c9500:{title:"Lab C9500X-28C8D · Hu1/0/1–Hu1/0/28 (100G QSFP28) · ports 1–10 in use by the lab", n:28,
+  c9500:{title:"Lab C9500X-28C8D · Hu1/0/1–Hu1/0/28 (QSFP28) · ports 1–10 in use by the lab, 11–13 ours", n:28,
         name:p=>"Hu1/0/"+p, cell:p=>"Hu"+p, lab:[1,2,3,4,5,6,7,8,9,10]}
 };
 
@@ -293,20 +290,20 @@ const CARTONS = [
    why:"NEMA 5-15P is a wall plug. It does not fit the 208 V Geist rack PDU. Flag it and get C19-to-C20 or C13-to-C14 cords to match the PSU inlets."},
   {id:"gpus", name:"GPUs", pn:"NVIDIA RTX PRO 6000 Blackwell Server Edition · CDW 8426124 · item 2", good:["4 cards, all four GPU slots in gpu01 (50 users)","Passive cooling, 96 GB, 16-pin 12V-2x6 power"]},
   {id:"svc", name:"svc01–svc03 · service nodes", pn:"Thinkmate RAX RE95-1104-01 · item 3", good:["3 servers, each with Broadcom N225P OCP 3.0 (2 × SFP28)","2 × 1300 W PSU each, rail kits","6 × power cord, C13 to C14"]},
-  {id:"sw", name:"sw01 · 25G switch", pn:"Dell S5248F-ON · 210-APFB · item 4", defect:"airflow",
-   good:["48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD","2 PSUs, fans","Airflow label: PSU to I/O (port-side exhaust)","ReadyRails 1U kit, 2 × C13 to C14 cords"],
-   bad:["48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD","2 PSUs, fans","Airflow label: I/O to PSU (port-side intake)","ReadyRails 1U kit, 2 × C13 to C14 cords"],
-   why:"The ports face the hot aisle. Port-side intake pulls hot exhaust air into the switch. Stop and swap it for PSU to I/O. Don't install it."},
-  {id:"dac", name:"In-rack 25G cables", pn:"Dell 470-ACEU · item 5", defect:"dac", good:["10 × SFP28 DAC, 3 m (8 used, 2 spare)"], bad:["8 × SFP28 DAC, 3 m"],
+  {id:"sw", name:"sw01 · top-of-rack switch", pn:"Cisco Nexus N9K-C93180YC-FX3 · item 4", defect:"airflow",
+   good:["48 × 1/10/25G SFP28, 6 × 40/100G QSFP28","2 × NXA-PAC-650W-PE power supplies (port-side exhaust, blue)","NXA-FAN-35CFM-PE fans (port-side exhaust, blue)","4-post rack-mount kit, 2 × C13 to C14 cords, NX-OS license paperwork"],
+   bad:["48 × 1/10/25G SFP28, 6 × 40/100G QSFP28","2 × NXA-PAC-650W-PI power supplies (port-side intake, burgundy)","NXA-FAN-35CFM-PI fans (port-side intake, burgundy)","4-post rack-mount kit, 2 × C13 to C14 cords, NX-OS license paperwork"],
+   why:"The ports face the hot aisle. -PI (port-side intake) parts pull hot exhaust air into the switch. Stop and get the -PE (port-side exhaust) power supplies and fans. Don't install it."},
+  {id:"dac", name:"In-rack 25G cables", pn:"Cisco SFP-H25G-CU3M · item 5", defect:"dac", good:["10 × SFP28 DAC, 3 m (8 used, 2 spare)"], bad:["8 × SFP28 DAC, 3 m"],
    why:"The order is 10 (8 used now, 2 spare). Flag the short count so the spares arrive."},
-  {id:"optics", name:"Optics", pn:"Cisco QSFP-100G-CWDM4-S ×2 · Dell 100GBASE-CWDM4 ×2 · Cisco SFP-10G-SR-S · Dell 407-BBOU · items 6a, 6b, 6e, 6f", defect:"optics",
-   good:["2 × Cisco QSFP-100G-CWDM4-S (100G, lab C9500X end)","2 × Dell 100GBASE-CWDM4 QSFP28 (100G, sw01 end)","1 × Cisco SFP-10G-SR-S, 1 × Dell 407-BBOU (oob01 to sw01)"],
-   bad:["0 × Cisco QSFP-100G-CWDM4-S","4 × Dell 100GBASE-CWDM4 QSFP28","1 × Cisco SFP-10G-SR-S, 1 × Dell 407-BBOU (oob01 to sw01)"],
-   why:"Each end of a link needs an optic coded for its own switch. The lab's C9500X-28C8D may refuse Dell-coded optics. Flag it: 2 Cisco QSFP-100G-CWDM4-S are missing."},
-  {id:"fiber", name:"Fiber cords", pn:"LC-LC duplex · items 6c, 6d, 6g", defect:"fiber",
-   good:["3 × 20 m OS2 single-mode, yellow (2 uplinks, 1 spare)","1 × 3 m OM4 multimode, aqua (oob01 to sw01)"],
-   bad:["3 × 20 m OM4 multimode, aqua","1 × 3 m OM4 multimode, aqua (oob01 to sw01)"],
-   why:"The 100G optics are CWDM4, which is single-mode. Aqua multimode cords won't carry it. Flag it: the three 20 m cords must be OS2 single-mode (yellow)."},
+  {id:"optics", name:"Optics", pn:"Cisco QSFP-40/100-SRBD ×4 · Cisco CVR-QSFP-SFP10G · Cisco SFP-10G-SR-S ×2 · items 6a, 6d, 6e", defect:"optics",
+   good:["4 × Cisco QSFP-40/100-SRBD (100G BiDi, LC duplex): 2 for sw01, 2 for the lab C9500X","1 × Cisco CVR-QSFP-SFP10G QSA adapter","2 × Cisco SFP-10G-SR-S (management link)"],
+   bad:["4 × Cisco QSFP-100G-SR4-S (100G, MPO-12)","1 × Cisco CVR-QSFP-SFP10G QSA adapter","2 × Cisco SFP-10G-SR-S (management link)"],
+   why:"SR4 optics take a 12-fiber MPO connector. Our cords are LC duplex, and the order is QSFP-40/100-SRBD. Flag it: wrong 100G optic."},
+  {id:"fiber", name:"Fiber cords", pn:"LC-LC duplex OM4 · items 6b, 6c", defect:"fiber",
+   good:["3 × 8 m OM4 multimode, aqua","3 × 15 m OM4 multimode, aqua","(2 data links + 1 management link; the unused length is the spare)"],
+   bad:["3 × 8 m OS2 single-mode, yellow","3 × 15 m OS2 single-mode, yellow","(2 data links + 1 management link; the unused length is the spare)"],
+   why:"Every optic in this build is multimode (SRBD and 10G SR). Yellow single-mode cords won't carry them. Flag it: the cords must be OM4 multimode (aqua)."},
   {id:"oob", name:"oob01 · management switch", pn:"Cisco C1300-24T-4X · CDW 8112270 · item 7", good:["24 × 1G RJ45, 4 × 10G SFP+","Rack ears, 1 × C13 to C14 cord"]},
   {id:"cat6", name:"Cat6 patch cables", pn:"item 9", good:["2 × 10-pack Cat6, 10 ft (3 m): 5 used, the rest spare"]},
   {id:"blank", name:"Blanking panels", pn:"Vertiv VRA2000 (10-pack) × 8 · item 8", defect:"blanks",
@@ -324,7 +321,7 @@ function fresh(inlet){
   const pool = DEFECT_POOL.slice(); const defects = [];
   while (defects.length < 2) defects.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
   return { inlet: inlet||"C20", step:0, started:false, t0:0, mistakes:[], fb:null, ss:{}, defects, view:"front",
-    rack:{}, blanks1:0, blanks2:0, cords:{}, outlets:{}, optics:{}, ports:{sw01:{},oob01:{},c9500:{}}, runsDone:{},
+    rack:{}, blanks1:0, blanks2:0, cords:{}, outlets:{}, optics:{}, ports:{sw01:{},oob01:{},c9500:{}}, runsDone:{}, used:{},
     feed:{A:true,B:true}, breakers:false, powered:{}, inspected:{} };
 }
 S = fresh();
@@ -361,7 +358,7 @@ function ampsTable(){
   const down = Object.keys(DEVS).filter(d => S.powered[d] && !up[d]);
   return `<div class="tablewrap"><table class="amps"><thead><tr><th>Display</th><th>Circuit 1</th><th>Circuit 2</th><th>Circuit 3</th><th>Total</th></tr></thead>
     <tbody>${row("A")}${row("B")}</tbody></table></div>
-    <p class="lead" style="font-size:13px">Max draw at ${VOLTS} V. Each PDU must carry about 4.8 kW alone. ${down.length ? `<b style="color:var(--bad)">Down: ${down.join(", ")}</b> (one cord, on the dead feed)` : "All powered devices up."}</p>`;
+    <p class="lead" style="font-size:13px">Max draw at ${VOLTS} V. Each PDU must carry about 5.1 kW alone. ${down.length ? `<b style="color:var(--bad)">Down: ${down.join(", ")}</b> (one cord, on the dead feed)` : "All powered devices up."}</p>`;
 }
 
 /* ---------- steps ---------- */
@@ -374,17 +371,17 @@ const STEPS = [
 
  {ph:0, type:"choice", title:"Which airflow does sw01 need?", ref:["02","§4 item 3"],
   q:"sw01 is mounted with its ports at the rear, inside the hot aisle containment. Its PSUs face the room. Which airflow option is right?",
-  opts:[["PSU to I/O (port-side exhaust): cool air in at the PSU end, out at the ports", true, "Cool room air enters at the PSU end and exhausts at the ports, into the hot aisle."],
-        ["I/O to PSU (port-side intake)", false, "That pulls air in at the ports, which sit in the hot aisle. The switch would breathe server exhaust."],
+  opts:[["Port-side exhaust (-PE power supplies and fans): cool air in at the PSU end, out at the ports", true, "Cool room air enters at the PSU end and exhausts at the ports, into the hot aisle."],
+        ["Port-side intake (-PI power supplies and fans)", false, "That pulls air in at the ports, which sit in the hot aisle. The switch would breathe server exhaust."],
         ["Either works, the containment sorts it out", false, "Containment only works if every device moves air front (room) to rear (hot aisle). The wrong switch fights it."]],
-  facts:["<b>Dell S5248F-ON:</b> 1U, 48 × 25G SFP28, 4 × 100G QSFP28, 2 × 200G QSFP28-DD, 2 PSUs","<b>Max draw:</b> 250 W"]},
+  facts:["<b>Cisco Nexus N93180YC-FX3:</b> 1U, 48 × 1/10/25G SFP28, 6 × 40/100G QSFP28, 2 PSUs","<b>Port-side exhaust:</b> NXA-PAC-650W-PE and NXA-FAN-35CFM-PE (blue). -PI (burgundy) is intake.","<b>Max draw:</b> about 600 W"]},
 
  {ph:1, type:"choice", title:"Which way does rack 1 face?", ref:["05","§2"], view:"front",
   q:"You're at rack 1, next to ACE 15. The glass of the hot aisle containment closes off one side. Where do servers go in, and where do you do cables?",
   opts:[["Front faces the room. Servers go in from the front. Cables and PDUs are done from the rear, inside the glass.", true, "Server intakes take room air. Exhaust and cabling sit in the contained hot aisle."],
         ["Front faces the glass, so the hot aisle stays tidy", false, "Then the servers would pull hot exhaust into their intakes. Fronts face the room."],
         ["Doesn't matter. The Liebert CRV cools both sides.", false, "The CRV cools the room side. Hot aisle containment only works if exhaust goes into the glass."]],
-  facts:["<b>Cooling:</b> Vertiv Liebert CRV (CR035RA…), 35 kW in-row, in the same row","<b>Our heat load:</b> about 16,400 BTU/hr (1.4 tons) at 50 users","<b>Intake air:</b> 18–27 °C (64.4–80.6 °F), ASHRAE recommended"]},
+  facts:["<b>Cooling:</b> Vertiv Liebert CRV (CR035RA…), 35 kW in-row, in the same row","<b>Our heat load:</b> about 17,500 BTU/hr (1.5 tons) at 50 users","<b>Intake air:</b> 18–27 °C (64.4–80.6 °F), ASHRAE recommended"]},
 
  {ph:1, type:"choice", title:"Is the rack grounded?", ref:["05","§2 step 2"],
   q:"The split rear doors have green bonding wires. You don't see a wire from the rack frame to a ground bar. What do you do?",
@@ -437,7 +434,7 @@ const STEPS = [
 
  {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"rear",
   lead:"Pick a cord, then pick an outlet. Odd-numbered PSUs go to PDU-A, even to PDU-B. Spread the load across the three circuits.",
-  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 250 W · oob01 30 W · con01 13 W"]},
+  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 600 W · oob01 30 W · con01 13 W"]},
 
  {ph:4, type:"choice", title:"What does one circuit carry?", ref:["01","§3"],
   q:"PDU-A circuit 3 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 3,300 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C3 carry now?",
@@ -447,7 +444,7 @@ const STEPS = [
 
  {ph:5, type:"network", title:"Run the network cables", ref:["05","§5"], view:"rear",
   lead:"Pick a run from the schedule, pick the part from the bin, then click the port. Optics go in before fiber. BMC Cat6 goes in last so it doesn't get buried.",
-  facts:["<b>DAC:</b> passive copper, 3 m, keep bends wider than about 5 cm radius","<b>Uplinks U01, U02:</b> 100GBASE-CWDM4 on single-mode (yellow) LC, 20 m to the lab C9500X-28C8D. No patch panel.","<b>M06:</b> oob01 to sw01, 10GBASE-SR on a 3 m multimode (aqua) cord, inside the rack","<b>Fiber:</b> dust caps on until you plug in, clean every connector first"]},
+  facts:["<b>DAC:</b> passive copper, 3 m, keep bends wider than about 5 cm radius","<b>Data U01, U02:</b> 100G QSFP-40/100-SRBD on multimode (aqua) LC, both ends Cisco, straight to the lab C9500X-28C8D, about 12 ft. No patch panel.","<b>Management M06:</b> oob01 to its own C9500X port, 10GBASE-SR on multimode (aqua) LC, QSA adapter at the lab end","<b>Fiber:</b> dust caps on until you plug in, clean every connector first"]},
 
  {ph:5, type:"choice", title:"Dress the DACs", ref:["05","§5 steps"],
   q:"Eight 3 m DACs run from the servers up to sw01 at U41. How do you dress them?",
@@ -479,12 +476,12 @@ const STEPS = [
          ["Close the hot aisle containment doors"]],
   bad:[["You switch feed A off at the panel to save time","Only facilities switches the upstream feeds."],
        ["Pull the PDU-A input plug to simulate a failure","Never pull a live PDU input. Facilities switches the feed off upstream."]],
-  facts:["<b>Expected:</b> oob01 and con01 have one cord each, so whichever is on the dead feed goes dark. Everything with two or more PSUs stays up.","<b>Each PDU</b> must carry about 4.8 kW alone at 50 users"]},
+  facts:["<b>Expected:</b> oob01 and con01 have one cord each, so whichever is on the dead feed goes dark. Everything with two or more PSUs stays up.","<b>Each PDU</b> must carry about 5.1 kW alone at 50 users"]},
 
  {ph:7, type:"order", title:"First power-on checks", ref:["05","§6"], view:"front",
   lead:"The rack console at U21 is your screen and keyboard. No laptop on the lab network, no internet.",
   items:[["Console cable into sw01. Set its management IP."],
-         ["On sw01, run show interface status: ethernet 1/1/1–1/1/8 up at 25G, both QSFP28 uplinks up at 100G in the port-channel, 1/1/48 up at 10G (oob01)"],
+         ["On sw01, run show interface status: Ethernet1/1–1/8 up at 25G, Ethernet1/49–1/50 up at 100G in the port-channel (show port-channel summary). On oob01, X1 (M06) up at 10G to the lab"],
          ["At the rack console, give each BMC an IP, change the default password, and store it in the lab's password store"]],
   bad:[["Leave the BMC default passwords until the software is installed","Change the default password at first login. Default BMC passwords are a known risk."],
        ["Plug a laptop into the lab network to pull drivers","Assume no internet. Drivers come in on the approved transfer drives, through the ISSM process."]]},
@@ -539,9 +536,9 @@ R.intro = () => `<div class="eyebrow"><span>Briefing</span></div><h2>Build rack 
   Every step follows <a href="${DOC["05"]}">doc 05</a>. Wrong choices count as mistakes and tell you why.</p>
   <div class="intro-grid">
     <div><b>Racks</b>2 × Vertiv VR3300, 42U, 600 × 1200 mm. Rack 1 now, rack 2 held for gpu02.</div>
-    <div><b>Power</b>Existing Geist PDUs, left and right, circuits 1–3, 208 V. About 4.8 kW at max.</div>
+    <div><b>Power</b>Existing Geist PDUs, left and right, circuits 1–3, 208 V. About 5.1 kW at max.</div>
     <div><b>Cooling</b>Liebert CRV in-row. Hot aisle containment: the rear is inside the glass.</div>
-    <div><b>Network</b>2 × 100G single-mode fiber, 20 m, from sw01 to the lab's C9500X-28C8D. No patch panels. oob01 uplinks through sw01.</div>
+    <div><b>Network</b>sw01 is a Cisco Nexus N93180YC-FX3: 2 × 100G multimode fiber to the lab's C9500X-28C8D, plus a separate 10G link from oob01. About 12 ft. No patch panels.</div>
   </div>
   <p class="subh">GPU server PSU inlet</p>
   <p class="lead" style="font-size:13px">Thinkmate hasn't answered quote question 1 yet. Pick what the cartons say.</p>
@@ -638,8 +635,8 @@ const PLACE = [
      ["Rest it on the blanking panels below", false, "The console drawer slides out under load. It needs its own rails."]]]},
   {id:"oob01", ask:["Which way do oob01's ports face?", [["To the rear, inside the glass, where all cables are run", true],
      ["To the front, so the port lights are easy to see", false, "Cabling is done from the rear. Ports face the rear."]]]},
-  {id:"sw01", ask:["How does sw01 go in?", [["Ports to the rear, PSUs to the front, on Dell ReadyRails (tool-less)", true],
-     ["Ports to the front so the cables are easy to reach", false, "Ports face the rear. With PSU-to-I/O airflow the switch then takes room air in at the PSU end."]]]}
+  {id:"sw01", ask:["How does sw01 go in?", [["Ports to the rear, power supplies and fans to the front, on the Cisco 4-post rack-mount kit", true],
+     ["Ports to the front so the cables are easy to reach", false, "Ports face the rear. With port-side exhaust the switch then takes room air in at the PSU end."]]]}
 ];
 const HEAVY = ["gpu01","svc01","svc02","svc03"];
 function rackFree(u){ return !S.rack[u]; }
@@ -727,7 +724,7 @@ B.power = (st, el) => {
 
 /* network */
 function partById(id){ return BIN.find(b=>b.id===id); }
-function binLeft(id){ const used = RUNS.filter(r => S.runsDone[r.id] && r.part===id).length; return partById(id).qty - used; }
+function binLeft(id){ const used = RUNS.filter(r => S.runsDone[r.id] && S.used[r.id]===id).length; return partById(id).qty - used; }
 R.network = st => { const s = ss(); const run = s.run && RUNS.find(r=>r.id===s.run);
   const grpName = {O:"Optics", D:"Data, in-rack DAC", U:"Fiber", M:"BMC / management Cat6"};
   const all = RUNS.every(r => S.runsDone[r.id]);
@@ -753,7 +750,7 @@ B.network = (st, el) => {
     const [dev, ps] = b.dataset.port.split("|"), p = +ps;
     if (!s.part) { miss("Pick the part from the bin first."); return; }
     const err = checkRun(run, s.part, dev, p, s.clean); if (err) { miss(err); return; }
-    S.runsDone[run.id] = true;
+    S.runsDone[run.id] = true; S.used[run.id] = s.part;
     if (run.grp==="O") S.optics[dev+":"+p] = s.part; else S.ports[dev][p] = run.id;
     if (run.grp==="U") S.ports[run.farDev][run.far] = run.id;
     good(`${run.id} done: ${run.label}.`); s.run = null; s.part = null; render(); });
@@ -762,13 +759,14 @@ B.network = (st, el) => {
 function checkRun(run, part, dev, p, clean){
   if (run.grp==="M" && RUNS.some(r => (r.grp==="D"||r.grp==="U") && !S.runsDone[r.id]))
     return "BMC Cat6 goes in last, so it doesn't get buried under the DACs and fiber. Finish the D, U, and M06 runs first.";
-  if (part !== run.part) {
-    if (run.grp==="D") return "Server to sw01 inside the rack is 25G SFP28. Use a Dell 470-ACEU DAC, 3 m.";
-    if (run.grp==="O") return OPTICS.includes(part) ? run.why : "Insert the optic first. Cables come after.";
-    if (run.id==="M06") return part==="OS2-20" ? "M06 stays inside the rack between two 10GBASE-SR (multimode) optics. Use the 3 m OM4 (aqua) cord. The third 20 m cord is the uplink spare."
-      : "M06 is a 3 m LC-LC OM4 (aqua) cord between the two 10GBASE-SR optics.";
-    if (run.grp==="U") return part==="OM4-3" ? "The uplink optics are CWDM4, which is single-mode. An aqua multimode cord won't link, and 3 m won't reach the C9500X-28C8D anyway. Use a 20 m OS2 (yellow) cord."
-      : "U01 and U02 are 20 m LC-LC OS2 single-mode (yellow) cords from row 4 to the C9500X-28C8D. No patch panel.";
+  if (!partOK(run, part)) {
+    if (run.grp==="D") return "Server to sw01 inside the rack is 25G SFP28. Use a Cisco SFP-H25G-CU3M DAC, 3 m.";
+    if (run.grp==="O") {
+      if (!OPTICS.includes(part)) return "Insert the optic first. Cables come after.";
+      if (part==="SR4") return "SR4 takes a 12-fiber MPO connector, and our cords are LC duplex. The data links use QSFP-40/100-SRBD.";
+      if (run.id==="O6" && part==="SFP-10G-SR-S") return "An SFP+ optic doesn't fit a QSFP28 port. Use the SFP-10G-SR-S seated in the CVR-QSFP-SFP10G (QSA) adapter.";
+      return run.why; }
+    if (run.grp==="U") return "Every link here is multimode LC. Use an OM4 (aqua) cord, 8 m or 15 m.";
     if (run.grp==="M") return "BMC and management ports are 1G RJ45. Use Cat6, 3 m.";
   }
   if (dev !== run.dev || p !== run.port) return `The schedule puts <b>${run.id}</b> on ${run.dev} ${DEVPORTS[run.dev].name(run.port)}. Label says ${run.id} at both ends.`;
@@ -786,7 +784,7 @@ R.end = () => { const n = S.mistakes.length, t = elapsed();
   return `<div class="eyebrow"><span>Result</span></div><h2>Rack 1 signed off</h2>
     <p class="grade">${grade}</p><p class="mono">${n} mistake${n===1?"":"s"} · ${t}</p>
     ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 05 on install day anyway.</p>"}
-    <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (doc 09), the cable route and port numbers on the lab C9500X-28C8D (doc 10 follow-up).</p>
+    <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (doc 09), the cable route and the three port numbers on the lab C9500X-28C8D (doc 09).</p>
     <div class="row"><button class="primary" id="again">Run it again</button></div>`; };
 B.end = () => { $("#again").onclick = () => { const inlet = S.inlet; S = fresh(inlet); render(); }; };
 
@@ -823,9 +821,9 @@ function renderScene(){
     } else {
       const np = d.psus; for (let i=0;i<np;i++) g += `<rect x="${RR-24-i*22}" y="${yt+3}" width="18" height="${h-6}" class="s-psu"/>`;
       const pc = (d0, p) => S.ports[d0][p] ? "on" : S.optics[d0+":"+p] ? "optic" : "";
-      if (it==="sw01") for (let p=1;p<=52;p++) { const q = p>48, i = q ? p-49 : p-1, col = Math.floor(i/2), row = i%2;
-        g += q ? `<rect x="${RL+163+col*8}" y="${yt+3+row*6}" width="6.5" height="5" class="s-port ${pc("sw01",p)}"/>`
-               : `<rect x="${RL+64+col*4}" y="${yt+3+row*6}" width="3.2" height="5" class="s-port ${pc("sw01",p)}"/>`; }
+      if (it==="sw01") for (let p=1;p<=54;p++) { const q = p>48, i = q ? p-49 : p-1, col = Math.floor(i/2), row = i%2;
+        g += q ? `<rect x="${RL+157+col*8}" y="${yt+3+row*6}" width="6.5" height="5" class="s-port ${pc("sw01",p)}"/>`
+               : `<rect x="${RL+64+col*3.8}" y="${yt+3+row*6}" width="3" height="5" class="s-port ${pc("sw01",p)}"/>`; }
       if (it==="oob01") for (let p=1;p<=28;p++) { const x = p>24, i = x ? p-25 : p-1, col = Math.floor(i/2), row = i%2;
         g += `<rect x="${RL+(x?152:64)+col*7}" y="${yt+3+row*6}" width="5.5" height="5" class="s-port ${pc("oob01",p)}"/>`; }
     }

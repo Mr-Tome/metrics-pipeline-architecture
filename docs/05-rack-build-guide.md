@@ -33,13 +33,13 @@ Thinkmate whether they offer an install walkthrough with the order.
 | Vertiv VR3300 rack | VR Rack Installer/User Guide, SL-11425: https://www.vertiv.com/globalassets/shared/sl-11425_rev0.pdf. Product page: https://www.vertiv.com/en-ca/products-catalog/facilities-enclosures-and-racks/racks-and-containment/vr3300/ | 4.6 rails, 4.9 grounding |
 | Vertiv Geist rack PDU (already installed) | Vertiv rPDU and VR rack integration flyer: https://www.vertiv.com/49bd35/globalassets/shared/vertiv-rpdu-vr-rack-integration-flyer.pdf. For the full manual, search the model number from the PDU label on vertiv.com. | Outlet and circuit layout, display |
 | Liebert CRV (the CR035RA unit) | Liebert CRV design manual: https://www.vertiv.com/globalassets/products/thermal-management/in-row-cooling/liebert-crv-row-based-cooling-system-design-manual.pdf | Facility's job, for reference only |
-| Dell S5248F-ON | S5200F-ON Series Installation Guide: https://dl.dell.com/topicspdf/s5200-on_install_pub_en-us.pdf | ReadyRails 1U tool-less square-hole install, power, airflow |
+| Cisco Nexus N93180YC-FX3 | Cisco Nexus 93180YC-FX3 NX-OS Mode Switch Hardware Installation Guide (search the title on cisco.com) | 4-post rack-mount kit, airflow (port-side exhaust), power, console |
 | Thinkmate GPU server and service nodes | Ships with a quick-start and rail kit sheet. Ask Thinkmate for the motherboard and chassis manuals when you order. | Rails, GPU install, PSU, BMC first login |
 | StarTech RKCONS1701 rack console | https://www.startech.com/en-us/server-management/rkcons1701 (manual under Support) | Rail and cage nut install |
 | NVIDIA RTX PRO 6000 Server Edition | Server Edition product brief (NVIDIA site, PDF) | Passive card, 16-pin power, 400-600 W setting |
 
 For video, search YouTube with the exact model number (for example "Vertiv VR3300 rail install" or
-"S5248F-ON rack install"). Watch the vendor's own channel first. Generic "server rail install" videos
+"Nexus 93180YC-FX3 rack install"). Watch the vendor's own channel first. Generic "server rail install" videos
 work fine for the sliding-rail steps, which are the same on almost every 2U server.
 
 ## 1. Before you start
@@ -53,14 +53,16 @@ console (item 11). Use velcro, not zip ties.
 
 - [ ] gpu01: 4 GPUs installed (or loose in boxes), 2 x 3.84 TB NVMe, dual-port 25G NIC, rail kit, power cords
 - [ ] svc01, svc02, svc03: rail kits, cords
-- [ ] sw01 S5248F-ON: airflow is **PSU-to-port (port-side exhaust)**. Check the fan and PSU handle color
-      against the Dell guide. **If it is wrong, stop and swap it.** Don't install it.
+- [ ] sw01 Nexus N93180YC-FX3: airflow is **port-side exhaust**. The power supplies read NXA-PAC-650W-**PE**
+      and the fans NXA-FAN-35CFM-**PE** (Cisco codes port-side exhaust blue; -PI is intake, burgundy).
+      **If it is wrong, stop and swap it.** Don't install it.
 - [ ] oob01 management switch
 - [ ] Rack console (StarTech RKCONS1701) with its VGA/USB cable, rails, and cage nuts
 - [ ] Power cords: C13-to-C14 for service nodes and switches; C13-to-C14 or C19-to-C20 for the GPU server (no wall-plug cords)
-- [ ] 10 x 25G SFP28 DAC, 3 m (8 used now, 2 spare)
-- [ ] 100G uplink: 2 x Cisco QSFP-100G-CWDM4-S (lab end), 2 x Dell 100GBASE-CWDM4 QSFP28 (sw01 end), 3 x 20 m LC-LC single-mode (OS2, yellow) cords (1 spare)
-- [ ] oob01 uplink: 1 x Cisco SFP-10G-SR-S (oob01 end), 1 x Dell 407-BBOU (sw01 end), 1 x 3 m LC-LC OM4 cord
+- [ ] 10 x Cisco SFP-H25G-CU3M 25G DAC, 3 m (8 used now, 2 spare)
+- [ ] 100G data links: 4 x Cisco QSFP-40/100-SRBD (2 per end)
+- [ ] Management link: 1 x Cisco CVR-QSFP-SFP10G adapter, 2 x Cisco SFP-10G-SR-S
+- [ ] Fiber cords, LC-LC OM4 multimode (aqua): 3 x 8 m, 3 x 15 m (data and management; the unused length is the spare)
 - [ ] Cat6 patch cables, 10 ft (3 m), 2 ten-packs (BMC and oob01 uplink, rest spare)
 - [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
@@ -91,7 +93,7 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 21 | con01 rack console | Eye height for a seated or kneeling person. Cage nuts (square holes). |
 | 22-39 | blanking | |
 | 40 | oob01 | Ports to the rear |
-| 41 | sw01 | Ports to the rear, PSUs to the front. Dell ReadyRails, tool-less. |
+| 41 | sw01 | Ports to the rear, power supplies and fans to the front. Cisco 4-post rack-mount kit, cage nuts. |
 | 42 | blanking | No patch panel in our racks. The uplink fiber runs straight from sw01 to the lab C9500X-28C8D. |
 
 **Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak hot air from
@@ -159,42 +161,42 @@ Label each cable at both ends with its ID.
 
 | ID | From | To | Cable | Purpose |
 |---|---|---|---|---|
-| D01 | gpu01 NIC port 1 | sw01 1/1/1 | 25G SFP28 DAC 3 m | data, bond member 1 |
-| D02 | gpu01 NIC port 2 | sw01 1/1/2 | 25G SFP28 DAC 3 m | data, bond member 2 |
-| D03 | svc01 NIC port 1 | sw01 1/1/3 | 25G SFP28 DAC 3 m | data |
-| D04 | svc01 NIC port 2 | sw01 1/1/4 | 25G SFP28 DAC 3 m | data |
-| D05 | svc02 NIC port 1 | sw01 1/1/5 | 25G SFP28 DAC 3 m | data |
-| D06 | svc02 NIC port 2 | sw01 1/1/6 | 25G SFP28 DAC 3 m | data |
-| D07 | svc03 NIC port 1 | sw01 1/1/7 | 25G SFP28 DAC 3 m | data |
-| D08 | svc03 NIC port 2 | sw01 1/1/8 | 25G SFP28 DAC 3 m | data |
-| (D09-D10) | reserved gpu02 | sw01 1/1/9-10 | | future |
-| U01 | sw01 QSFP28 uplink 1 (Dell 100GBASE-CWDM4) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-100G-CWDM4-S) | LC-LC OS2 single-mode, 20 m | uplink, bond member 1 |
-| U02 | sw01 QSFP28 uplink 2 (Dell 100GBASE-CWDM4) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-100G-CWDM4-S) | LC-LC OS2 single-mode, 20 m | uplink, bond member 2 |
+| D01 | gpu01 NIC port 1 | sw01 Ethernet1/1 | Cisco SFP-H25G-CU3M DAC | data, bond member 1 |
+| D02 | gpu01 NIC port 2 | sw01 Ethernet1/2 | Cisco SFP-H25G-CU3M DAC | data, bond member 2 |
+| D03 | svc01 NIC port 1 | sw01 Ethernet1/3 | Cisco SFP-H25G-CU3M DAC | data |
+| D04 | svc01 NIC port 2 | sw01 Ethernet1/4 | Cisco SFP-H25G-CU3M DAC | data |
+| D05 | svc02 NIC port 1 | sw01 Ethernet1/5 | Cisco SFP-H25G-CU3M DAC | data |
+| D06 | svc02 NIC port 2 | sw01 Ethernet1/6 | Cisco SFP-H25G-CU3M DAC | data |
+| D07 | svc03 NIC port 1 | sw01 Ethernet1/7 | Cisco SFP-H25G-CU3M DAC | data |
+| D08 | svc03 NIC port 2 | sw01 Ethernet1/8 | Cisco SFP-H25G-CU3M DAC | data |
+| (D09-D10) | reserved gpu02 | sw01 Ethernet1/9-1/10 | | future |
+| U01 | sw01 Ethernet1/49 (Cisco QSFP-40/100-SRBD) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-40/100-SRBD) | LC-LC OM4, 8 m or 15 m | data uplink, bond member 1 |
+| U02 | sw01 Ethernet1/50 (Cisco QSFP-40/100-SRBD) | lab C9500X-28C8D, port assigned by the lab (Cisco QSFP-40/100-SRBD) | LC-LC OM4, 8 m or 15 m | data uplink, bond member 2 |
 | M01 | gpu01 BMC | oob01 port 1 | Cat6 3 m | management |
 | M02 | svc01 BMC | oob01 port 2 | Cat6 3 m | management |
 | M03 | svc02 BMC | oob01 port 3 | Cat6 3 m | management |
 | M04 | svc03 BMC | oob01 port 4 | Cat6 3 m | management |
-| M05 | sw01 mgmt port | oob01 port 5 | Cat6 3 m | management |
-| M06 | oob01 SFP+ port 1 (Cisco SFP-10G-SR-S) | sw01 1/1/48 (Dell 407-BBOU) | LC-LC OM4, 3 m | management uplink (management VLAN) |
+| M05 | sw01 mgmt0 port | oob01 port 5 | Cat6 3 m | management |
+| M06 | oob01 SFP+ port 1 (Cisco SFP-10G-SR-S) | lab C9500X-28C8D, third port assigned by the lab (CVR-QSFP-SFP10G + Cisco SFP-10G-SR-S) | LC-LC OM4, 8 m or 15 m | management uplink |
 
-Check sw01 port numbering on the faceplate. The Dell OS10 names are `ethernet 1/1/1` to `1/1/48` for
-SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface status` to see them.
+Check sw01 port numbering on the faceplate. NX-OS names the SFP28 ports `Ethernet1/1` to `Ethernet1/48` and
+the QSFP28 ports `Ethernet1/49` to `Ethernet1/54`.
 
 ### Steps
 
 1. Run DACs along the side of the rack in velcro bundles. Don't bend them tighter than about a 5 cm radius.
 2. Fiber: keep the dust caps on until you plug in. Clean each connector with a one-click cleaner first.
-   The two 20 m uplink cords are single-mode (yellow) and run from row 4 to the C9500X-28C8D above rows
-   2 and 3, along the route the lab network team gives. Leave the coil of spare length at our end.
-   M06 is the short aqua (multimode) cord, inside the rack only.
+   U01, U02, and M06 are all multimode (aqua) LC. All three run directly to the lab C9500X-28C8D along
+   the route the lab network team gives. Use the 8 m cords if they reach with slack,
+   otherwise the 15 m ones; coil spare length at our end.
 3. Plug BMC Cat6 last so it doesn't get buried.
 4. Install the rear door. Check that no cable bundle blocks server exhaust.
 
 ## 6. First power-on checks
 
 1. **Switch:** console in, set the management IP, then confirm `show interface status` shows each D-cable
-   link up at 25G. Put the two QSFP28 uplinks in one LACP port-channel trunking the data and management
-   VLANs (IDs from the lab), and set 1/1/48 as an access port in the management VLAN for oob01.
+   link up at 25G. Enable `feature lacp` and put Ethernet1/49-1/50 in one LACP port-channel (VLAN plan from
+   the lab); check with `show port-channel summary`. oob01's uplink (M06) goes to the lab directly, not through sw01.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
    **Set the BMC LAN mode to Dedicated** on every server (BIOS setup, or `ipmitool raw 0x30 0x70 0x0c 1 0`
@@ -222,7 +224,7 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
 ## 7. Sign-off
 
 - [ ] Feed A / feed B test passed
-- [ ] All D-links up at 25G, both 100G uplinks up and in a port-channel, oob01 uplink (M06) up at 10G
+- [ ] All D-links up at 25G, both 100G uplinks up and in a port-channel, oob01 uplink (M06) up at 10G to the C9500X-28C8D
 - [ ] `hw-check.sh` passed on every node
 - [ ] All empty U blanked, rear door on, cold-aisle intake in range
 - [ ] Cable labels match this schedule
