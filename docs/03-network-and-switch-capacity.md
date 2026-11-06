@@ -42,7 +42,12 @@ The narrowest link users cross is the C9500X-28C8D's 10G uplink. 10G carries abo
    4-bit format, so it fits on one 96 GB GPU. Adding users adds more copies of the model on more GPUs,
    not one model spread across servers.
 
-## 3. How our rack connects (decided 2026-11-05)
+## 3. How our rack connects (on hold, 2026-11-06)
+
+> **On hold.** The network team now says our racks connect to a **Cisco N93180YC-FX3** access switch
+> (48 x 25G SFP28, 6 x 100G QSFP28, NX-OS), not the C9500X-28C8D, which is their core. Everything inside
+> our rack below stays the same; only the uplink's far end, speed (100G or 25G), fiber, and optics change.
+> Questions: [10](10-lab-network-team-email.md), round 3. The design below is the 2026-11-05 version.
 
 ```
 LAB

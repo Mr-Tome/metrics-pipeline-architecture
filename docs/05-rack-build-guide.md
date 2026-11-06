@@ -197,6 +197,10 @@ SFP28. The QSFP28 uplink numbers vary by OS10 version, so run `show interface st
    VLANs (IDs from the lab), and set 1/1/48 as an access port in the management VLAN for oob01.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
+   **Set the BMC LAN mode to Dedicated** on every server (BIOS setup, or `ipmitool raw 0x30 0x70 0x0c 1 0`
+   on Supermicro-based boards). Many server boards ship in *Failover* or *Shared* mode: if the BMC port has
+   no link at power-on, the BMC moves onto the onboard RJ45 data port and stays there. The onboard RJ45
+   ports (gpu01: 2 x 10GbE, each service node: 1 x 1GbE) stay unplugged in this design.
 3. **BIOS settings on gpu01**:
    - Above 4G decoding: on
    - Resizable BAR: on

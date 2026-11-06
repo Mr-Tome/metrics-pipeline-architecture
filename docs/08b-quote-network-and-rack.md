@@ -1,6 +1,10 @@
 # 08b. Quote request: network, rack, and setup items (not yet sent)
 
-**Status: ready to send.** Revised for the new C9500X-28C8D above rows 2 and 3 (2026-11-04: 100G from
+**Status: on hold (2026-11-06).** The network team says we connect to a Cisco N93180YC-FX3 access switch,
+not the C9500X-28C8D, so items 6a-6g change again. Waiting on round 3 ([10](10-lab-network-team-email.md)).
+Items 4, 5, and 7-12 are unaffected.
+
+Previous status: revised for the new C9500X-28C8D above rows 2 and 3 (2026-11-04: 100G from
 it to our switch is allowed, its uplink to the core is 10G, and we supply our own optics; 2026-11-05:
 no patch panel in our racks, direct connection to the C9500X-28C8D, single-mode LC, IOS XE 17.15.06,
 Cisco optics, racks next to ACE 15 with 20 m cords, management switch uplinked through our switch). The servers
