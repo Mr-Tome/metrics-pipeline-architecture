@@ -35,12 +35,12 @@ lengths because the cable route is not measured yet; the unused length is the sp
 
 | # | Item | Part / model | Qty | Est. each | Est. total | Link |
 |---|---|---|---|---|---|---|
-| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack. Include the NX-OS license subscription Cisco requires with new hardware (shortest term) and 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3 | 1 | quote | quote | |
-| 5 | 25G SFP28 passive direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Cisco SFP-H25G-CU3M | 10 | quote | quote | |
-| 6a | 100G optic, QSFP28 BiDi, multimode, LC duplex. Two go in the lab C9500X-28C8D, two in our switch (item 4): one at each end of each data link. | Cisco QSFP-40/100-SRBD | 4 | quote | quote | |
-| 6b | Fiber cord, LC-LC duplex, OM4 multimode, **8 m**. Two for the data links (6a to 6a), one for the management link (6e to 6e). Plenum or riser rated if the lab requires. | any | 3 | quote | quote | |
-| 6c | Fiber cord, LC-LC duplex, OM4 multimode, **15 m** (same as 6b, longer, in case the route is longer than estimated) | any | 3 | quote | quote | |
-| 6d | QSFP to SFP+ adapter (QSA): goes in a QSFP28 port of the lab C9500X-28C8D and holds one 6e | Cisco CVR-QSFP-SFP10G | 1 | quote | quote | |
+| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack. License: NX-OS (DCN) Essentials, shortest term offered (3 years); we do not need Advantage. 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3, with 2 x NXA-PAC-650W-PE and NXA-FAN-35CFM-PE fans | 1 | quote | quote | https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067 (power supply: https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988, fan: https://www.cdw.com/product/cisco-network-device-fan-module/5497378) |
+| 5 | 25G SFP28 passive direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Cisco SFP-H25G-CU3M= | 10 | quote | quote | https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569 |
+| 6a | 100G optic, QSFP28 BiDi, multimode, LC duplex. Two go in the lab C9500X-28C8D, two in our switch (item 4): one at each end of each data link. | Cisco QSFP-40/100-SRBD= | 4 | quote | quote | https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042 |
+| 6b | Fiber cord, LC-LC duplex, OM4 multimode, **8 m**. Two for the data links (6a to 6a), one for the management link (6e to 6e). Plenum or riser rated if the lab requires. | any (example: Axiom) | 3 | quote | quote | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521 |
+| 6c | Fiber cord, LC-LC duplex, OM4 multimode, **15 m** (same as 6b, longer, in case the route is longer than estimated) | any (example: Axiom) | 3 | quote | quote | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985 |
+| 6d | QSFP to SFP+ adapter (QSA): goes in a QSFP28 port of the lab C9500X-28C8D and holds one 6e | Cisco CVR-QSFP-SFP10G= | 1 | quote | quote | https://www.cdw.com/product/cisco-network-adapter/3234087 |
 | 6e | 10G optic, 10GBASE-SR SFP+ (multimode, LC). One in 6d (lab end), one in an SFP+ port of item 7 (our end). | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
 | 7 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,100 | $1,100 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
 | 8 | Blanking panels, tool-less 1U, 10-pack (both racks) | Vertiv VRA2000 | 8 | $85 | $680 | https://www.cdw.com/product/vertiv-rack-toolless-airflow-blanking-panel-1u/5323823 |
@@ -69,6 +69,6 @@ build comes to $195,249 plus the quoted items, leaving **$54,751** under $250,00
    apart. Does the rack-mount kit for item 4 fit?
 2. **Lead time** for each item, especially item 4.
 3. **Switch configuration (item 4).** Please confirm the quote is for port-side exhaust airflow
-   (NXA-PAC-650W-PE power supplies and NXA-FAN-35CFM-PE fans, not the -PI parts), and list the NX-OS
-   license and term included.
+   (NXA-PAC-650W-PE power supplies and NXA-FAN-35CFM-PE fans, not the -PI parts), that the power supplies
+   and the full set of fans are included, and that the license is NX-OS Essentials at the shortest term.
 4. **10G optic in item 7 (6e).** Please confirm the Catalyst C1300-24T-4X accepts Cisco SFP-10G-SR-S.
