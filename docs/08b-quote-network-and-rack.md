@@ -35,23 +35,24 @@ lengths because the cable route is not measured yet; the unused length is the sp
 
 | # | Item | Part / model | Qty | Est. each | Est. total | Link |
 |---|---|---|---|---|---|---|
-| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack. License: NX-OS (DCN) Essentials, shortest term offered (3 years); we do not need Advantage. 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3, with 2 x NXA-PAC-650W-PE and NXA-FAN-35CFM-PE fans | 1 | quote | quote | https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067 (power supply: https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988, fan: https://www.cdw.com/product/cisco-network-device-fan-module/5497378) |
-| 5 | 25G SFP28 passive direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Cisco SFP-H25G-CU3M= | 10 | quote | quote | https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569 |
-| 6a | 100G optic, QSFP28 BiDi, multimode, LC duplex. Two go in the lab C9500X-28C8D, two in our switch (item 4): one at each end of each data link. | Cisco QSFP-40/100-SRBD= | 4 | quote | quote | https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042 |
-| 6b | Fiber cord, LC-LC duplex, OM4 multimode, **8 m**. Two for the data links (6a to 6a), one for the management link (6e to 6e). Plenum or riser rated if the lab requires. | any (example: Axiom) | 3 | quote | quote | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521 |
-| 6c | Fiber cord, LC-LC duplex, OM4 multimode, **15 m** (same as 6b, longer, in case the route is longer than estimated) | any (example: Axiom) | 3 | quote | quote | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985 |
-| 6d | QSFP to SFP+ adapter (QSA): goes in a QSFP28 port of the lab C9500X-28C8D and holds one 6e | Cisco CVR-QSFP-SFP10G= | 1 | quote | quote | https://www.cdw.com/product/cisco-network-adapter/3234087 |
-| 6e | 10G optic, 10GBASE-SR SFP+ (multimode, LC). One in 6d (lab end), one in an SFP+ port of item 7 (our end). | Cisco SFP-10G-SR-S | 2 | $500 | $1,000 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
-| 7 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,100 | $1,100 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
-| 8 | Blanking panels, tool-less 1U, 10-pack (both racks) | Vertiv VRA2000 | 8 | $85 | $680 | https://www.cdw.com/product/vertiv-rack-toolless-airflow-blanking-panel-1u/5323823 |
+| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack. License: NX-OS (DCN) Essentials, shortest term offered (3 years); we do not need Advantage. 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3, with 2 x NXA-PAC-650W-PE and NXA-FAN-35CFM-PE fans | 1 | $30,993.93 (switch $29,297.99, 2 x power supply $487.99, 4 x fan $179.99) + license | $30,993.93 + license | https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067 (power supply: https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988, fan: https://www.cdw.com/product/cisco-network-device-fan-module/5497378) |
+| 5 | 25G SFP28 passive direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Cisco SFP-H25G-CU3M= | 10 | $129.99 | $1,299.90 | https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569 |
+| 6a | 100G optic, QSFP28 BiDi, multimode, LC duplex. Two go in the lab C9500X-28C8D, two in our switch (item 4): one at each end of each data link. | Cisco QSFP-40/100-SRBD= | 4 | $2,014.99 | $8,059.96 | https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042 |
+| 6b | Fiber cord, LC-LC duplex, OM4 multimode, **8 m**. Two for the data links (6a to 6a), one for the management link (6e to 6e). Plenum or riser rated if the lab requires. | any (example: Axiom) | 3 | $35.99 | $107.97 | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521 |
+| 6c | Fiber cord, LC-LC duplex, OM4 multimode, **15 m** (same as 6b, longer, in case the route is longer than estimated) | any (example: Axiom) | 3 | $45.99 | $137.97 | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985 |
+| 6d | QSFP to SFP+ adapter (QSA): goes in a QSFP28 port of the lab C9500X-28C8D and holds one 6e | Cisco CVR-QSFP-SFP10G= | 1 | $377.99 | $377.99 | https://www.cdw.com/product/cisco-network-adapter/4890545 |
+| 6e | 10G optic, 10GBASE-SR SFP+ (multimode, LC). One in 6d (lab end), one in an SFP+ port of item 7 (our end). | Cisco SFP-10G-SR-S | 2 | $639.99 | $1,279.98 | https://www.cdwg.com/product/cisco-sfp-transceiver-module-10gbe/3731455 |
+| 7 | Management switch, 24 x 1G, 4 x 10G SFP+ | Cisco Catalyst C1300-24T-4X | 1 | $1,047.99 | $1,047.99 | https://www.cdw.com/product/cisco-catalyst-1300-24t-4x-switch-24-ports-managed-rack-mountable/8112270 |
+| 8 | Blanking panels, tool-less 1U, 10-pack (both racks) | Vertiv VRA2000 | 8 | $98.99 | $791.92 | https://www.cdw.com/product/vertiv-rack-toolless-airflow-blanking-panel-1u/5323823 |
 | 9 | Cat6 patch cable, 10 ft (3 m), 10-pack. 3 ft is too short: BMC ports at U1-U7 run to the management switch at U40. | any | 2 | $72 | $144 | |
-| 10 | Encrypted SSD, 4 TB, FIPS 140-2 (or the lab's approved type) | Apricorn Aegis Padlock Fortress A25-3PL256-S4000F | 2 | $1,800 | $3,600 | https://www.cdw.com/product/apricorn-4tb-fips-validated-aegis/4456344 |
+| 10 | Encrypted SSD, 4 TB, FIPS 140-2 (or the lab's approved type) | Apricorn Aegis Padlock Fortress A25-3PL256-S4000F | 2 | $2,774.99 | $5,549.98 | https://www.cdw.com/product/apricorn-4tb-fips-validated-aegis/4456344 |
 | 11 | Rack console, 1U, 17" LCD, keyboard, VGA/USB | StarTech RKCONS1701 | 1 | $1,200 | $1,200 | https://www.startech.com/en-us/server-management/rkcons1701 |
 | 12 | Setup kit (list below) | see list | 1 lot | $500 | $500 | |
 
-**Total: $8,224 plus items 4, 5, and 6a-6d** (to be quoted). With the servers and GPUs (08a, $187,025), the
-build comes to $195,249 plus the quoted items, leaving **$54,751** under $250,000 for them. The switch
-(item 4, with its license) is the large one; please flag it if items 4, 5, and 6a-6d together pass $54,751.
+**Total: $51,491.59 plus the item 4 license** (to be quoted). Prices are CDW's advertised prices on
+2026-11-06, except items 9, 11 and 12 (estimates); item 4 counts the 4 fan modules its install guide lists. With the servers and GPUs (08a,
+$187,025), the build comes to $238,516.59 plus the license, leaving **$11,483.41** under $250,000 for the
+license and contingency. Please flag it if your quote for items 4-12, license included, passes $62,975.
 
 **Setup checklist (item 12)**
 

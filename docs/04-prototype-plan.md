@@ -90,7 +90,8 @@ cybersecurity review first ([06](06-software-delivery.md), section 6). The hardw
 ## 4. If rehearsal is not enough
 
 If GPU-side problems keep showing up first in the lab, add a single-GPU test machine on the unclassified
-side. The budget has about $48,000 left after the order ([02](02-budget-and-bom.md), section 3). It installs
+side. At CDW prices the budget has only about $11,500 left after the order, before the switch license
+([02](02-budget-and-bom.md), section 3), so this needs the GPU or government-price savings listed there. It installs
 with `deploy.sh apps --single-node` (one PostgreSQL instance, one model copy, no Whisper), from the same
 bundle the lab gets. Nothing in this plan changes to add it.
 

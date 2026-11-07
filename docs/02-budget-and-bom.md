@@ -9,12 +9,13 @@ not to have staging, so the lab-only figures are what count.
 
 | Tier | BOM with staging | Lab only (no staging) | Lab only + additions (section 2) | Fits $250k? |
 |---|---|---|---|---|
-| 20 users | $221,086 | $155,048 | $165,382 | Yes |
-| **50 users** | $257,578 | **$191,540** | **$201,874** | **Yes** |
-| 100 users | $382,869 | $316,831 | about $327,000 | No |
+| 20 users | $221,086 | $155,048 | about $202,000 | Yes |
+| **50 users** | $257,578 | **$191,540** | **$238,517 + switch license** | **Yes, $11,483 left** |
+| 100 users | $382,869 | $316,831 | about $364,000 | No |
 
 **Decision: buy the 50-user tier, no staging.** It fills all four GPU slots in gpu01 and keeps all three
-service nodes. The money that was staging pays for the two extra GPUs, with about $48,000 left.
+service nodes. The money that was staging pays for the two extra GPUs, the Cisco Nexus switch, and the install items,
+with about $11,500 left before the switch license (section 3).
 Growing to 100 users later means adding a second GPU server in rack 2. Nothing gets replaced.
 
 BOM sizing (`Assumptions` tab, column C): 50 users, 10 simultaneous requests at peak, 2 GPUs for the
@@ -36,13 +37,13 @@ Part numbers and links are in the quote request, [08a](08a-quote-servers-submitt
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
-| A1 | Uplink lot: 4 x Cisco QSFP-40/100-SRBD (2 per end), OM4 multimode LC cords in two lengths, and a separate 10G management link (QSA adapter, 2 x Cisco SFP-10G-SR-S) | 1 lot | $3,110 (placeholder) | Our switch to the lab network. The 100G parts are out for quote; the old 10G lot price stays in the totals until then. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
-| A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,100 | Keeps server management (BMC) off the data network |
-| A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $824 | The racks have none, and hot aisle containment does not work with open U spaces |
-| A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $3,600 | Software and model transfer. Use the lab's approved type; drop if the lab provides it. |
+| A1 | Uplink lot: 4 x Cisco QSFP-40/100-SRBD (2 per end), OM4 multimode LC cords (3 x 8 m, 3 x 15 m), and a separate 10G management link (QSA adapter, 2 x Cisco SFP-10G-SR-S) | 1 lot | $9,963.87 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
+| A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,047.99 | Keeps server management (BMC) off the data network |
+| A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $935.92 | The racks have none, and hot aisle containment does not work with open U spaces |
+| A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $5,549.98 | Software and model transfer. Use the lab's approved type; drop if the lab provides it (saves $5,550). |
 | A5 | Rack console, 1U LCD and keyboard | 1 | $1,200 | First boot and BIOS setup. The lab has no crash cart. |
 | A6 | Setup kit (labels, velcro, cage nuts, ESD strap, fiber cleaner, console cables, hand tools) | 1 lot | $500 | Needed on install day |
-| | **Additions total** | | **$10,334** | |
+| | **Additions total** | | **$19,197.76** | |
 
 Only if needed, not in the total:
 
@@ -50,7 +51,8 @@ Only if needed, not in the total:
 |---|---|---|---|
 | C1 | Red Hat Enterprise Linux Server subscriptions, 4 servers (gpu01, svc01-svc03), 1 year | $5,600 per year | Only if the lab requires RHEL. Rocky Linux 9 is free. Not in the original BOM. |
 
-All items are estimates. Get quotes before you finalize.
+A1-A4 use CDW's advertised prices on 2026-11-06 (links in 08b); A5, A6, and the Cat6 cables are estimates.
+Get quotes before you finalize.
 
 **Terms used above:**
 
@@ -74,21 +76,28 @@ All items are estimates. Get quotes before you finalize.
 | Line | Amount |
 |---|---|
 | BOM hardware, 50-user tier, lab only | $191,540.00 |
-| Additions (A1-A6) | $10,334.00 |
-| **Committed subtotal** | **$201,874.00** |
-| Contingency left inside $250k | $48,126.00 (19.3%) |
+| Switch and 25G cables at CDW prices, minus the BOM's Dell switch ($3,515) and cables ($1,000): $32,293.83 - $4,515 (section 4, item 3) | $27,778.83 |
+| Additions (A1-A6) | $19,197.76 |
+| **Committed subtotal** | **$238,516.59** |
+| Left inside $250k, for the NX-OS license and contingency | $11,483.41 (4.6%) |
 | **Total** | **$250,000.00** |
 
-If RHEL (C1) is needed, the subtotal is $207,474 and $42,526 (17.0%) is left.
+Same total another way: servers and GPUs (08a) $187,025 plus network, rack, and setup (08b) $51,491.59.
 
-Consider holding part of the remainder for a small single-GPU test machine, if the first lab
-installs show that rehearsing on the build workstation alone is not enough ([04](04-prototype-plan.md)).
+If RHEL (C1) is needed, the subtotal is $244,116.59 and $5,883.41 (2.4%) is left.
 
-Two things can add margin:
+**The margin is thin.** The switch (about $31,000 at CDW) is most of the change. Ask for NX-OS Essentials,
+not Advantage ($19,405 at CDW), or the license alone breaks the budget.
+
+A small single-GPU test machine ([04](04-prototype-plan.md)) no longer fits unless the margin below comes through.
+
+Three things can add margin:
 
 1. **GPU price.** The BOM uses $18,246 per GPU (Thinkmate quote). CDW listed the same card at
    $13,824.99 in late October 2026 (CDW 8426124). Across 4 GPUs that saves about $17,684.
-2. **Government pricing.** The BOM already notes GSA and SEWP may come in lower than commercial.
+2. **Government pricing.** The BOM already notes GSA and SEWP may come in lower than commercial. Cisco
+   partners also often quote the switch below CDW's advertised price.
+3. **Transfer drives (A4).** If the lab supplies approved drives, drop A4 and save $5,550.
 
 ## 4. Items to fix in the BOM workbook
 
@@ -103,7 +112,8 @@ These are corrections, not new scope:
    (48 x 1/10/25G SFP28, 6 x 40/100G QSFP28), ordered **port-side exhaust** (NXA-PAC-650W-PE power supplies,
    NXA-FAN-35CFM-PE fans). Reason: every optic between it and the lab's Cisco C9500X-28C8D is then listed in
    Cisco's compatibility matrix, and the lab already runs this model. Price by quote, including the NX-OS
-   license subscription Cisco sells with it. The totals rise by (quote minus $3,515). Its ports face the hot
+   NX-OS Essentials license (shortest term). At CDW prices the switch with power supplies and fans is
+   $30,993.93 plus the license, so the totals rise by about $27,479 plus the license. Its ports face the hot
    aisle (see [05-rack-build-guide.md](05-rack-build-guide.md)); the wrong airflow pulls hot air in.
 4. **Power cord type** for the GPU server PSUs (C19/C20 vs C13/C14). Ask Thinkmate when you request the
    quote. The configurator's cord options are NEMA 5-15P wall plugs, which do not fit a 208V rack PDU.

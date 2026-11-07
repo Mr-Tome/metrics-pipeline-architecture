@@ -4,7 +4,7 @@ Hardware, facility, and delivery plan for the GPU servers behind the metrics ana
 goal is getting the SI service (language model, gateway, chat page, and access from Jupyter, VS Code,
 and MATLAB) running in the lab. The rest of the pipeline follows on the same platform.
 
-- **Budget:** $250,000.00. The 50-user build (one GPU server with 4 GPUs, no staging) plus the install items comes to $201,874, with $48,126 left ([02](docs/02-budget-and-bom.md)).
+- **Budget:** $250,000.00. The 50-user build (one GPU server with 4 GPUs, no staging) plus the install items comes to $238,517 at CDW prices, with $11,483 left for the switch license and contingency ([02](docs/02-budget-and-bom.md)).
 - **Site:** existing Vertiv racks (empty, next to ACE 15) with Liebert CRV in-row cooling.
   Our switch, a Cisco Nexus N93180YC-FX3, connects directly to the lab's C9500X-28C8D: 2 x 100G for data,
   plus a separate 10G link from our management switch ([03](docs/03-network-and-switch-capacity.md), section 3).
