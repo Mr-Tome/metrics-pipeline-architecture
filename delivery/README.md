@@ -15,9 +15,10 @@ lib.sh                     shared helpers
 20-build-zarf-package.sh   all charts and images in one Zarf package
 30-pull-models.sh          model weights, safetensors only, checksum-verified
 40-pull-vuln-db.sh         Trivy and vulnerability databases
+45-scan-images.sh          scans every packaged image, reports in scanner/reports/
 50-pull-client-tools.sh    Jupyter AI wheels, VS Code extension
 60-pull-nvidia-driver.sh   NVIDIA driver installer
-90-seal.sh                 checksums and signature
+90-seal.sh                 checksums and signature (a signing key is required)
 pull-all.sh                runs all of the above in order
 
 zarf/                      package template, chart values, manifests

@@ -24,7 +24,9 @@ and MATLAB) running in the lab. The rest of the pipeline follows on the same pla
 | 08b | [Quote request: network, rack, setup](docs/08b-quote-network-and-rack.md) | **Send to purchasing.** Switch, cables, optics, rack items | Ready to send |
 | 09 | [Site visit checklist](docs/09-site-visit-checklist.md) | What to look at and ask in the server room | Ready |
 | 10 | [Email to the lab network team](docs/10-lab-network-team-email.md) | Lab network team emails and answers. **Send the short Nexus note** (last section) | Note ready to send |
+| 11 | [Sandbox bring-up plan](docs/11-sandbox-bringup-plan.md) | Making the SI workbench start and work in an offline sandbox; what must be fixed before the air gap | Draft |
 | | [Rack 1 install sim](training/rack1-install-sim.html) | **Installers.** Interactive practice run of doc 05: delivery check to sign-off. Open in a browser, works offline. | Ready |
+| | [SI bring-up sim](training/si-bringup-sim.html) | **Installers.** Continues from the rack sim: verify the bundle, build the cluster, deploy the SI service, issue keys, run the checks, connect analysts. Three random faults per run. Works offline. | Draft |
 
 ## Diagrams
 
@@ -42,7 +44,7 @@ README.md                                      this page
 Metrics_Analysis_Pipeline_Hardware_BOM.xlsx    hardware BOM (Summary, BOM, Assumptions, Software tabs)
 metrics_architecture.html                      full pipeline architecture (interactive)
 docs/                                          numbered documents above, diagrams/
-training/                                      rack1-install-sim.html, interactive install practice
+training/                                      rack1-install-sim.html and si-bringup-sim.html, interactive practice
 delivery/                                      scripts that build the release bundle (connected side)
 delivery/intake/                               scripts that verify and install it (rehearsal VM and lab)
 validate/                                      hardware, network, and load checks

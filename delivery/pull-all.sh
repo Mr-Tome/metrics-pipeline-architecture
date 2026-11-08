@@ -5,11 +5,13 @@
 #   SKIP=30 ./pull-all.sh             skip steps by number (example: models already pulled)
 #   BUNDLE_DIR=/mnt/xfer/b1 ./pull-all.sh
 #
+# Set COSIGN_KEY or GPG_KEY first: 90-seal.sh refuses to make an unsigned bundle.
+#
 # Each step is safe to re-run; downloads resume and finished files are skipped.
 source "$(dirname "$0")/lib.sh"
 
 steps=(00-check-tools 01-check-latest 10-pull-rke2 15-pull-zarf 20-build-zarf-package
-       30-pull-models 40-pull-vuln-db 50-pull-client-tools 60-pull-nvidia-driver 90-seal)
+       30-pull-models 40-pull-vuln-db 45-scan-images 50-pull-client-tools 60-pull-nvidia-driver 90-seal)
 
 exec > >(tee -a "${BUNDLE_DIR%/}.pull.log") 2>&1  # log sits next to the bundle, not in it, so sealing is not disturbed
 log "bundle: ${BUNDLE_DIR}"

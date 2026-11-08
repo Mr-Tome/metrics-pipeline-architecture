@@ -38,9 +38,14 @@ download() {
     mv "${dest}.part" "${dest}"
 }
 
-# Record a line in the bundle manifest (what is in the bundle and where it came from).
+# manifest KEY TEXT: record what is in the bundle and where it came from. One line per key,
+# so re-running a step replaces its line instead of adding a duplicate.
 manifest() {
-    printf '%s\n' "$*" >> "${BUNDLE_DIR}/MANIFEST.txt"
+    local key="$1"; shift
+    local file="${BUNDLE_DIR}/MANIFEST.txt"
+    touch "${file}"
+    awk -v k="${key}:" '$1 != k' "${file}" > "${file}.tmp" && mv "${file}.tmp" "${file}"
+    printf '%s: %s\n' "${key}" "$*" >> "${file}"
 }
 
 # URL-encode the '+' in versions like v1.33.1+rke2r1

@@ -44,6 +44,10 @@ spec:
               value: "1"
             - name: DO_NOT_TRACK
               value: "1"
+            # gpt-oss's tokenizer (openai_harmony) downloads its vocabulary unless this points at a local
+            # copy. 30-pull-models.sh puts the files in models/tiktoken.
+            - name: TIKTOKEN_ENCODINGS_BASE
+              value: /models/tiktoken
           ports:
             - containerPort: 8000
           resources:

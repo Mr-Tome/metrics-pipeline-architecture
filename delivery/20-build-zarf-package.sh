@@ -46,6 +46,11 @@ scan GPU_OPERATOR gpu-operator gpu-operator "${GPU_OPERATOR_VERSION}" gpu-operat
 scan DATABASE cnpg cloudnative-pg "${CNPG_CHART_VERSION}" cnpg.yaml \
      --repo https://cloudnative-pg.github.io/charts --namespace cnpg-system
 echo "${POSTGRES_IMAGE}" >> "${build}/images/DATABASE.txt"
+# Plain manifests: one image each, listed here so they also reach IMAGES.txt (and the scan in step 45).
+echo "${VLLM_IMAGE}"    > "${build}/images/MODEL_SERVER.txt"
+echo "${WHISPER_IMAGE}" > "${build}/images/TRANSCRIPTION.txt"
+echo "${EMBED_IMAGE}"   > "${build}/images/EMBEDDING.txt"
+echo "${TIKA_IMAGE}"    > "${build}/images/OCR.txt"
 scan GATEWAY litellm oci://ghcr.io/berriai/litellm-helm "${LITELLM_CHART_VERSION}" litellm.yaml --namespace si
 scan CHAT open-webui open-webui "${OPEN_WEBUI_CHART_VERSION}" open-webui.yaml \
      --repo https://helm.openwebui.com --namespace si
@@ -66,5 +71,5 @@ log "creating Zarf package (downloads all charts and images; this takes a while)
 
 cp "${build}/zarf.yaml" "${BUNDLE_DIR}/package/zarf.yaml.rendered"
 cat "${build}"/images/*.txt | sort -u > "${BUNDLE_DIR}/package/IMAGES.txt"
-manifest "zarf package ${RELEASE_NAME} ${RELEASE_VERSION}: $(wc -l < "${BUNDLE_DIR}/package/IMAGES.txt") images (see package/IMAGES.txt)"
+manifest zarf-package "${RELEASE_NAME} ${RELEASE_VERSION}: $(wc -l < "${BUNDLE_DIR}/package/IMAGES.txt") images (see package/IMAGES.txt)"
 log "package ready in ${BUNDLE_DIR}/package"

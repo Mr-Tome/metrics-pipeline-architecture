@@ -24,12 +24,53 @@ extraEnvVars:
     value: "true"
   - name: ANONYMIZED_TELEMETRY
     value: "false"
+  # Speech-to-text goes to Whisper through the gateway (same URL and key as chat). Without this, the
+  # chat page tries to download its own Whisper model, which fails offline.
+  - name: AUDIO_STT_ENGINE
+    value: openai
+  - name: AUDIO_STT_MODEL
+    value: whisper
+  # Document upload. Embeddings come from arctic-embed through the gateway (manifests/embed.yaml); the
+  # openai engine also stops the chat page from trying to download its built-in embedding model.
+  # Vectors are stored in the chat page's own volume (Chroma), next to its chat history.
+  - name: RAG_EMBEDDING_ENGINE
+    value: openai
+  - name: RAG_EMBEDDING_MODEL
+    value: arctic-embed
+  # The model expects questions to start with "query: " and document text with nothing.
+  - name: RAG_EMBEDDING_QUERY_PREFIX
+    value: "query: "
+  # Default is 1 piece per request, which makes a large upload thousands of calls.
+  - name: RAG_EMBEDDING_BATCH_SIZE
+    value: "32"
+  # Larger pieces and more of them than the defaults (1000 characters, 3 pieces): about 5,000 tokens of
+  # document per question, well inside the model's 65k context.
+  - name: CHUNK_SIZE
+    value: "2000"
+  - name: CHUNK_OVERLAP
+    value: "200"
+  - name: RAG_TOP_K
+    value: "10"
+  # Text extraction goes to Tika (manifests/tika.yaml), which also OCRs scanned PDF pages.
+  - name: CONTENT_EXTRACTION_ENGINE
+    value: tika
+  - name: TIKA_SERVER_URL
+    value: http://tika.si.svc:9998
+  # Megabytes; matches the ingress body limit below.
+  - name: RAG_FILE_MAX_SIZE
+    value: "50"
+# The settings above are read on first start only; after that they live in the chat page database
+# (Admin Panel, Settings).
 persistence:
   enabled: true
   size: 20Gi
 ingress:
   enabled: true
   class: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
   host: "###ZARF_VAR_CHAT_HOST###"
   tls: true
   existingSecret: si-tls

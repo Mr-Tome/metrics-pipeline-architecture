@@ -1,6 +1,13 @@
-# Models to pull. One per line:  name  repo  revision  layout
+# Models to pull. One per line:  name  repo  revision  layout  format
 #   revision: a branch or tag; the script resolves it to a commit and records it.
 #   layout:   local = plain folder (vLLM reads it), cache = Hugging Face cache layout (whisper server reads it)
+#   format:   safetensors = only .safetensors weights are accepted.
+#             ct2 = CTranslate2 (faster-whisper). Its weights are one file, model.bin. That is a flat binary,
+#             not pickle; the pull and verify.sh accept exactly that one file, and only if it starts with the
+#             CTranslate2 binary header. Every other pickle-style file is still refused (A17).
 # Model selection, origin, and license are subject to program approval (BOM, Assumptions section 2).
-gpt-oss-120b              openai/gpt-oss-120b               main  local
-faster-whisper-large-v3   Systran/faster-whisper-large-v3   main  cache
+gpt-oss-120b              openai/gpt-oss-120b               main  local  safetensors
+faster-whisper-large-v3   Systran/faster-whisper-large-v3   main  cache  ct2
+# Embedding model for chat-page document upload. Apache 2.0, 568M parameters, 8192-token input.
+# BAAI/bge-m3 is the usual pick but ships pickle weights only (pytorch_model.bin), so it fails A17.
+snowflake-arctic-embed-l-v2.0  Snowflake/snowflake-arctic-embed-l-v2.0  main  local  safetensors

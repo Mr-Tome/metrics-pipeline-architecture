@@ -31,6 +31,6 @@ done
 # The upstream manifest pins busybox by bare name; point it at the exact version we ship.
 sed -i "s#image: busybox\b.*#image: ${BUSYBOX_IMAGE#docker.io/library/}#" "${out}/local-path-storage.yaml"
 
-manifest "rke2 ${RKE2_VERSION} from ${base}"
-manifest "local-path-provisioner ${LOCAL_PATH_VERSION}, ${BUSYBOX_IMAGE}"
+manifest rke2 "${RKE2_VERSION} from ${base}"
+manifest local-path "local-path-provisioner ${LOCAL_PATH_VERSION}, ${BUSYBOX_IMAGE}"
 log "RKE2 ${RKE2_VERSION} ready in ${out}"

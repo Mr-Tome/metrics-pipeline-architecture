@@ -1,0 +1,79 @@
+# Embedding model for chat-page document upload (Text Embeddings Inference, CPU build).
+# The chat page cuts each uploaded file into pieces, this model turns each piece into a vector, and a question
+# pulls back the closest pieces. It is called through the gateway as model "arctic-embed".
+#
+# It runs on CPU on the node that holds /var/lib/models (gpu01 in the lab, the only node in the rehearsal VM):
+# all four GPUs are taken (three language model copies, one Whisper), and CPU lets the rehearsal test uploads.
+# Questions embed in well under a second; a 200-page PDF takes on the order of a minute to index.
+# If that is too slow, move it to a slice of the Whisper GPU (docs/11, W20).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embed
+  namespace: si
+  labels:
+    app: embed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: embed
+  template:
+    metadata:
+      labels:
+        app: embed
+    spec:
+      nodeSelector:
+        node-role.si/models: "true"
+      containers:
+        - name: embed
+          image: ${EMBED_IMAGE}
+          args:
+            - --model-id=/models/snowflake-arctic-embed-l-v2.0
+            - --served-model-name=arctic-embed
+            - --port=8000
+            # Kubernetes sets HOSTNAME to the pod name, and the server reads HOSTNAME as its listen address.
+            - --hostname=0.0.0.0
+            # Over-long input is cut to the model's 8192 tokens (the server's default, --auto-truncate).
+          env:
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: DO_NOT_TRACK
+              value: "1"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "4"
+              memory: 4Gi
+            limits:
+              cpu: "16"
+              memory: 8Gi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+          volumeMounts:
+            - name: models
+              mountPath: /models
+              readOnly: true
+      volumes:
+        - name: models
+          hostPath:
+            path: /var/lib/models
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: embed
+  namespace: si
+spec:
+  selector:
+    app: embed
+  ports:
+    - port: 8000
+      targetPort: 8000

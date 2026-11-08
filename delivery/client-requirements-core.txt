@@ -1,0 +1,3 @@
+# Fallback for a Python version that is too new for Jupyter AI's packages: the OpenAI client alone, which is
+# enough for scripts and notebooks to call the gateway (docs/06, section 5). Same pin as client-requirements.txt.
+openai==2.48.0

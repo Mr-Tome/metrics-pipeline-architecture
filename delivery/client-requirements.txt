@@ -1,6 +1,14 @@
 # Python packages analysts install on their own machines (Jupyter AI and the OpenAI client).
-# 50-pull-client-tools.sh downloads wheels for these plus all dependencies, and writes the
-# resolved versions to clients/RESOLVED.txt so the exact set is recorded.
-jupyter-ai
-langchain-openai
-openai
+# 50-pull-client-tools.sh downloads wheels for these plus all dependencies, for every Python version in
+# CLIENT_PYTHON_VERSIONS, and lists the result in clients/SUPPORT.txt and clients/RESOLVED.txt.
+#
+# Pinned so every analyst gets the same versions (checked 2026-11-07: resolves on Python 3.9 to 3.14, Linux
+# and Windows). Jupyter AI 3.x needs Python 3.10+, has a different setup, and adds agent and MCP components;
+# staying on 2.x is deliberate until that is reviewed (docs/11).
+jupyter-ai==2.31.7
+langchain-openai==0.3.35
+openai==2.48.0
+# Not used directly. Pinned so that on a Python version without wheels for these (3.15 in November 2026),
+# pip fails in seconds instead of trying every older release for several minutes.
+langchain==0.3.30
+langchain-core==0.3.86

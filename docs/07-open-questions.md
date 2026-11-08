@@ -55,7 +55,8 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 |---|---|---|---|---|
 | L1 | Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? Is there a package mirror? Asked in the quote email ([08a](08a-quote-servers-submitted.md), question 6). | Lab IT, ISSM | Rocky Linux 9 (free); RHEL 9 if required, at about $1,400 per server per year | Our choice unless accreditation says otherwise. It matters for two reasons: the NVIDIA driver is built against the OS kernel, so the driver package must match it; and RHEL needs paid subscriptions (not in the BOM), while Rocky Linux 9 is free and compatible. |
 | L2 | Does the lab already run Kubernetes? | Lab IT | | No. We bring our own (RKE2). |
-| L3 | Python versions on analyst machines, and Windows or Linux? | Lab IT | | Many versions, mostly Windows, some Linux. Client packages must cover Python 3.9 to 3.13 on both. |
+| L3 | Python versions on analyst machines, and Windows or Linux? | Lab IT | | Many versions, mostly Windows, some Linux. Many use Anaconda. Client packages must cover Python 3.9 and newer (3.14, 3.15) on both. |
+| L6 | How do analysts get Python packages into the lab today (an internal conda or PyPI mirror, transfer media, something else)? Is the lab's Anaconda use licensed? (Anaconda's default channel needs a paid license for larger organizations.) | Lab IT | Our wheel folder (`clients/`) | Open. If there is already a mirror, publish our pinned packages there instead of a wheel folder. The architecture's in-lab Nexus would become that mirror later. |
 | L5 | Internet access during the initial build and debug? | ISSM | No. All software arrives on transfer media. | |
 | L4 | Is MATLAB allowed to make HTTPS calls to an internal service? | Lab IT | Yes | |
 

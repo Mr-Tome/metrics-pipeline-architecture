@@ -75,7 +75,7 @@ components:
         files:
           - manifests/vllm.yaml
     images:
-      - "${VLLM_IMAGE}"
+      ${IMAGES_MODEL_SERVER}
 
   - name: transcription
     description: faster-whisper speech-to-text with an OpenAI-compatible API
@@ -86,7 +86,29 @@ components:
         files:
           - manifests/whisper.yaml
     images:
-      - "${WHISPER_IMAGE}"
+      ${IMAGES_TRANSCRIPTION}
+
+  - name: embedding
+    description: Embedding model on CPU for chat-page document upload (Text Embeddings Inference)
+    required: true
+    manifests:
+      - name: embed
+        namespace: si
+        files:
+          - manifests/embed.yaml
+    images:
+      ${IMAGES_EMBEDDING}
+
+  - name: ocr
+    description: Apache Tika text extraction with OCR for chat-page document upload (scanned PDFs, Office files)
+    required: true
+    manifests:
+      - name: tika
+        namespace: si
+        files:
+          - manifests/tika.yaml
+    images:
+      ${IMAGES_OCR}
 
   - name: gateway
     description: LiteLLM gateway - API keys, logging, usage limits. Jupyter, VS Code, and MATLAB call this.

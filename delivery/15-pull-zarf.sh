@@ -19,5 +19,5 @@ log "verifying Zarf checksums"
 chmod +x "${out}/${bin}"
 ln -sf "${bin}" "${out}/zarf"
 
-manifest "zarf ${ZARF_VERSION} cli + init package from ${base}"
+manifest zarf "${ZARF_VERSION} cli + init package from ${base}"
 log "Zarf ${ZARF_VERSION} ready in ${out}"

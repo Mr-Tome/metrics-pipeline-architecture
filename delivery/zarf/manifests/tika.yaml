@@ -1,0 +1,89 @@
+# Text extraction for chat-page document upload (Apache Tika server, "full" image with Tesseract OCR).
+# The chat page sends every uploaded file here and gets plain text back: PDF, Word, Excel, PowerPoint, and more.
+# For a PDF page with little or no text (a scan), Tika runs OCR on the page image. Without this, a scanned PDF
+# gives the chat page nothing to search.
+#
+# Runs on CPU on the service nodes. OCR is slow: roughly a few seconds per scanned page (estimate, not measured),
+# so a 100-page scan takes minutes. The chat page's ingress allows 10 minutes per request (docs/11, W20).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tika-config
+  namespace: si
+data:
+  tika-config.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <properties>
+      <parsers>
+        <parser class="org.apache.tika.parser.DefaultParser">
+          <parser-exclude class="org.apache.tika.parser.pdf.PDFParser"/>
+        </parser>
+        <!-- auto: read the text layer; OCR only the pages that have too little text (scans). -->
+        <parser class="org.apache.tika.parser.pdf.PDFParser">
+          <params>
+            <param name="ocrStrategy" type="string">auto</param>
+          </params>
+        </parser>
+      </parsers>
+    </properties>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tika
+  namespace: si
+  labels:
+    app: tika
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tika
+  template:
+    metadata:
+      labels:
+        app: tika
+    spec:
+      nodeSelector:
+        node-role.si/service: "true"
+      containers:
+        - name: tika
+          image: ${TIKA_IMAGE}
+          args:
+            - -c
+            - /config/tika-config.xml
+          ports:
+            - containerPort: 9998
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+          readinessProbe:
+            httpGet:
+              path: /tika
+              port: 9998
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: tika-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tika
+  namespace: si
+spec:
+  selector:
+    app: tika
+  ports:
+    - port: 9998
+      targetPort: 9998

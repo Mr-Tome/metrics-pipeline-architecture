@@ -16,5 +16,5 @@ download "https://us.download.nvidia.com/tesla/${NVIDIA_DRIVER_VERSION}/${run}" 
 chmod +x "${out}/${run}"
 sh "${out}/${run}" --check >/dev/null || die "driver installer failed its own integrity check"
 
-manifest "nvidia driver ${NVIDIA_DRIVER_VERSION} sha256 $(sha256sum "${out}/${run}" | cut -d' ' -f1)"
+manifest nvidia-driver "${NVIDIA_DRIVER_VERSION} sha256 $(sha256sum "${out}/${run}" | cut -d' ' -f1)"
 log "driver ready in ${out}"

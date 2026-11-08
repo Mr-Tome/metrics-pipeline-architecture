@@ -19,5 +19,5 @@ log "downloading vulnerability databases"
 "${out}/bin/trivy" image --download-db-only --cache-dir "${out}/trivy-cache"
 "${out}/bin/trivy" image --download-java-db-only --cache-dir "${out}/trivy-cache"
 
-manifest "trivy ${TRIVY_VERSION} + vulnerability DB downloaded $(date -u +%Y-%m-%dT%H:%MZ)"
+manifest trivy "${TRIVY_VERSION} + vulnerability DB downloaded $(date -u +%Y-%m-%dT%H:%MZ)"
 log "scanner ready in ${out}. Inside the lab: trivy image --skip-db-update --skip-java-db-update --cache-dir ${out##*/}/trivy-cache ..."

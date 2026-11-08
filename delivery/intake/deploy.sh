@@ -3,8 +3,8 @@
 # Run verify.sh first. Steps, in order (see docs/06-software-delivery.md):
 #
 #   On svc01 (or the single node):          ./deploy.sh server-init
-#   On svc02 and svc03:                     RKE2_TOKEN=... ./deploy.sh server-join <svc01-ip>
-#   On gpu01:                               RKE2_TOKEN=... ./deploy.sh agent-join <svc01-ip>
+#   On svc02 and svc03:                     ./deploy.sh server-join <svc01-ip>   (asks for the join token)
+#   On gpu01:                               ./deploy.sh agent-join <svc01-ip>    (or RKE2_TOKEN_FILE=<file>)
 #                                           ./deploy.sh driver
 #                                           ./deploy.sh models
 #   On svc01:                               ./deploy.sh platform
@@ -48,17 +48,29 @@ tls-san:
 write-kubeconfig-mode: "0600"
 EOF
     systemctl enable --now rke2-server
-    log "RKE2 server up. Join token for the other nodes:"
+    log "RKE2 server up. Join token for the other nodes (also in /var/lib/rancher/rke2/server/node-token):"
     cat /var/lib/rancher/rke2/server/node-token
     ;;
 server-join|agent-join)
     first="${1:?usage: $0 ${cmd} <svc01-ip>}"
-    : "${RKE2_TOKEN:?set RKE2_TOKEN to the token printed by server-init}"
+    # The token goes in a root-only file, never on the command line or in the environment, where it
+    # would land in shell history and the process list.
+    tokfile=/etc/rancher/rke2/join-token
+    install -d -m 700 /etc/rancher/rke2
+    if [[ -n "${RKE2_TOKEN_FILE:-}" ]]; then
+        [[ -s "${RKE2_TOKEN_FILE}" ]] || die "RKE2_TOKEN_FILE ${RKE2_TOKEN_FILE} is empty or missing"
+        install -m 600 "${RKE2_TOKEN_FILE}" "${tokfile}"
+    else
+        read -rsp "Join token (printed by server-init on svc01): " token; echo
+        [[ -n "${token}" ]] || die "no token given"
+        ( umask 077; printf '%s\n' "${token}" > "${tokfile}" )
+        unset token
+    fi
     type=server; [[ "${cmd}" == agent-join ]] && type=agent
     install_rke2 "${type}"
     cat > /etc/rancher/rke2/config.yaml <<EOF
 server: https://${first}:9345
-token: ${RKE2_TOKEN}
+token-file: ${tokfile}
 EOF
     systemctl enable --now "rke2-${type}"
     log "joined ${first} as ${type}"
@@ -94,6 +106,14 @@ platform)
     else
         for n in ${SERVICE_NODES:-$(grep -o 'svc[0-9]*' <<<"${nodes}")}; do
             kubectl label "node/${n}" node-role.si/service=true --overwrite
+        done
+    fi
+    log "labels: the node with /var/lib/models runs the embedding model"
+    if [[ $(wc -l <<<"${nodes}") -eq 1 ]]; then
+        kubectl label ${nodes} node-role.si/models=true --overwrite
+    else
+        for n in ${MODEL_NODES:-$(grep -o 'gpu[0-9]*' <<<"${nodes}")}; do
+            kubectl label "node/${n}" node-role.si/models=true --overwrite
         done
     fi
     log "zarf init (in-cluster registry and image agent)"
@@ -132,7 +152,12 @@ gateway-key|user-key)
     alias="open-webui"; [[ "${cmd}" == user-key ]] && alias="${1:?usage: $0 user-key <name>}"
     mk=$(kubectl -n si get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
     kubectl -n si port-forward svc/litellm 14000:4000 >/dev/null 2>&1 &
-    pf=$!; trap 'kill ${pf} 2>/dev/null || true' EXIT; sleep 3
+    pf=$!; trap 'kill ${pf} 2>/dev/null || true' EXIT
+    for i in $(seq 30); do
+        curl -fsS -o /dev/null http://127.0.0.1:14000/health/liveliness && break
+        (( i < 30 )) || die "gateway did not answer through the port-forward in 30 s (kubectl -n si get pods)"
+        sleep 1
+    done
     newkey=$(curl -fsS http://127.0.0.1:14000/key/generate \
         -H "Authorization: Bearer ${mk}" -H 'Content-Type: application/json' \
         -d "{\"key_alias\": \"${alias}\"}" | json_field key)
@@ -153,5 +178,5 @@ status)
     command -v nvidia-smi >/dev/null && nvidia-smi --query-gpu=index,name,temperature.gpu,power.draw,memory.used --format=csv
     ;;
 *)
-    sed -n '2,17p' "$0"; exit 1 ;;
+    sed -n '2,/^set -euo/p' "$0" | sed '$d'; exit 1 ;;
 esac
