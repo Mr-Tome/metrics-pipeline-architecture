@@ -41,15 +41,18 @@ header.top{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:flex-end; ju
 .stats b{display:block; font:700 22px/1 var(--font-display)}
 .stats .bad b{color:var(--bad)}
 
-.rail{max-width:1280px; margin:0 auto 16px; display:grid; grid-template-columns:repeat(9, minmax(0,1fr)); gap:4px}
-.rail div{font:600 11px/1.2 var(--font-display); text-transform:uppercase; letter-spacing:.06em; color:var(--muted);
-  border-top:4px solid var(--line); padding-top:6px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.rail div.done{border-color:var(--ok); color:var(--ink)}
-.rail div.now{border-color:var(--tape); color:var(--ink)}
-.rail div span{font-family:var(--font-mono); margin-right:4px}
+.rail{max-width:1280px; margin:0 auto 8px; display:grid; grid-template-columns:repeat(9, minmax(0,1fr)); gap:4px}
+.rail button{font:600 11px/1.2 var(--font-display); text-transform:uppercase; letter-spacing:.06em; color:var(--muted); text-align:left;
+  background:none; border:0; border-top:4px solid var(--line); padding:6px 0 4px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer}
+.rail button:hover{color:var(--ink)}
+.rail button.done{border-color:var(--ok); color:var(--ink)}
+.rail button.now{border-color:var(--tape); color:var(--ink)}
+.rail button span{font-family:var(--font-mono); margin-right:4px}
+.jumpbar{max-width:1280px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; font-size:13px; color:var(--muted)}
+.jumpbar select{font:inherit; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:4px 6px; max-width:100%; min-width:0}
 
 main{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:minmax(0, 500px) minmax(0, 1fr); gap:20px; align-items:start}
-@media (max-width: 900px){ main{grid-template-columns:minmax(0,1fr)} .rail div{font-size:0} .rail div span{font-size:11px} }
+@media (max-width: 900px){ main{grid-template-columns:minmax(0,1fr)} .rail button{font-size:0} .rail button span{font-size:11px} }
 
 .scene{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:12px; position:sticky; top:12px}
 @media (max-width: 900px){ .scene{position:static} .task{order:-1} }
@@ -142,7 +145,8 @@ main{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:minmax
     <div>Time<b id="st-time">0:00</b></div>
   </div>
 </header>
-<nav class="rail" id="rail" aria-label="Phases"></nav>
+<nav class="rail" id="rail" aria-label="Phases (click to jump)"></nav>
+<div class="jumpbar"><label for="jump">Jump to</label><select id="jump"></select><span>Earlier steps are filled in for you. Mistakes count from where you land.</span></div>
 <main>
   <section class="scene" aria-label="Cluster view">
     <div class="scene-head"><h2>Cluster</h2><span id="scene-sub"></span></div>
@@ -169,7 +173,7 @@ const FAULT_POOL = ["sig","noroute","headers","checksum","imgpull","emptykey"];
    opts [[text, correct, why]], out (console output when answered right), fx (state change), fault (only on runs with that fault),
    skipIf (fault that replaces this step). Order steps: items [[text, fx, out]], bad [[text, why]]. */
 const STEPS = [
- {ph:0, type:"intro"},
+ {ph:0, type:"intro", title:"Briefing"},
 
  {ph:0, type:"choice", title:"The transfer drive arrives", ref:["06","§4"],
   q:"The bundle came through the approved media process and is mounted on svc01 at <code>"+B_DIR+"</code>. What do you run first?",
@@ -403,8 +407,8 @@ const STEPS = [
 
 /* ---------- state ---------- */
 let S;
-function fresh(){
-  const pool = FAULT_POOL.slice(), faults = [];
+function fresh(keep){
+  const pool = FAULT_POOL.slice(), faults = keep ? keep.slice() : [];
   while (faults.length < 3) faults.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
   return { step:0, started:false, t0:0, mistakes:[], fb:null, ss:{}, faults, term:[],
     steps: STEPS.filter(st => !st.fault || faults.includes(st.fault)),
@@ -433,7 +437,8 @@ function render(){
   const st = cur();
   $("#st-step").textContent = Math.min(S.step+1, S.steps.length-1) + "/" + (S.steps.length-1);
   $("#st-miss").textContent = S.mistakes.length;
-  $("#rail").innerHTML = PHASES.map((p,i)=>`<div class="${i<st.ph?"done":i===st.ph?"now":""}" title="${p}"><span>${i+1}</span>${p}</div>`).join("");
+  renderJump();
+  $("#rail").innerHTML = PHASES.map((p,i)=>`<button class="${i<st.ph?"done":i===st.ph?"now":""}" data-ph="${i}" title="Jump to ${p}"><span>${i+1}</span>${p}</button>`).join("");
   renderScene();
   const el = $("#task");
   const head = st.type==="intro"||st.type==="end" ? "" :
@@ -519,7 +524,7 @@ R.end = () => { const n = S.mistakes.length, t = elapsed();
   const grade = n===0 ? "Ready for bring-up" : n<=5 ? "Ready, after a review" : "Run it again";
   const names = {sig:"signature check failed", noroute:"no default route", headers:"missing kernel headers", checksum:"model checksum failed", imgpull:"image missing from the package", emptykey:"empty key for document upload"};
   return `<div class="eyebrow"><span>Result</span></div><h2>SI service handed over</h2>
-    <p class="grade">${grade}</p><p class="mono">${n} mistake${n===1?"":"s"} · ${t} · faults this run: ${S.faults.map(f=>names[f]).join(", ")}</p>
+    <p class="grade">${grade}</p>${S.from ? `<p class="lead">You jumped to <b>${esc(S.steps[S.from].title)}</b>, so only the steps from there on are graded.</p>` : ""}<p class="mono">${n} mistake${n===1?"":"s"} · ${t} · faults this run: ${S.faults.map(f=>names[f]).join(", ")}</p>
     ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 06 on the day anyway.</p>"}
     <p class="lead">Still open before the real bring-up: the signing key and how the lab gets its public key (ISSM), the lab CA certificate for chat and api, the subnet gateway for the default route, and the Continue agent-mode decision (doc 11, section 7).</p>
     <div class="row"><button class="primary" id="again">Run it again</button><a href="rack1-install-sim.html">Back to the Rack 1 Install Sim</a></div>`; };
@@ -573,8 +578,33 @@ function renderScene(){
 }
 
 function elapsed(){ if (!S.started) return "0:00"; const s = Math.floor((Date.now()-S.t0)/1000); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
+/* ---------- jump ---------- */
+/* Jumping replays every earlier step as if answered right (state changes and console output),
+   keeping this run's three faults. */
+function solveStep(st){
+  if (st.type==="intro") { S.started = true; S.t0 = Date.now(); }
+  else if (st.type==="choice" || st.type==="multi") finish(st);
+  else if (st.type==="order") st.items.forEach(it => { if (it[1]) FX[it[1]](); });
+}
+function jumpTo(i){
+  if (i === S.step) return;
+  if (S.started && cur().type !== "end" && !confirm(`Jump to "${S.steps[i].title}"? This run starts over from there.`)) { render(); return; }
+  S = fresh(S.faults);
+  for (let k=0; k<i; k++) solveStep(S.steps[k]);
+  S.step = i; S.from = i;
+  history.replaceState(null, "", "#step-" + (i+1));
+  render(); window.scrollTo({top:0, behavior:"smooth"});
+}
+function renderJump(){
+  $("#jump").innerHTML = PHASES.map((p,ph) => `<optgroup label="${ph+1} · ${p}">${S.steps.map((st,i) => st.ph===ph
+    ? `<option value="${i}" ${i===S.step?"selected":""}>${i+1}. ${esc(st.title)}</option>` : "").join("")}</optgroup>`).join("");
+}
+$("#jump").onchange = e => jumpTo(+e.target.value);
+$("#rail").onclick = e => { const b = e.target.closest("[data-ph]"); if (b) jumpTo(S.steps.findIndex(st => st.ph === +b.dataset.ph)); };
+
 setInterval(() => { if (cur().type !== "end") $("#st-time").textContent = elapsed(); }, 1000);
 render();
+{ const m = /^#step-(\d+)$/.exec(location.hash), i = m ? +m[1]-1 : -1; if (i > 0 && i < S.steps.length) jumpTo(i); }
 </script>
 </body>
 </html>
