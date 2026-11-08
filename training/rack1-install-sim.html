@@ -507,7 +507,6 @@ const STEPS = [
          ["Run validate/hw-check.sh --gpus 4 on gpu01: GPU count, PCIe Gen5 x16, temperature, power limit, NVMe, NIC speed"],
          ["Run validate/hw-check.sh --gpus 0 on svc01–svc03"],
          ["Run validate/net-test.sh between the nodes"],
-         ["Run validate/llm-load-test.py --users 10 (the 50-user peak): time to first token under about 2 s"],
          ["With ISSM approval, photograph the rack front, rear, and each PDU display under load for docs/photos/"]],
   bad:[["Skip hw-check on gpu01 since the vendor tested it","Shipping can unseat a GPU or a 16-pin connector. hw-check proves Gen5 x16 and the power limit on site."]]},
 
@@ -793,7 +792,7 @@ R.end = () => { const n = S.mistakes.length, t = elapsed();
     <p class="grade">${grade}</p><p class="mono">${n} mistake${n===1?"":"s"} · ${t}</p>
     ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 05 on install day anyway.</p>"}
     <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (doc 09), the cable route and the three port numbers on the lab C9500X-28C8D (doc 09).</p>
-    <div class="row"><button class="primary" id="again">Run it again</button></div>`; };
+    <div class="row"><button class="primary" id="again">Run it again</button><a href="si-bringup-sim.html">Next: SI Bring-up Sim, from the transfer drive to hand-over</a></div>`; };
 B.end = () => { $("#again").onclick = () => { const inlet = S.inlet; S = fresh(inlet); render(); }; };
 
 /* ---------- scene ---------- */
