@@ -212,9 +212,13 @@ the QSFP28 ports `Ethernet1/49` to `Ethernet1/54`.
    - Boot mode: UEFI
    - Secure Boot: per lab policy. With Secure Boot on, the NVIDIA driver must be signed, so tell the
      software team.
-4. Install the OS, then run `validate/hw-check.sh --gpus 4`. It checks:
-   - GPU count, and that each GPU is on PCIe Gen5 x16
-   - GPU temperature and power limit
+4. Install the OS on every node, then run `validate/hw-check.sh` on each one:
+   - gpu01: `validate/hw-check.sh --gpus 4`
+   - svc01, svc02, svc03: `validate/hw-check.sh --gpus 0` (no GPUs, so only the NVMe and NIC checks run)
+
+   It checks:
+   - GPU count, and that each GPU is on PCIe Gen5 x16 (gpu01 only)
+   - GPU temperature and power limit (gpu01 only)
    - NVMe drives present
    - NIC link speed
 5. Run `validate/net-test.sh` between nodes.
