@@ -21,14 +21,14 @@ Status of each number:
 | Item | Lab |
 |---|---|
 | Racks | 2 x Vertiv VR3300 (42U, 600 mm wide, 1200 mm deep, square holes), next to ACE 15. Rack 1 now, rack 2 held for growth. |
-| Power | The existing Vertiv Geist rack PDUs: two per rack, left and right, each with circuits 1, 2, and 3 at 208V |
+| Power | The existing Vertiv Geist rack PDUs: two per rack, left and right, mounted at the front of the rack (inside the cold aisle containment), each with circuits 1, 2, and 3 at 208V |
 | A and B | Please confirm the left and right PDUs are fed from separate sources (A and B) |
 | Outlets used, rack 1 | Per PDU: up to 2 x C19 (GPU server, if C20 inlets) and about 6 x C13 |
 | Peak draw, 50 users | about 5.1 kW in rack 1, and each PDU must carry it alone if the other feed fails |
 | Peak draw, 100 users (future) | about 8.7 kW across both racks |
 | Heat load, 50 users | about 17,500 BTU/hr (about 1.5 tons) |
 | Heat load, 100 users | about 29,500 BTU/hr (about 2.5 tons) |
-| Airflow | Front to back. Fronts face the room, exhaust goes into the hot aisle containment. |
+| Airflow | Front to back. Fronts face into the cold aisle containment (the glass), exhaust goes out the rear into the room. |
 | Intake air | 18 to 27 C (64.4 to 80.6 F), the ASHRAE recommended range |
 | Weight | under 200 kg (440 lb) of equipment in rack 1 |
 | Network | See section 5 |
@@ -36,7 +36,7 @@ Status of each number:
 There is no staging server. Everything is in the lab.
 
 Nothing in this build is non-standard: no liquid cooling, no 400V or 480V, no special connectors. The only
-item to watch is the GPU server power cord type (section 3).
+items to watch are the GPU server power cord type (section 3) and the cord length to the front-mounted PDUs (section 4).
 
 ## 2. Power: what we need from the existing PDUs
 
@@ -79,10 +79,16 @@ some throughput instead of tripping a breaker.
   chassis fans.
 - The model number we were given, **CR035RA1A7X...**, is a **Vertiv Liebert CRV in-row cooling unit**
   (35 kW, air cooled). It sits in the row between racks. A 35 kW unit covers this load many times over.
-- The row uses **hot aisle containment**: the glass doors close off the rear of the racks. Our server fronts
-  face the room and exhaust into the contained hot aisle. Switch ports are at the rear, so the switches
-  are ordered with port-side exhaust.
-- We will install blanking panels in every empty U, in both racks. Containment does not work without them.
+- The row uses **cold aisle containment**: the glass doors close off the front of the racks, and the CRV
+  supplies cool air into that contained aisle. Our server fronts face into the glass and take in the cool
+  air; exhaust leaves the rear into the room, and the CRV draws it back from there. Switch ports are at
+  the rear, with the server cabling, so the switches are ordered with port-side exhaust (intake at the
+  PSU end, inside the glass).
+- The Geist PDUs are mounted at the front, inside the glass. Server power supplies are at the rear, so
+  every power cord runs the depth of the rack along the side channel. See the cord length note in
+  [05](05-rack-build-guide.md), section 4.
+- We will install blanking panels in every empty U, in both racks. Containment does not work without them:
+  an open U lets cool air escape the contained aisle and lets warm room air in.
 - Approximate airflow: about 810 CFM at 50 users, about 1,370 CFM at 100 users.
   This uses CFM = 3.16 x W / delta-T(F), with an assumed 20 F rise.
 

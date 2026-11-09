@@ -39,7 +39,7 @@ Part numbers and links are in the quote request, [08a](08a-quote-servers-submitt
 |---|---|---|---|---|
 | A1 | Uplink lot: 4 x Cisco QSFP-40/100-SRBD (2 per end), OM4 multimode LC cords (3 x 8 m, 3 x 15 m), and a separate 10G management link (QSA adapter, 2 x Cisco SFP-10G-SR-S) | 1 lot | $9,963.87 | Our switch to the lab network. The BOM line "Cables and optics" ($1,000) covers only the in-rack 25G cables. |
 | A2 | 1G management switch, Cisco C1300-24T-4X | 1 | $1,047.99 | Keeps server management (BMC) off the data network |
-| A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $935.92 | The racks have none, and hot aisle containment does not work with open U spaces |
+| A3 | Blanking panels (80, both racks), Cat6 patch cables (10 ft) | 1 lot | $935.92 | The racks have none, and cold aisle containment does not work with open U spaces |
 | A4 | Encrypted SSD, 4 TB, FIPS 140-2 | 2 | $5,549.98 | Software and model transfer. Use the lab's approved type; drop if the lab provides it (saves $5,550). |
 | A5 | Rack console, 1U LCD and keyboard | 1 | $1,200 | First boot and BIOS setup. The lab has no crash cart. |
 | A6 | Setup kit (labels, velcro, cage nuts, ESD strap, fiber cleaner, console cables, hand tools) | 1 lot | $500 | Needed on install day |
@@ -65,8 +65,8 @@ Get quotes before you finalize.
 - **Patch cords:** fiber cables from optic to optic. Ours run straight from sw01 and oob01 to the lab C9500X-28C8D (8 m or 15 m).
 - **Management switch:** a small separate switch for each server's BMC port, the built-in remote
   console used for power and BIOS control.
-- **Blanking panels:** flat plates that cover empty rack spaces. They stop hot exhaust air from
-  circling back to the front.
+- **Blanking panels:** flat plates that cover empty rack spaces. They stop warm exhaust air from
+  leaking into the contained cold aisle at the front, and cool air from escaping it.
 - **Rack console:** a fold-out screen and keyboard in a 1U drawer. It plugs into one server at a time
   for first setup. After each server's BMC has an IP address, the servers are managed over the network.
 - **Transfer media:** the approved encrypted drives that carry software into the lab.

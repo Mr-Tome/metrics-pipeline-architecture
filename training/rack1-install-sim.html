@@ -215,7 +215,7 @@ table.amps th:first-child,table.amps td:first-child{text-align:left}
       <dt>1U</dt><dd>1.75 in (44.45 mm). 42U = 73.5 in of mounting space</dd>
       <dt>VR3300</dt><dd>600 mm wide × 1200 mm deep, square holes (cage nuts)</dd>
       <dt>Rails</dt><dd>19 in (EIA-310), set 29 in (737 mm) front to rear at visit 1</dd>
-      <dt>Rack PDUs</dt><dd>Vertiv Geist, left and right, circuits 1–3, 208 V, one C19 per circuit</dd>
+      <dt>Rack PDUs</dt><dd>Vertiv Geist, left and right at the front (inside the glass), circuits 1–3, 208 V, one C19 per circuit</dd>
     </dl>
   </section>
   <section class="task" id="task" aria-live="polite"></section>
@@ -297,7 +297,7 @@ const CARTONS = [
   {id:"sw", name:"sw01 · top-of-rack switch", pn:"Cisco Nexus N9K-C93180YC-FX3 · CDW 6462067 · item 4", defect:"airflow",
    good:["48 × 1/10/25G SFP28, 6 × 40/100G QSFP28","2 × NXA-PAC-650W-PE power supplies (port-side exhaust, blue)","NXA-FAN-35CFM-PE fans (port-side exhaust, blue)","4-post rack-mount kit, 2 × C13 to C14 cords","NX-OS Essentials license, 3-year term"],
    bad:["48 × 1/10/25G SFP28, 6 × 40/100G QSFP28","2 × NXA-PAC-650W-PI power supplies (port-side intake, burgundy)","NXA-FAN-35CFM-PI fans (port-side intake, burgundy)","4-post rack-mount kit, 2 × C13 to C14 cords","NX-OS Essentials license, 3-year term"],
-   why:"The ports face the hot aisle. -PI (port-side intake) parts pull hot exhaust air into the switch. Stop and get the -PE (port-side exhaust) power supplies and fans. Don't install it."},
+   why:"The ports face the rear, into the server exhaust. -PI (port-side intake) parts pull that hot air into the switch and blow it into the cold aisle. Stop and get the -PE (port-side exhaust) power supplies and fans. Don't install it."},
   {id:"dac", name:"In-rack 25G cables", pn:"Cisco SFP-H25G-CU3M= · CDW 4285569 · item 5", defect:"dac", good:["10 × SFP28 DAC, 3 m (8 used, 2 spare)"], bad:["8 × SFP28 DAC, 3 m"],
    why:"The order is 10 (8 used now, 2 spare). Flag the short count so the spares arrive."},
   {id:"optics", name:"Optics", pn:"Cisco QSFP-40/100-SRBD= ×4 (CDW 4899042) · Cisco CVR-QSFP-SFP10G= (CDW 4890545) · Cisco SFP-10G-SR-S ×2 · items 6a, 6d, 6e", defect:"optics",
@@ -312,7 +312,7 @@ const CARTONS = [
   {id:"cat6", name:"Cat6 patch cables", pn:"item 9", good:["2 × 10-pack Cat6, 10 ft (3 m): 5 used, the rest spare"]},
   {id:"blank", name:"Blanking panels", pn:"Vertiv VRA2000 (10-pack) × 8 · item 8", defect:"blanks",
    good:["80 × 1U tool-less blanking panels"], bad:["4 boxes: 40 × 1U panels"],
-   why:"Rack 1 needs 34 and rack 2 needs 42. 40 panels leaves rack 2 open to the hot aisle. Flag it."},
+   why:"Rack 1 needs 34 and rack 2 needs 42. 40 panels leaves rack 2 open, leaking cool air out of the contained cold aisle. Flag it."},
   {id:"con", name:"con01 · rack console", pn:"StarTech RKCONS1701 · item 11", good:["17 in LCD, keyboard, touchpad, 1U drawer","VGA/USB cable, rails, mounting hardware"]},
   {id:"kit", name:"Setup kit", pn:"item 12", good:["Cord labels, label maker, velcro","M6 cage nuts and screws, cage nut tool","ESD wrist strap, one-click LC fiber cleaner","Console cables (RJ45 and USB-C serial), hand tools"]},
   {id:"usb", name:"Transfer drives", pn:"Apricorn A25-3PL256-S4000F × 2 · item 10", good:["2 × 4 TB encrypted SSD, FIPS 140-2","Hand to the ISSM process unopened if the lab requires it"]}
@@ -374,10 +374,10 @@ const STEPS = [
   facts:["<b>Quote:</b> doc 08 lists every part number and quantity","<b>Rule:</b> a wrong-airflow switch is never installed. Stop and swap it.","<b>Genuine Cisco only:</b> optics and cables must be Cisco parts (the = suffix is Cisco's spare-part code). Third-party \"compatible\" parts are not what was checked against Cisco's matrix.","<b>Order links (CDW):</b> <a href=\"https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067\" target=\"_blank\" rel=\"noopener\">switch</a> · <a href=\"https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988\" target=\"_blank\" rel=\"noopener\">-PE power supply</a> · <a href=\"https://www.cdw.com/product/cisco-network-device-fan-module/5497378\" target=\"_blank\" rel=\"noopener\">-PE fan</a> · <a href=\"https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569\" target=\"_blank\" rel=\"noopener\">25G DAC</a> · <a href=\"https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042\" target=\"_blank\" rel=\"noopener\">SRBD optic</a> · <a href=\"https://www.cdw.com/product/cisco-network-adapter/4890545\" target=\"_blank\" rel=\"noopener\">QSA adapter</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521\" target=\"_blank\" rel=\"noopener\">OM4 8 m</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985\" target=\"_blank\" rel=\"noopener\">OM4 15 m</a>"]},
 
  {ph:0, type:"choice", title:"Which airflow does sw01 need?", ref:["02","§4 item 3"],
-  q:"sw01 is mounted with its ports at the rear, inside the hot aisle containment. Its PSUs face the room. Which airflow option is right?",
-  opts:[["Port-side exhaust (-PE power supplies and fans): cool air in at the PSU end, out at the ports", true, "Cool room air enters at the PSU end and exhausts at the ports, into the hot aisle."],
-        ["Port-side intake (-PI power supplies and fans)", false, "That pulls air in at the ports, which sit in the hot aisle. The switch would breathe server exhaust."],
-        ["Either works, the containment sorts it out", false, "Containment only works if every device moves air front (room) to rear (hot aisle). The wrong switch fights it."]],
+  q:"sw01 is mounted with its ports at the rear, facing the room with the server exhaust. Its PSUs face the front, into the cold aisle containment. Which airflow option is right?",
+  opts:[["Port-side exhaust (-PE power supplies and fans): cool air in at the PSU end, out at the ports", true, "Cool air from the contained aisle enters at the PSU end and exhausts at the ports, out the rear with the server exhaust."],
+        ["Port-side intake (-PI power supplies and fans)", false, "That pulls air in at the ports, which sit in the server exhaust at the rear, and blows it into the cold aisle."],
+        ["Either works, the containment sorts it out", false, "Containment only works if every device moves air front (cold aisle) to rear (room). The wrong switch fights it."]],
   facts:["<b>Cisco Nexus N93180YC-FX3:</b> 1U, 48 × 1/10/25G SFP28, 6 × 40/100G QSFP28, 2 PSUs","<b>Port-side exhaust:</b> NXA-PAC-650W-PE and NXA-FAN-35CFM-PE (blue). -PI (burgundy) is intake.","<b>Max draw:</b> about 600 W"]},
 
  {ph:0, type:"choice", title:"Which NX-OS license goes with sw01?", ref:["08","item 4"],
@@ -389,10 +389,10 @@ const STEPS = [
   facts:["<b>Free with no license (Cisco):</b> static routes, SVIs, HSRP. VLANs, LACP, SSH and SNMP are in no package.","<b>Essentials adds:</b> OSPF, BGP, VXLAN EVPN, PIM, telemetry","<b>Terms:</b> 3, 5 or 7 years. Advantage is the only perpetual option.","<b>Enforcement:</b> honor-based on the Nexus 9000. Expiry is a compliance state."]},
 
  {ph:1, type:"choice", title:"Which way does rack 1 face?", ref:["05","§2"], view:"front",
-  q:"You're at rack 1, next to ACE 15. The glass of the hot aisle containment closes off one side. Where do servers go in, and where do you do cables?",
-  opts:[["Front faces the room. Servers go in from the front. Cables and PDUs are done from the rear, inside the glass.", true, "Server intakes take room air. Exhaust and cabling sit in the contained hot aisle."],
-        ["Front faces the glass, so the hot aisle stays tidy", false, "Then the servers would pull hot exhaust into their intakes. Fronts face the room."],
-        ["Doesn't matter. The Liebert CRV cools both sides.", false, "The CRV cools the room side. Hot aisle containment only works if exhaust goes into the glass."]],
+  q:"You're at rack 1, next to ACE 15. The glass closes off the front of the rack, and the Geist PDUs are in there with the CRV's cool supply air. Where do servers go in, and where do you do cables?",
+  opts:[["Front faces the glass (cold aisle containment). Servers go in from the front, and power cords plug into the PDUs there. Network cables are done from the rear, on the room side.", true, "Server intakes take the cool air inside the glass. Exhaust and network cabling are at the rear, in the room."],
+        ["Front faces the room, so the rear sits inside the glass", false, "Then the servers would blow their exhaust into the cold aisle and pull warm room air in. Fronts face the glass."],
+        ["Doesn't matter. The Liebert CRV cools both sides.", false, "The CRV supplies cool air into the contained aisle. Cold aisle containment only works if every intake faces the glass."]],
   facts:["<b>Cooling:</b> Vertiv Liebert CRV (CR035RA…), 35 kW in-row, in the same row","<b>Our heat load:</b> about 17,500 BTU/hr (1.5 tons) at 50 users","<b>Intake air:</b> 18–27 °C (64.4–80.6 °F), ASHRAE recommended"]},
 
  {ph:1, type:"choice", title:"Is the rack grounded?", ref:["05","§2 step 2"],
@@ -408,8 +408,8 @@ const STEPS = [
         ["Move the rails to the full 1200 mm cabinet depth", false, "1200 mm is the cabinet, not the rail spacing. No rail kit spans that."]],
   facts:["<b>Cabinet:</b> 1200 mm deep","<b>Rails at visit 1:</b> 29 in (737 mm) front to rear","<b>Vendor question 4:</b> confirm the GPU server and service node rail kits fit a VR3300 at 29 in"]},
 
- {ph:1, type:"choice", title:"Label the PDUs", ref:["05","§4"], view:"rear",
-  q:"Facilities tells you (sim answer) that the left PDU, seen from the rear, is fed from source A and the right one from source B. What do you write on them?",
+ {ph:1, type:"choice", title:"Label the PDUs", ref:["05","§4"], view:"front",
+  q:"Facilities tells you (sim answer) that the left PDU, seen from the front (inside the glass), is fed from source A and the right one from source B. What do you write on them?",
   opts:[["Left: PDU-A. Right: PDU-B. Label both before any cord goes in.", true, "Now every cord label can name its PDU, for example gpu01-PSU1 / A-C3-C19."],
         ["Nothing, they're the same model", false, "Without labels nobody can tell which PDU a cord is on during a feed failure."],
         ["Guess A and B, then check with a meter later", false, "Only facilities knows which upstream panel feeds each PDU. Use their answer."]],
@@ -435,8 +435,8 @@ const STEPS = [
   lead:"Pick a device, then click its U in the rack. Heaviest first, at the bottom, so the rack can't tip. Then blank every empty U.",
   facts:["<b>gpu01:</b> 2U, about 40–50 kg boxed. Two-person lift. No server lift on site.","<b>U3–U4:</b> held for gpu02","<b>Blanking:</b> Vertiv VRA2000, 1U tool-less, 80 ordered (rack 1 needs 34, rack 2 needs 42)"]},
 
- {ph:4, type:"order", title:"Before any cord goes in", ref:["05","§4 step 0–1"], view:"rear",
-  lead:"Power work is at the rear, inside the glass. Put these in order.",
+ {ph:4, type:"order", title:"Before any cord goes in", ref:["05","§4 step 0–1"], view:"front",
+  lead:"The PDUs are at the front, inside the glass. Cords start at the PSUs on the rear and run along the side channel. Put these in order.",
   items:[["Facilities confirms the upstream feeds to both PDUs are off and locked out (or confirms in writing that live plug-in is their normal practice)"],
          ["Switch every PDU circuit breaker off: A-C1, A-C2, A-C3, B-C1, B-C2, B-C3"],
          ["Label every cord at both ends with device, PSU, PDU, circuit and outlet"]],
@@ -444,9 +444,9 @@ const STEPS = [
        ["Switch the PDU breakers on to check the displays work","Breakers stay off until every cord is in and facilities removes the lockout."],
        ["Open the PDU input box and check the wiring yourself","Upstream wiring is facilities' work. You only touch the outlet side."]]},
 
- {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"rear",
+ {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"front",
   lead:"Pick a cord, then pick an outlet. Odd-numbered PSUs go to PDU-A, even to PDU-B. Spread the load across the three circuits.",
-  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 600 W · oob01 30 W · con01 13 W"]},
+  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 600 W · oob01 30 W · con01 13 W","<b>Cord route:</b> PSU at the rear, along the side channel about 29 in, then up or down to the circuit at the front. Check the length first (doc 07, F8)."]},
 
  {ph:4, type:"choice", title:"What does one circuit carry?", ref:["01","§3"],
   q:"PDU-A circuit 3 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 3,300 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C3 carry now?",
@@ -462,10 +462,10 @@ const STEPS = [
   q:"Eight 3 m DACs run from the servers up to sw01 at U41. How do you dress them?",
   opts:[["Velcro bundles along the side of the rack, no bend tighter than about 5 cm radius, clear of server exhaust", true, "Velcro can be re-opened without cutting, and a wide bend protects the copper pairs."],
         ["Zip ties pulled tight every 20 cm", false, "Tight zip ties crush DACs and have to be cut for every change. Use velcro."],
-        ["Coil the slack behind gpu01 to keep it neat", false, "A coil behind the server blocks its exhaust into the hot aisle. Run slack along the side."]]},
+        ["Coil the slack behind gpu01 to keep it neat", false, "A coil behind the server blocks its exhaust. Run slack along the side."]]},
 
- {ph:6, type:"order", title:"Power on", ref:["05","§4 step 4–5"], view:"rear",
-  lead:"Rear cabling is done. The contained aisle gets hot once things run, so finish rear work first.",
+ {ph:6, type:"order", title:"Power on", ref:["05","§4 step 4–5"], view:"front",
+  lead:"Rear cabling is done. The rear sits in the server exhaust once things run, so finish rear work first. The breakers are on the PDUs at the front.",
   items:[["Check no cable bundle blocks server exhaust and the rear doors close"],
          ["Facilities removes the lockout", "unlock"],
          ["Switch the PDU circuit breakers on", "breakers"],
@@ -475,7 +475,7 @@ const STEPS = [
   bad:[["Power on gpu01 first so it has the most time to post","Switches first, so the servers find their links and the BMCs get addresses. gpu01 last."],
        ["Switch on the breakers yourself before facilities removes the lockout","The lockout is facilities'. They remove it, then you switch the PDU breakers."]]},
 
- {ph:6, type:"order", title:"Feed test", ref:["05","§4 step 6"], view:"rear", amps:true,
+ {ph:6, type:"order", title:"Feed test", ref:["05","§4 step 6"], view:"front", amps:true,
   lead:"Prove the rack survives losing either feed. Watch the PDU readings as you go.",
   items:[["Facilities switches feed A off upstream", "Aoff"],
          ["Check every two-PSU device is still up on PDU-B and read the PDU-B circuits"],
@@ -485,7 +485,7 @@ const STEPS = [
          ["Check every two-PSU device is still up on PDU-A and read the PDU-A circuits"],
          ["Facilities switches feed B back on", "Bon"],
          ["Record the current on each circuit from each PDU display"],
-         ["Close the hot aisle containment doors"]],
+         ["Close the cold aisle containment doors"]],
   bad:[["You switch feed A off at the panel to save time","Only facilities switches the upstream feeds."],
        ["Pull the PDU-A input plug to simulate a failure","Never pull a live PDU input. Facilities switches the feed off upstream."]],
   facts:["<b>Expected:</b> oob01 and con01 have one cord each, so whichever is on the dead feed goes dark. Everything with two or more PSUs stays up.","<b>Each PDU</b> must carry about 5.1 kW alone at 50 users"]},
@@ -519,7 +519,7 @@ const STEPS = [
   opts:[["Feed A and feed B tests passed", true],["All D-links up at 25G, uplinks up and in a port-channel", true],
         ["hw-check.sh passed on every node", true],["All empty U blanked in both racks, doors on, intake in range", true],
         ["Cable labels match the schedule", true],["Photos added to docs/photos/", true],
-        ["Rack 2 left open until gpu02 arrives", false, "Rack 2 gets 42 blanking panels now, or it leaks hot air out of the contained aisle."],
+        ["Rack 2 left open until gpu02 arrives", false, "Rack 2 gets 42 blanking panels now, or it leaks cool air out of the contained aisle."],
         ["Uplinks running as two separate links (no port-channel)", false, "U01 and U02 are one LACP port-channel."]]},
 
  {ph:9, type:"end", title:"Done"}
@@ -548,8 +548,8 @@ R.intro = () => `<div class="eyebrow"><span>Briefing</span></div><h2>Build rack 
   Every step follows <a href="${DOC["05"]}">doc 05</a>. Wrong choices count as mistakes and tell you why.</p>
   <div class="intro-grid">
     <div><b>Racks</b>2 × Vertiv VR3300, 42U, 600 × 1200 mm. Rack 1 now, rack 2 held for gpu02.</div>
-    <div><b>Power</b>Existing Geist PDUs, left and right, circuits 1–3, 208 V. About 5.1 kW at max.</div>
-    <div><b>Cooling</b>Liebert CRV in-row. Hot aisle containment: the rear is inside the glass.</div>
+    <div><b>Power</b>Existing Geist PDUs, left and right at the front, circuits 1–3, 208 V. About 5.1 kW at max.</div>
+    <div><b>Cooling</b>Liebert CRV in-row. Cold aisle containment: the front is inside the glass, with the PDUs.</div>
     <div><b>Network</b>sw01 is a Cisco Nexus N93180YC-FX3: 2 × 100G multimode fiber to the lab's C9500X-28C8D, plus a separate 10G link from oob01. About 12 ft. No patch panels.</div>
   </div>
   <p class="subh">GPU server PSU inlet</p>
@@ -645,10 +645,10 @@ const PLACE = [
   {id:"con01", ask:["The rack has square holes. How do the console rails mount?", [["M6 cage nuts from the setup kit, then screws", true],
      ["Screws straight into the square holes", false, "Square holes have no thread. Fit cage nuts first."],
      ["Rest it on the blanking panels below", false, "The console drawer slides out under load. It needs its own rails."]]]},
-  {id:"oob01", ask:["Which way do oob01's ports face?", [["To the rear, inside the glass, where all cables are run", true],
-     ["To the front, so the port lights are easy to see", false, "Cabling is done from the rear. Ports face the rear."]]]},
+  {id:"oob01", ask:["Which way do oob01's ports face?", [["To the rear, on the room side, where the network cables are run", true],
+     ["To the front, so the port lights are easy to see", false, "Network cabling is done from the rear. Ports face the rear."]]]},
   {id:"sw01", ask:["How does sw01 go in?", [["Ports to the rear, power supplies and fans to the front, on the Cisco 4-post rack-mount kit", true],
-     ["Ports to the front so the cables are easy to reach", false, "Ports face the rear. With port-side exhaust the switch then takes room air in at the PSU end."]]]}
+     ["Ports to the front so the cables are easy to reach", false, "Ports face the rear. With port-side exhaust the switch then takes cool air in at the PSU end, inside the glass."]]]}
 ];
 const HEAVY = ["gpu01","svc01","svc02","svc03"];
 function rackFree(u){ return !S.rack[u]; }
@@ -711,7 +711,7 @@ function cordLabel(cord, pdu, c, o){ return `${cord.id} / ${pdu}-C${c}-${o==="C1
 R.power = st => { const s = ss(); const sel = s.sel && CORDS.find(x=>x.id===s.sel);
   const all = CORDS.every(x => S.cords[x.id]);
   const inletOf = x => x.dev==="gpu01" ? S.inlet : "C14";
-  const pduHTML = p => `<div class="pdu ${p}"><h4>PDU-${p} · ${p==="A"?"left":"right"} (from the rear)</h4>${[1,2,3].map(c=>`<div class="circ"><b>C${c}</b><div class="outs">
+  const pduHTML = p => `<div class="pdu ${p}"><h4>PDU-${p} · ${p==="A"?"left":"right"} (from the front)</h4>${[1,2,3].map(c=>`<div class="circ"><b>C${c}</b><div class="outs">
     ${["C19", ...Array.from({length:C13_PER_CIRCUIT},(_,i)=>"C13"+(i+1))].map(o=>{ const occ = S.outlets[outletKey(p,c,o)];
       return `<button class="out ${o==="C19"?"c19":""} ${occ?"full":""}" data-o="${p}|${c}|${o}" ${occ?"disabled":""} title="${occ||o}">${occ ? occ.replace("-PSU",".").replace("-PWR","") : o==="C19"?"C19":"C13"}</button>`; }).join("")}</div></div>`).join("")}</div>`;
   return `<p class="lead">${st.lead}</p>
@@ -810,10 +810,10 @@ const yU = u => TOP + (42-u)*U_H;
 function renderScene(){
   const v = S.view, {up} = loads();
   $("#v-front").setAttribute("aria-pressed", v==="front"); $("#v-rear").setAttribute("aria-pressed", v==="rear");
-  $("#scene-title").textContent = v==="front" ? "Rack 1 · front (room side)" : "Rack 1 · rear (inside the glass)";
+  $("#scene-title").textContent = v==="front" ? "Rack 1 · front (inside the glass)" : "Rack 1 · rear (room side)";
   const H = TOP + 42*U_H + 34; let g = "";
   g += `<rect x="0" y="0" width="460" height="${H}" class="${v==="front"?"s-cold":"s-hot"}"/>`;
-  g += `<text x="230" y="18" text-anchor="middle" class="s-zone">${v==="front" ? "ROOM · COLD SIDE · CRV SUPPLY AIR" : "HOT AISLE CONTAINMENT · EXHAUST"}</text>`;
+  g += `<text x="230" y="18" text-anchor="middle" class="s-zone">${v==="front" ? "COLD AISLE CONTAINMENT · CRV SUPPLY AIR" : "ROOM · SERVER EXHAUST"}</text>`;
   g += `<rect x="${FX0}" y="${TOP-12}" width="${FX1-FX0}" height="${42*U_H+24}" rx="3" class="s-frame"/>`;
   g += `<rect x="${FX0+8}" y="${TOP-4}" width="${FX1-FX0-16}" height="${42*U_H+8}" class="s-inner"/>`;
   for (const x of [RL-12, RR]) { g += `<rect x="${x}" y="${TOP}" width="12" height="${42*U_H}" class="s-rail"/>`;
@@ -847,7 +847,7 @@ function renderScene(){
     g += `<text x="${RL+16}" y="${yt+h/2+(h>U_H?-1:3.5)}" class="s-txt">${it}</text>`;
     if (h>U_H) g += `<text x="${RL+16}" y="${yt+h/2+11}" class="s-sub">${d.model}</text>`;
   }
-  if (v==="rear") for (const [p, x] of [["A", FX0+12], ["B", RR+14]]) {
+  if (v==="front") for (const [p, x] of [["A", FX0+12], ["B", RR+14]]) {
     const off = !S.feed[p] || !S.breakers;
     g += `<rect x="${x}" y="${TOP+6}" width="28" height="${42*U_H-12}" rx="3" class="s-pdu ${p==="B"?"B":""} ${!S.feed[p]?"off":""}"/>`;
     g += `<text x="${x+14}" y="${TOP+20}" text-anchor="middle" class="s-pdul" style="fill:${p==="A"?"var(--feed-a)":"var(--feed-b)"}">${p}</text>`;
@@ -859,7 +859,7 @@ function renderScene(){
                        : `<rect x="${x+7}" y="${yy}" width="14" height="10" rx="2" class="s-out ${occ?p:""}"><title>${p}-C${c} C13${occ?" · "+occ:""}</title></rect>`; }); }
     if (off) g += `<text x="${x+14}" y="${TOP+42*U_H-12}" text-anchor="middle" class="s-sub" style="fill:var(--bad)">${!S.feed[p]?"FEED":"BRKR"}</text><text x="${x+14}" y="${TOP+42*U_H-3}" text-anchor="middle" class="s-sub" style="fill:var(--bad)">OFF</text>`;
   }
-  g += `<text x="230" y="${H-6}" text-anchor="middle" class="s-zone">${v==="front" ? "SERVERS IN FROM HERE" : "PDUs, POWER AND NETWORK CABLES WORKED FROM HERE"}</text>`;
+  g += `<text x="230" y="${H-6}" text-anchor="middle" class="s-zone">${v==="front" ? "SERVERS IN AND POWER CORDS PLUGGED IN HERE" : "NETWORK CABLES WORKED FROM HERE · POWER CORDS START AT THE PSUs"}</text>`;
   $("#svg").innerHTML = `<svg viewBox="0 0 460 ${H}" role="img" aria-label="Rack 1 elevation, ${v}">${g}</svg>`;
 }
 $("#svg").addEventListener("click", e => { const t = e.target.closest("[data-u]"); if (!t || STEPS[S.step].type!=="place") return;

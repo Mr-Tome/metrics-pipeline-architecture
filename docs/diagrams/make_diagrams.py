@@ -37,7 +37,7 @@ LAYOUT = {  # top U of each item: (height in U, label, color)
     2: (2, "gpu01  GPU server, 2U, 4 x RTX PRO 6000 (all slots)", C["gpu"]),
 }
 
-def rack(x0, y0, title, rear=False):
+def rack(x0, y0, title, rear=False, pdus=False):
     w = 360
     b = [text(x0 + w / 2, y0 - 12, title, 15, "middle", "bold")]
     b.append(rect(x0 - 24, y0, w + 48, 42 * U + 8, "#455a64", "#263238", 2, 4))
@@ -58,7 +58,7 @@ def rack(x0, y0, title, rear=False):
             b.append(rect(x0 + 2, y + 1, w - 4, U - 2, C["blank"], "#cfd8dc"))
         b.append(text(x0 - 6, y + 12, str(u), 9, "end", fill="#eceff1"))
     b.append(text(x0 + w / 2, y0 + 4 + (42 - 24) * U + 4, "U8 to U39 (except U21): blanking panels", 10.5, "middle", fill="#78909c"))
-    if rear:
+    if pdus:
         b.append(rect(x0 - 52, y0 + 30, 14, 42 * U - 60, C["A"], "#000"))
         b.append(rect(x0 + w + 38, y0 + 30, 14, 42 * U - 60, C["B"], "#000"))
         b.append(text(x0 - 45, y0 + 22, "PDU-A", 11, "middle", "bold", C["A"]))
@@ -75,15 +75,15 @@ def rack(x0, y0, title, rear=False):
 
 def rack_svg():
     b = [text(30, 34, "Lab rack 1 elevation, Vertiv VR3300 42U (50-user build)", 20, weight="bold"),
-         text(30, 56, "Heaviest gear at the bottom. Switches at the top. Fronts face the room; the rear is inside the hot aisle containment.", 12, fill="#444")]
-    f, w = rack(110, 100, "FRONT (room side)")
-    r, _ = rack(560, 100, "REAR (inside hot aisle containment)", rear=True)
+         text(30, 56, "Heaviest gear at the bottom. Switches at the top. Fronts face into the cold aisle containment (the glass); the rear faces the room.", 12, fill="#444")]
+    f, w = rack(90, 100, "FRONT (inside the glass, cold aisle)", pdus=True)
+    r, _ = rack(590, 100, "REAR (room side, exhaust)", rear=True)
     b += [f, r]
     y = 100 + 42 * U + 40
     notes = [
-        "1. Order sw01 (Nexus, -PE power supplies and fans) and the OOB switch with port-side exhaust airflow. Their ports sit at the rear, so air must exit at the rear.",
-        "2. Fill every open U with a blanking panel. Gaps let hot air leak out of the containment. Rack 2 gets a full set too.",
-        "3. The Geist PDUs are already installed at the rear, left and right, circuit C1 at the top. Facilities says which side is feed A.",
+        "1. Order sw01 (Nexus, -PE power supplies and fans) and the OOB switch with port-side exhaust airflow. Ports at the rear (room), intake at the PSU end (glass).",
+        "2. Fill every open U with a blanking panel. Gaps let cool air escape the contained aisle and warm air in. Rack 2 gets a full set too.",
+        "3. The Geist PDUs are already installed at the FRONT, left and right, C1 at the top. Cords run from the rear PSUs along the sides. Facilities says which is A.",
         "4. U3-U4 is held for a second GPU server (needs C14 inlets, since each PDU has 3 C19). Otherwise it goes in rack 2.",
     ]
     for i, n in enumerate(notes):
@@ -95,11 +95,11 @@ def power_svg():
     # Rear view of rack 1, drawn to the same U scale as the elevation. Cords run from each PSU to its outlet.
     PU = 16
     RX, RW, RY = 360, 280, 190            # rack opening, rear view
-    AX, BX, PW = 232, 722, 46             # PDU-A (rear left), PDU-B (rear right)
+    AX, BX, PW = 232, 722, 46             # PDU-A, PDU-B (mounted at the front; drawn at the sides of this rear view)
     def uy(u): return RY + (42 - u) * PU  # top edge of U u
-    b = [text(30, 34, "Power wiring: rack 1 rear view (50-user build)", 20, weight="bold"),
-         text(30, 56, "Seen from the rear, inside the containment. Odd PSUs go to PDU-A, even PSUs to PDU-B. Either PDU alone carries the whole rack.", 12, fill="#444"),
-         text(30, 74, "C1 is at the top of each PDU, C3 at the bottom. Each cord goes to the circuit nearest its device, so the 6 ft cords reach.", 12, fill="#444")]
+    b = [text(30, 34, "Power wiring: rack 1 rear view, where the PSUs are (50-user build)", 20, weight="bold"),
+         text(30, 56, "Seen from the rear (room side). The PDUs are mounted at the FRONT, inside the glass; they are drawn at the sides, where the cords run. Odd PSUs to PDU-A, even to PDU-B.", 12, fill="#444"),
+         text(30, 74, "C1 is at the top of each PDU, C3 at the bottom. Every cord also runs about 29 in front to rear along the side channel: check 6 ft cords reach (07, F8).", 12, fill="#444")]
     # facility feeds and PDU input cords
     for x, p, col, fill, src in [(AX, "A", C["A"], "#ffebee", "existing"), (BX, "B", C["B"], "#e3f2fd", "separate source")]:
         bx = 40 if p == "A" else 740
@@ -193,7 +193,7 @@ def power_svg():
              "- Never plug both supplies of one device into the same PDU. Cords from a server's right-hand PSUs cross to the left PDU; that is expected.",
              "- If gpu01 has C14 inlets: same circuits, C13 outlets instead of the C19s, and all C19s stay free.",
              "- Label each cord at both ends: device, PSU, PDU, circuit, outlet (example: gpu01-PSU1 / A-C3-C19).",
-             "- All six PDU breakers off before the first cord goes in. Route cords along the sides, clear of server exhaust.",
+             "- All six PDU breakers off before the first cord goes in. Route cords along the side channels to the front, clear of server exhaust.",
              "- Test: facilities switches feed A off; everything with two or more PSUs stays up, oob01 goes dark. Restore. Repeat with B (con01 goes dark).",
              "- Each PDU must carry the whole rack alone: about 5.1 kW at 50 users. PSU positions and outlet counts: check the real labels."]
     for i, r in enumerate(rules):

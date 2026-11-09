@@ -10,11 +10,11 @@ need approval for cameras and phones.
 | Rack model | Vertiv VR3300: 42U, 600 mm wide, 1200 mm deep (Vertiv spec) |
 | Hole type | Square (cage nuts for anything without tool-less rails) |
 | Vertical rails | Adjustable, currently 29 in apart front to rear |
-| Rack PDUs | Already installed: Vertiv Geist, one on the left and one on the right. Each has circuits 1, 2, and 3. Mostly C13 outlets (smaller, slots vertical), plus one C19 per circuit (larger, slots horizontal): three C19 per PDU, six per rack. 208V. Not marked A or B. |
+| Rack PDUs | Already installed at the front of the rack, inside the glass: Vertiv Geist, one on the left and one on the right (as seen from the front). Each has circuits 1, 2, and 3. Mostly C13 outlets (smaller, slots vertical), plus one C19 per circuit (larger, slots horizontal): three C19 per PDU, six per rack. 208V. Not marked A or B. |
 | Where power arrives | Through those PDU strips. No separate receptacles needed. |
 | Ground | Green bonding wires on the rear split doors. No rack-to-ground-bar wire seen. |
 | Doors | Perforated front and rear. No blanking panels installed. |
-| Containment | Glass doors close off the rear of the racks, where the PDUs are: **hot aisle containment** |
+| Containment | Glass doors close off the front of the racks, where the PDUs are: **cold aisle containment**. (Corrected 2026-11-09: first recorded as hot aisle at the rear.) |
 | Floor | Raised floor, no perforated tiles. Cooling comes from the in-row CRV units. |
 | Row layout | One CRV cooler in a rack position, then three racks to its left |
 | Requested racks | Two racks next to ACE 15 |
@@ -38,6 +38,12 @@ What this changed:
 - [ ] Display on the PDU showing amps? (Metered PDUs show current per circuit.)
 - [ ] Where the PDU input cord goes: under the floor, or overhead. Any label on it, for example
       `RPP-2A CB 12,14,16`: ________
+- [ ] Where exactly each PDU is mounted: in front of the front rails, or in the side channel just behind
+      them? Is there a gap down the side of the rack for cords to run front to rear? ________
+- [ ] Measure a cord route ([07](07-open-questions.md) F8): from the rear of U7 (svc03's PSUs) along the
+      side to the top third of the PDU (circuit 1), and from the rear of U1-U2 (gpu01) to the middle
+      third (circuit 2). Longest run: ____ in. 6 ft = 72 in.
+- [ ] Which way the PDU outlets face (toward the rear, the side, or into the aisle)? ________
 
 ### Ground
 

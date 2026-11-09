@@ -6,8 +6,10 @@ There is no staging server; this rack is the whole build (50 users).
 Site facts from visit 1 ([09](09-site-visit-checklist.md)):
 
 - Vertiv VR3300 racks: 42U, 1200 mm deep, square holes, adjustable rails
-- Vertiv Geist PDUs already mounted, left and right
-- Hot aisle containment: the rear of the rack is inside the glass. That is where you work on cables and PDUs.
+- Vertiv Geist PDUs already mounted, left and right, at the **front** of the rack, inside the glass
+- Cold aisle containment: the front of the rack is inside the glass, with the cool supply air. The rear
+  faces the room and gets the server exhaust. Network cables are done from the rear; power cords run
+  from the rear PSUs along the side of the rack to the PDUs at the front.
 - No lift, crash cart, or console on site
 
 Diagrams (open the SVG files for full size; they print well on 11x17):
@@ -68,14 +70,16 @@ console (item 11). Use velcro, not zip ties.
 
 ## 2. Rack prep
 
-1. Confirm the rack: rack 1 of the two next to ACE 15. **The front faces the room. The rear is inside the
-   hot aisle containment.** Servers go in from the front, cables are done from the rear.
+1. Confirm the rack: rack 1 of the two next to ACE 15. **The front is inside the cold aisle containment
+   (the glass). The rear faces the room.** Servers go in from the front, inside the glass. Network cables
+   are done from the rear. Power cords plug in at the front.
 2. Confirm with facilities that the rack frame is bonded to facility ground (SL-11425 section 4.9).
    The green wires on the doors only bond the doors to the frame.
 3. Set the 19" rails. In VR racks, the built-in rail alignment marks set the front rail position. Set the
    rear rails so the depth matches the GPU server's rail kit (the server rail is the longest; set for it).
-4. The Geist PDUs are already mounted, left and right, at the rear. Once facilities says which side is
-   feed A, label the left PDU and the right PDU `PDU-A` and `PDU-B` (or the other way round).
+4. The Geist PDUs are already mounted, left and right, at the front. "Left" and "right" in this guide
+   are as seen from the front, inside the glass. Once facilities says which side is feed A, label the left
+   PDU and the right PDU `PDU-A` and `PDU-B` (or the other way round).
 5. Check each PDU's display is on (if fitted) and every outlet is empty.
 
 ## 3. Install equipment, bottom up
@@ -96,8 +100,8 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 41 | sw01 | Ports to the rear, power supplies and fans to the front. Cisco 4-post rack-mount kit, cage nuts. |
 | 42 | blanking | No patch panel in our racks. The uplink fiber runs straight from sw01 to the lab C9500X-28C8D. |
 
-**Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak hot air from
-the contained aisle.
+**Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak cool air out of
+the contained aisle (or let warm room air in).
 
 **GPU install, if the GPUs come loose:**
 
@@ -126,7 +130,13 @@ panel and breaker feed each one. Ask them ([09](09-site-visit-checklist.md)), th
 **Circuits on each PDU.** Each PDU has circuits 1, 2, and 3. Each circuit has its own breaker on the PDU,
 mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pair.
 On the site's PDUs, circuit 1 is at the top, nearest the switches, and circuit 3 is at the bottom, nearest
-gpu01. The plan keeps every cord on the circuit closest to its device, so the 6 ft cords reach.
+gpu01.
+
+**Cord length.** The PDUs are at the front and every PSU is at the rear, so each cord first runs about
+29 in (the rail depth) along the side channel, then up or down to its circuit. The longest runs are svc03
+(U7) to circuit 1 and gpu01 (U1-U2) to circuit 2, and 6 ft cords probably don't reach them. Measure on the
+next visit ([09](09-site-visit-checklist.md)) and see [07](07-open-questions.md) F8. Route cords along the
+side channel, tied to the frame, clear of the server exhaust at the rear and of the intake at the front.
 
 0. **Before plugging anything in:** facilities confirms that the upstream feeds to both PDUs are off and
    locked out per the lab's lockout/tagout process, or confirms in writing that plugging in with the
@@ -148,8 +158,8 @@ gpu01. The plan keeps every cord on the circuit closest to its device, so the 6 
    or more PSUs must stay up on PDU-B. oob01 and con01 have one cord each, so the one on feed A goes off.
    That is expected. Facilities switches A back on. Wait 2 minutes, then repeat with feed B off. Same result.
    Record the current on each circuit from each PDU display. Only facilities switches the upstream feeds.
-7. Close the hot aisle containment doors when you finish. Cable work at the rear is done before power-on,
-   because the contained aisle gets hot once the servers run.
+7. Close the cold aisle containment doors when you finish. Do the rear cable work before power-on: once
+   the servers run, the rear of the rack sits in their exhaust. Inside the glass stays cool.
 
 ## 5. Network cabling
 
