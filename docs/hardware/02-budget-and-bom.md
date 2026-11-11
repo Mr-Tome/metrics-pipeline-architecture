@@ -1,5 +1,7 @@
 # 02. Budget and BOM
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 Target: **$250,000.00**. Source of the base numbers: `Metrics_Analysis_Pipeline_Hardware_BOM.xlsx`.
 
 ## 1. Which tier fits
@@ -23,7 +25,7 @@ language model plus 1 for speech-to-text and document search = 3 GPUs needed. Th
 third language model copy, which also gives headroom during updates (one copy at a time is replaced).
 
 **What dropping staging costs.** Every install and update now lands first on the production rack.
-[04-prototype-plan.md](04-prototype-plan.md) covers how the build workstation rehearses each bundle
+[04-prototype-plan.md](../software/04-prototype-plan.md) covers how the build workstation rehearses each bundle
 instead, and how the four GPUs let an update roll out one copy at a time.
 
 ## 2. What the BOM leaves out
@@ -89,7 +91,7 @@ If RHEL (C1) is needed, the subtotal is $244,116.59 and $5,883.41 (2.4%) is left
 **The margin is thin.** The switch (about $31,000 at CDW) is most of the change. Ask for NX-OS Essentials,
 not Advantage ($19,405 at CDW), or the license alone breaks the budget.
 
-A small single-GPU test machine ([04](04-prototype-plan.md)) no longer fits unless the margin below comes through.
+A small single-GPU test machine ([04](../software/04-prototype-plan.md)) no longer fits unless the margin below comes through.
 
 Three things can add margin:
 

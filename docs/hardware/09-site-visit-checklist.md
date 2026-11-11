@@ -1,5 +1,7 @@
 # 09. Site visit: look and ask
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 Bring: tape measure, flashlight, this page, a pen. **Ask before taking photos.** Many server rooms
 need approval for cameras and phones.
 

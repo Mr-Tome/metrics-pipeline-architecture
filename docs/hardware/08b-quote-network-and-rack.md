@@ -1,5 +1,7 @@
 # 08b. Quote request: network, rack, and setup items (not yet sent)
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 **Status: ready to send (2026-11-06).** The network team confirmed a direct connection to the C9500X-28C8D:
 2 x 100G for data and a third port for a separate management link. Our switch (item 4) is now a Cisco
 Nexus N93180YC-FX3, so every optic is a Cisco part listed for the switch it goes in. Items 4, 5, and 6a-6e

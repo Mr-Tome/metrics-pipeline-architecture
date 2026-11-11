@@ -5,7 +5,7 @@
 #   On another node:     ./net-test.sh client <target-ip>
 #
 # Expect about 23 Gb/s per 25G link node to node in the rack, and close to the desk port speed
-# (about 940 Mb/s on 1G) from an analyst workstation. See docs/03, section 5.
+# (about 940 Mb/s on 1G) from an analyst workstation. See docs/hardware/03, section 5.
 set -euo pipefail
 command -v iperf3 >/dev/null || { echo "install iperf3 from the OS mirror"; exit 1; }
 

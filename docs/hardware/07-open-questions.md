@@ -1,7 +1,12 @@
-# 07. Open questions
+# 07. Open questions: hardware, facility, network, vendor
 
-Questions that block or change the plan. Each has an owner and a default. If the question is not
-answered, the plan proceeds with the default. Update the Answer column as answers come in.
+**Track:** Hardware. Questions for facilities, the lab network team, and the vendors. Each has an owner and a
+default. If the question is not answered, the plan proceeds with the default. Update the Answer column as
+answers come in.
+
+Questions for the ISSM and Cyber Security (S) are in the [Cyber Security package](../cyber/README.md), including
+the ones that affect the hardware install (S1, S2, S4, S8). Lab IT questions about software (L) are in
+[software/07](../software/07-open-questions.md).
 
 ## Facility (F)
 
@@ -35,31 +40,6 @@ answered, the plan proceeds with the default. Update the Answer column as answer
 | N13 | 2 x 100G QSFP28 or 2 x 25G SFP28? Direct cord or panel? Single-mode or multimode, LC? Cisco optics required? NX-OS version? | Lab network team | 2 x 25G SFP28, Cisco optics | Asked 2026-11-06 (round 3, Q3-Q4). Decides items 6a-6d. **Closed 2026-11-06:** 2 x 100G, FR single-mode LC, Cisco optics, IOS XE 17.15.06. |
 | N14 | **Deferred until after the order:** single switch or vPC pair, LACP/vPC, cable route and who runs it, L2 trunk or routed, VLAN IDs and subnets, 802.1X/NAC, port security, MTU | Lab network team | L2 trunk, LACP, lab gateway | Not needed for purchasing. Ask after the order. |
 | N15 | Is the lab network team comfortable with our top-of-rack switch being a Cisco Nexus N93180YC-FX3 (their own access model), using two of its six 100G QSFP28 ports to the C9500X-28C8D? | Lab network team | Yes | Asked 2026-11-06 ([10](10-lab-network-team-email.md), last section). The engineer noted it is "rated for 25G": true for its 48 server ports; its 6 uplink ports are 40/100G. |
-
-## Security (S)
-
-| ID | Question | Ask | Default if no answer | Answer |
-|---|---|---|---|---|
-| S1 | Is the lab classified? What is the approved process to bring hardware in? | ISSM | Classified; hardware one way only | |
-| S2 | May new lab hardware be burned in on the unclassified side before it enters (then wiped)? | ISSM | No; burn in inside the lab | |
-| S3 | Approved transfer media type, and how long a transfer takes | ISSM | Encrypted SSD, 1 week turnaround | |
-| S4 | Is Secure Boot required on servers? (It changes how the NVIDIA driver is installed.) | ISSM | Off | |
-| S5 | Is there an approved model list? Is gpt-oss-120b (Apache 2.0) acceptable? | Program | Yes, pending approval | |
-| S6 | Are upstream (non-Iron Bank) images allowed in the lab for phase 1? | ISSM | Iron Bank where available, upstream otherwise | |
-| S7 | Where may the staging server live? | Program | | No staging server (decided 2026-10-30). The build workstation rehearses each bundle; see [04](04-prototype-plan.md). |
-| S8 | Is a laptop allowed in the room for first switch setup over a console cable? | ISSM | No; use the lab's approved device | |
-| S9 | Future phase: may a typed decision model (Cloudflare Clef, Qwen3.8-27B base, Apache 2.0) run in the lab? It ships a Python code file that runs at load time, and it needs its own model server (SGLang) and gateway route. | ISSM, Program | Deferred; not in phase 1 | Deferred 2026-10-30 |
-
-## Lab IT (L)
-
-| ID | Question | Ask | Default if no answer | Answer |
-|---|---|---|---|---|
-| L1 | Does the lab's accreditation require a specific server OS (for example RHEL 9 with STIG)? Is there a package mirror? Asked in the quote email ([08a](08a-quote-servers-submitted.md), question 6). | Lab IT, ISSM | Rocky Linux 9 (free); RHEL 9 if required, at about $1,400 per server per year | Our choice unless accreditation says otherwise. It matters for two reasons: the NVIDIA driver is built against the OS kernel, so the driver package must match it; and RHEL needs paid subscriptions (not in the BOM), while Rocky Linux 9 is free and compatible. |
-| L2 | Does the lab already run Kubernetes? | Lab IT | | No. We bring our own (RKE2). |
-| L3 | Python versions on analyst machines, and Windows or Linux? | Lab IT | | Many versions, mostly Windows, some Linux. Many use Anaconda. Client packages must cover Python 3.9 and newer (3.14, 3.15) on both. |
-| L6 | How do analysts get Python packages into the lab today (an internal conda or PyPI mirror, transfer media, something else)? Is the lab's Anaconda use licensed? (Anaconda's default channel needs a paid license for larger organizations.) | Lab IT | Our wheel folder (`clients/`) | Open. If there is already a mirror, publish our pinned packages there instead of a wheel folder. The architecture's in-lab Nexus would become that mirror later. |
-| L5 | Internet access during the initial build and debug? | ISSM | No. All software arrives on transfer media. | |
-| L4 | Is MATLAB allowed to make HTTPS calls to an internal service? | Lab IT | Yes | |
 
 ## Vendor (V)
 

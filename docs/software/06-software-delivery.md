@@ -1,5 +1,7 @@
 # 06. Software delivery: pulling, moving, and installing
 
+**Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 This follows the **Delivery** view in `FUTURE_NEED_TO_WORK_metrics_architecture_with_Sec_Dep.html`:
 
 1. A connected build environment pulls everything.
@@ -8,7 +10,7 @@ This follows the **Delivery** view in `FUTURE_NEED_TO_WORK_metrics_architecture_
    There is no staging server.
 4. After the rehearsal passes, the same bundle moves to the lab by the approved media process.
 
-The scripts are in [`delivery/`](../delivery) and [`validate/`](../validate).
+The scripts are in [`delivery/`](../../delivery) and [`validate/`](../../validate).
 
 ## 1. What the bundle contains
 
@@ -87,7 +89,7 @@ On the receiving side, from the bundle:
 ./intake/verify.sh /path/to/bundle                     # must print PASS
 ```
 
-Then, as root ([`delivery/intake/deploy.sh`](../delivery/intake/deploy.sh) has the full list):
+Then, as root ([`delivery/intake/deploy.sh`](../../delivery/intake/deploy.sh) has the full list):
 
 | Where | Command |
 |---|---|

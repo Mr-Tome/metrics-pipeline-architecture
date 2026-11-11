@@ -1,6 +1,6 @@
 # delivery/
 
-Builds the release bundle on the connected build workstation. Full guide: [docs/06-software-delivery.md](../docs/06-software-delivery.md).
+Builds the release bundle on the connected build workstation. Full guide: [docs/06-software-delivery.md](../docs/software/06-software-delivery.md).
 
 ```
 versions.env               every pinned version (the only file to edit for an update)

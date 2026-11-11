@@ -1,5 +1,7 @@
 # 05. Rack build guide
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 Step-by-step for racking, powering, and cabling the lab rack (rack 1 of the two racks next to ACE 15).
 There is no staging server; this rack is the whole build (50 users).
 
@@ -14,13 +16,13 @@ Site facts from visit 1 ([09](09-site-visit-checklist.md)):
 
 Diagrams (open the SVG files for full size; they print well on 11x17):
 
-- [Rack elevation](diagrams/rack-elevation.svg)
-- [Power wiring](diagrams/power-wiring.svg)
-- [Network cabling](diagrams/network-cabling.svg)
+- [Rack elevation](../diagrams/rack-elevation.svg)
+- [Power wiring](../diagrams/power-wiring.svg)
+- [Network cabling](../diagrams/network-cabling.svg)
 
-![Rack elevation](diagrams/rack-elevation.svg)
+![Rack elevation](../diagrams/rack-elevation.svg)
 
-**Practice first:** [training/rack1-install-sim.html](../training/rack1-install-sim.html) walks through every
+**Practice first:** [training/rack1-install-sim.html](../../training/rack1-install-sim.html) walks through every
 step below in order, with the real part numbers, U positions, outlets, and ports. Open it in any browser.
 It needs no network.
 
@@ -114,7 +116,7 @@ the contained aisle (or let warm room air in).
 
 ## 4. Power cabling
 
-![Power wiring](diagrams/power-wiring.svg)
+![Power wiring](../diagrams/power-wiring.svg)
 
 **What A and B mean.** Each rack has two Geist PDUs, one left and one right. If facilities feeds them
 from separate sources (A and B), losing one source leaves the other PDU running. Every server has two
@@ -163,7 +165,7 @@ side channel, tied to the frame, clear of the server exhaust at the rear and of 
 
 ## 5. Network cabling
 
-![Network cabling](diagrams/network-cabling.svg)
+![Network cabling](../diagrams/network-cabling.svg)
 
 ### Cable schedule
 

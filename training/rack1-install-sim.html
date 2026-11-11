@@ -192,7 +192,7 @@ table.amps th:first-child,table.amps td:first-child{text-align:left}
 <header class="top">
   <div class="brand">
     <h1>Rack 1 Install Sim</h1>
-    <p>Two Vertiv VR3300 racks next to ACE 15 · 50-user build · follows <a href="../docs/05-rack-build-guide.md">05 Rack build guide</a></p>
+    <p>Two Vertiv VR3300 racks next to ACE 15 · 50-user build · follows <a href="../docs/hardware/05-rack-build-guide.md">05 Rack build guide</a></p>
   </div>
   <div class="stats" aria-live="polite">
     <div>Step<b id="st-step">1/1</b></div>
@@ -225,8 +225,8 @@ table.amps th:first-child,table.amps td:first-child{text-align:left}
 "use strict";
 /* ---------- data ---------- */
 const PHASES = ["Delivery","Rack prep","GPU install","Rack the gear","Power cords","Network","Power-on","First checks","Sign-off"];
-const DOC = { "01":"../docs/01-facility-requirements.md", "02":"../docs/02-budget-and-bom.md", "03":"../docs/03-network-and-switch-capacity.md",
-  "05":"../docs/05-rack-build-guide.md", "07":"../docs/07-open-questions.md", "08":"../docs/08b-quote-network-and-rack.md", "09":"../docs/09-site-visit-checklist.md" };
+const DOC = { "01":"../docs/hardware/01-facility-requirements.md", "02":"../docs/hardware/02-budget-and-bom.md", "03":"../docs/hardware/03-network-and-switch-capacity.md",
+  "05":"../docs/hardware/05-rack-build-guide.md", "07":"../docs/hardware/07-open-questions.md", "08":"../docs/hardware/08b-quote-network-and-rack.md", "09":"../docs/hardware/09-site-visit-checklist.md" };
 
 const DEVS = {
   gpu01:{u:[1,2], model:"Thinkmate GPX GE95-2206-41", short:"GPU server, 2U", psus:4, w:3300},

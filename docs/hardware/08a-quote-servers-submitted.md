@@ -1,5 +1,7 @@
 # 08a. Quote request: servers and GPUs (submitted)
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 **Status: submitted to purchasing as a PR, 2026-11-04.** This is the record of what was asked for.
 Do not resend. The network, rack, and setup items are in [08b](08b-quote-network-and-rack.md).
 

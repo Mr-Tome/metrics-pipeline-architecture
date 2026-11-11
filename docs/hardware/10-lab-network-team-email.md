@@ -1,5 +1,7 @@
 # 10. Emails to the lab network team
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 **Current: answered 2026-11-06 (see the last section). Nothing more is needed for purchasing.**
 The earlier emails are kept as a record.
 

@@ -4,7 +4,7 @@
 #     CLIENT_PYTHON_VERSIONS). A Python version too new for some of Jupyter AI's packages (no wheels
 #     published yet) gets the OpenAI client only (client-requirements-core.txt); RESOLVED.txt lists which.
 #   - The Continue extension for VS Code (from Open VSX)
-# MATLAB needs nothing extra; it calls the gateway API with webwrite (see docs/06).
+# MATLAB needs nothing extra; it calls the gateway API with webwrite (see docs/software/06).
 source "$(dirname "$0")/lib.sh"
 require curl jq python3
 

@@ -1,5 +1,7 @@
 # 01. Facility requirements (send to the lab)
 
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 This is the answer to the lab's request in the README: power, cooling, connectors, and anything non-standard.
 It covers the 50-user build that fits the $250,000 budget (one GPU server with all four GPUs, no staging),
 and it is sized so the rack does not need new power when it grows to 100 users.

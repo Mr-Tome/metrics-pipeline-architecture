@@ -6,6 +6,10 @@ ollama:
   enabled: false
 pipelines:
   enabled: false
+# The chart adds a Redis for websockets by default. One chat-page replica doesn't need it, and Redis 7.4
+# is under RSALv2/SSPLv1, not an open-source license.
+websocket:
+  enabled: false
 openaiBaseApiUrl: http://litellm.si.svc:4000/v1
 extraEnvVars:
   - name: OPENAI_API_KEY
@@ -56,7 +60,7 @@ extraEnvVars:
     value: tika
   - name: TIKA_SERVER_URL
     value: http://tika.si.svc:9998
-  # Megabytes; matches the ingress body limit below.
+  # Megabytes. The chat page enforces this itself; Traefik sets no body limit.
   - name: RAG_FILE_MAX_SIZE
     value: "50"
 # The settings above are read on first start only; after that they live in the chat page database
@@ -66,11 +70,11 @@ persistence:
   size: 20Gi
 ingress:
   enabled: true
-  class: nginx
+  # RKE2's Traefik. No response-time or body-size limit by default (see values/litellm.yaml).
+  class: traefik
   annotations:
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
   host: "###ZARF_VAR_CHAT_HOST###"
   tls: true
   existingSecret: si-tls

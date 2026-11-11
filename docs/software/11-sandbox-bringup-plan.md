@@ -1,5 +1,7 @@
 # 11. Sandbox bring-up plan, and what is left before the air gap
 
+**Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
 **Goal:** when the SI workbench and its delivery pipeline are started in an offline sandbox, they come up and
 *work*, not just show pods running. Then, list the weak spots, gaps, and shortcuts that must be dealt with
 before the bundle crosses into the lab.
@@ -43,12 +45,12 @@ These would fail in the sandbox, or worse, pass the sandbox and fail in the lab.
 | F1 | `models.txt` has a format column. Whisper is `ct2`: its `model.bin` is pulled and kept, but only if it starts with the CTranslate2 header. `verify.sh` accepts that one file and still refuses every other pickle-style file. | Header confirmed on the real file. `verify.sh` passes a CTranslate2 file and refuses a pickle file in its place, and refuses a `.bin` in the safetensors model. |
 | F2 | `30-pull-models.sh` pulls `o200k_base` and `cl100k_base` (checked against tiktoken's own SHA-256). `vllm.yaml` sets `TIKTOKEN_ENCODINGS_BASE=/models/tiktoken`. | Checksums confirmed. Sandbox check C3 still has to prove vLLM uses them. |
 | F3 | `LITELLM_LOCAL_MODEL_COST_MAP=True` | Chart renders it into the gateway and its migration Job. The Prisma question stays open until the sandbox runs. |
-| F4 | **Not done.** Bumping versions is a release decision: each bump needs the values re-rendered and a rehearsal. | |
+| F4 | **Bumped 2026-11-09** against upstream (see `versions.env` for each reason): RKE2 v1.37.2, Zarf v0.89.0, GPU Operator v26.7.2, driver 580.196.07 (R580 long-term branch), vLLM v0.32.0, LiteLLM v1.108.4-lts (chart 1.89.2), Open WebUI v0.12.5 (chart 17.5.0), speaches 0.8.3, CloudNativePG chart 0.29.1, PostgreSQL 18.6, Trivy 0.76.2, local-path v0.0.37, busybox 1.38.0. RKE2 v1.37 has no ingress-nginx (retired upstream March 2026), so both Ingresses moved to Traefik, and `deploy.sh` sets `ingress-controller: traefik` on the servers. The Open WebUI chart's default Redis is turned off. | Driver and GPU Operator checked against NVIDIA's 26.7 component matrix; image tags and chart versions confirmed to exist; the values keys we set are unchanged in the new LiteLLM and Open WebUI charts. **Not rendered with helm and not rehearsed** (this machine has no helm and is ARM). |
 | F5 | Wheels pulled for Python 3.9 to 3.15 into one folder per OS. Pinned `jupyter-ai==2.31.7`, `langchain-openai==0.3.35`, `openai==2.48.0` (plus `langchain` and `langchain-core`, so pip fails fast). A version too new for Jupyter AI's packages gets the OpenAI client only, listed in `clients/SUPPORT.txt`. Continue pinned to 2.1.0. Anaconda steps (a separate virtual environment on their own Python) in [06](06-software-delivery.md); package route question added as [07](07-open-questions.md) L6. | Resolves on 3.9 to 3.14, Linux and Windows. On 3.15 (Nov 2026), `PyYAML`, `frozenlist`, `zstandard`, and on Windows `faiss-cpu` have no wheels yet, so 3.15 gets the OpenAI client only, which resolves. Fallback logic tested with a stub. Continue 2.1.0 exists for both. |
 | F6 | Sandbox setup, section 2 | |
 | F7 | Chat page speech-to-text goes to `whisper` through the gateway. Document upload is on: new `embed` service (Text Embeddings Inference on CPU, `snowflake-arctic-embed-l-v2.0`) behind the gateway as `arctic-embed`; chat page uses it with a `query: ` prefix, batches of 32, 2,000-character pieces, 10 per question. Per file, analysts can switch to "Using Entire Document". Text extraction and OCR: new `tika` service (Apache Tika 3.3.3.0, full image with Tesseract) on the service nodes; PDF pages with too little text are OCR'd. | Setting names checked in Open WebUI 0.6.22 and TEI 1.9.4 source; model listed as supported by TEI; charts render. Not run. |
 | (found while doing F7) | vLLM and Whisper images were missing from `package/IMAGES.txt`, so step 45 didn't scan them and C2 couldn't check them. Each plain-manifest image now has its own list in `20-build-zarf-package.sh`. | Template renders |
-| F8 | 600 s read and send timeouts and a 50 MB body limit on both Ingresses | Both charts render the annotations |
+| F8 | Was nginx annotations. **Now Traefik (2026-11-09):** it has no response-time limit and no body-size limit by default, so no annotations are needed. Its one default limit is 60 s to receive a request. The chat page enforces its own 50 MB file limit. | Traefik v3.7 defaults checked in its docs. Sandbox C11b (upload) and C14 (MATLAB, non-streaming) prove it. |
 | W5 | `90-seal.sh` and `verify.sh` refuse unsigned bundles (`ALLOW_UNSIGNED=1` for throw-away tests only) | Both refusals tested |
 | W6, part of W7 | New `45-scan-images.sh`: Trivy report per image, `SUMMARY.txt`, `IMAGE-DIGESTS.txt` in `scanner/reports/` | Summary tested on a sample report; Trivy not run (this machine is ARM) Harbor's built-in scanner takes over the in-lab scanning when Harbor arrives with Big Bang. This build-side scan stays as the check before transfer (the Delivery view lists "SBOM and scan results" in the release package), so a critical finding doesn't cost a transfer cycle. |
 | W12, part | Continue telemetry setting added to [06](06-software-delivery.md) | |
@@ -61,7 +63,7 @@ VMs from a script (kickstart or cloud-init) for every release so nothing carries
 
 | Item | Setting | Why |
 |---|---|---|
-| Node VM | Same OS, version, **and hardening** as the lab ([07](07-open-questions.md) L1). If the lab uses STIG: SELinux enforcing, FIPS mode, fapolicyd, `noexec` on `/tmp`. 12 vCPU, 48 GB RAM, 400 GB disk. | A plain OS install hides the failures that a STIG'd host causes (SELinux policy for RKE2, binaries blocked by fapolicyd). More CPU and RAM than doc 04 because the stand-in model runs on CPU. |
+| Node VM | Same OS, version, **and hardening** as the lab ([security decisions](../cyber/README.md) L1). If the lab uses STIG: SELinux enforcing, FIPS mode, fapolicyd, `noexec` on `/tmp`. 12 vCPU, 48 GB RAM, 400 GB disk. | A plain OS install hides the failures that a STIG'd host causes (SELinux policy for RKE2, binaries blocked by fapolicyd). More CPU and RAM than doc 04 because the stand-in model runs on CPU. |
 | Bundle disk | Attached **read-only** | Proves nothing in the install writes into the bundle |
 | Client VMs | One Windows and one Linux, with Python 3.9 and 3.13, VS Code, and MATLAB if a license is free. No internet. | Analysts are mostly on Windows (L3). This is the only way to test the workbench side. |
 | Network | Host-only network (example `10.99.0.0/24`), no NAT. The host is `10.99.0.1` and is the default route, but it does not forward traffic. | RKE2 gets its default route, and nothing reaches the internet |
@@ -177,7 +179,7 @@ dataset, see the metric on the page" test.
 |---|---|---|---|
 | W1 | **The GPU path is first exercised in the lab.** Doc 04 accepts this, but it is now the largest single risk: a new GPU generation, a new driver branch, and a quantized model format, all untested together. | Before transfer | Decide now, not after a failure: (a) a single-GPU Blackwell test machine from the ~$48k left ([04](04-prototype-plan.md), section 4), or (b) ask Thinkmate to run our vLLM image and model during factory burn-in. At minimum, find published evidence of the exact vLLM + driver + gpt-oss combination working on RTX PRO 6000. |
 | W2 | F1 to F8 above | Before transfer | Section 1 |
-| W3 | **OS packages come from a lab mirror that may not exist** ([07](07-open-questions.md) L1 is open). The driver needs gcc, make, and kernel headers for the exact running kernel. SELinux needs `rke2-selinux` and `container-selinux`. Also rsync and openssl. | Before transfer | If there is no mirror, add these RPMs to the bundle, matched to the lab's kernel, and test them in the sandbox. Secure Boot (S4) adds module signing. |
+| W3 | **OS packages come from a lab mirror that may not exist** ([security decisions](../cyber/README.md) L1 is open). The driver needs gcc, make, and kernel headers for the exact running kernel. SELinux needs `rke2-selinux` and `container-selinux`. Also rsync and openssl. | Before transfer | If there is no mirror, add these RPMs to the bundle, matched to the lab's kernel, and test them in the sandbox. Secure Boot (S4) adds module signing. |
 | W4 | **The sandbox OS must match the lab's hardening.** Otherwise the sandbox passes and the lab fails. | Before transfer | Section 2. If L1 is still open, rehearse with the strictest likely baseline (RHEL 9 STIG). |
 
 ### Security shortcuts
@@ -216,7 +218,7 @@ dataset, see the metric on the page" test.
 
 ## 8. Order of work
 
-1. ~~Fix F1 to F8, W5, W6, and W17~~ (done except F4 and F6, see section 1). Bump `versions.env` (F4).
+1. ~~Fix F1 to F8, W5, W6, and W17~~ (done except F6, see section 1). F4 bumped 2026-11-09: render the charts and rehearse.
 2. Script the sandbox VMs (section 2) and build the rehearsal add-on.
 3. Write `validate/smoke-test.sh` (section 4).
 4. Pull, seal, rehearse. Repeat until C1 to C19 pass and the tripwire log is empty.

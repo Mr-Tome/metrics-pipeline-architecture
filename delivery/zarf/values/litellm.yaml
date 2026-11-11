@@ -41,13 +41,13 @@ proxy_config:
     telemetry: false
 ingress:
   enabled: true
-  className: nginx
+  # RKE2's Traefik. HTTPS only. Traefik has no limit on how long the gateway takes to answer and no body
+  # size limit by default, so non-streaming calls (MATLAB webwrite) and long reasoning answers need no
+  # annotations. Its only default limit is 60 s to receive the request itself.
+  className: traefik
   annotations:
-    # ingress-nginx closes a request after 60 s by default. Non-streaming calls (MATLAB webwrite) and long
-    # reasoning answers take longer.
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
   hosts:
     - host: "###ZARF_VAR_API_HOST###"
       paths:

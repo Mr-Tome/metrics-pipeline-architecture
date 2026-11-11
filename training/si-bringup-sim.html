@@ -137,7 +137,7 @@ main{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:minmax
 <header class="top">
   <div class="brand">
     <h1>SI Bring-up Sim</h1>
-    <p>Picks up where the <a href="rack1-install-sim.html">Rack 1 Install Sim</a> ends · follows <a href="../docs/06-software-delivery.md">06 Software delivery</a> and <a href="../docs/11-sandbox-bringup-plan.md">11 Sandbox bring-up plan</a></p>
+    <p>Picks up where the <a href="rack1-install-sim.html">Rack 1 Install Sim</a> ends · follows <a href="../docs/software/06-software-delivery.md">06 Software delivery</a> and <a href="../docs/software/11-sandbox-bringup-plan.md">11 Sandbox bring-up plan</a></p>
   </div>
   <div class="stats" aria-live="polite">
     <div>Step<b id="st-step">1/1</b></div>
@@ -161,8 +161,8 @@ main{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:minmax
 "use strict";
 /* ---------- data ---------- */
 const PHASES = ["Intake","Cluster","GPU node","Platform","SI apps","Keys","Checks","Users","Hand-over"];
-const DOC = { "05":"../docs/05-rack-build-guide.md", "06":"../docs/06-software-delivery.md", "07":"../docs/07-open-questions.md",
-  "11":"../docs/11-sandbox-bringup-plan.md", "deploy":"../delivery/intake/deploy.sh" };
+const DOC = { "05":"../docs/hardware/05-rack-build-guide.md", "06":"../docs/software/06-software-delivery.md", "07":"../docs/hardware/07-open-questions.md",
+  "11":"../docs/software/11-sandbox-bringup-plan.md", "deploy":"../delivery/intake/deploy.sh" };
 const B_DIR = "/mnt/xfer/si-phase1-2026.11.20";
 const NODES = ["svc01","svc02","svc03","gpu01"];
 
@@ -304,7 +304,7 @@ const STEPS = [
 
  {ph:4, type:"choice", fault:"imgpull", title:"Fault: a pod can't get its image", ref:["11","§4 C2"],
   out:{h:"svc01", c:"./intake/deploy.sh apps …   # new bundle, verified", o:["  transcription ... ok","+whisper-6c9f…   1/1   Running"]},
-  show:"svc01# kubectl -n si get pods\nwhisper-6c9f…   0/1   ImagePullBackOff\n\nFailed to pull image \"127.0.0.1:31999/speaches-ai/speaches:0.7.0-cuda-zarf-…\": not found",
+  show:"svc01# kubectl -n si get pods\nwhisper-6c9f…   0/1   ImagePullBackOff\n\nFailed to pull image \"127.0.0.1:31999/speaches-ai/speaches:0.8.3-cuda-zarf-…\": not found",
   q:"Every other pod is running. The Whisper image isn't in the Zarf registry. What do you do?",
   opts:[["Leave voice input down. Report it to the build side: the image is missing from the package, so it has to be added, rebuilt, scanned, re-sealed, and sent as a new bundle.", true, "This happened for real: the vLLM and Whisper images were missing from the package's image list (fixed 2026-11-08). Check C2 (every image in IMAGES.txt is in the registry) catches it in the rehearsal, before transfer. In the sim, the new bundle arrives before the checks."],
         ["Pull it from Docker Hub on a laptop, save it, and load it on gpu01", false, "That image would bypass the scan, the signature, and the media process. Nothing enters the lab outside the bundle."],
@@ -489,7 +489,7 @@ const FX = {
   j2(){ S.k.rke2.svc02 = "server"; say({h:"svc02", c:"./intake/deploy.sh server-join 10.20.30.11", o:["join token: (hidden prompt)","node svc02 Ready"]}); },
   j3(){ S.k.rke2.svc03 = "server"; say({h:"svc03", c:"./intake/deploy.sh server-join 10.20.30.11", o:["join token: (hidden prompt)","node svc03 Ready"]}); },
   jg(){ S.k.rke2.gpu01 = "agent";  say({h:"gpu01", c:"./intake/deploy.sh agent-join 10.20.30.11", o:["join token: (hidden prompt)","node gpu01 Ready"]}); },
-  nodes(){ say({h:"svc01", c:"kubectl get nodes", o:["NAME    STATUS   ROLES                       VERSION","svc01   Ready    control-plane,etcd,master   v1.33.1+rke2r1","svc02   Ready    control-plane,etcd,master   v1.33.1+rke2r1","svc03   Ready    control-plane,etcd,master   v1.33.1+rke2r1","gpu01   Ready    <none>                      v1.33.1+rke2r1"]}); },
+  nodes(){ say({h:"svc01", c:"kubectl get nodes", o:["NAME    STATUS   ROLES                       VERSION","svc01   Ready    control-plane,etcd,master   v1.37.2+rke2r1","svc02   Ready    control-plane,etcd,master   v1.37.2+rke2r1","svc03   Ready    control-plane,etcd,master   v1.37.2+rke2r1","gpu01   Ready    <none>                      v1.37.2+rke2r1"]}); },
   driver(){ S.k.driver = 1; say({h:"gpu01", c:"./intake/deploy.sh driver", o:["building NVIDIA open kernel modules with DKMS ... ok"]}); },
   smi(){ say({h:"gpu01", c:"nvidia-smi -L", o:[0,1,2,3].map(i=>`GPU ${i}: NVIDIA RTX PRO 6000 Blackwell Server Edition`)}); },
   models(){ S.k.models = 1;

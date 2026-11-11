@@ -1,6 +1,8 @@
 # 04. Prototype plan
 
-![Software path](diagrams/prototype-topology.svg)
+**Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
+![Software path](../diagrams/prototype-topology.svg)
 
 ## 1. The short answer
 
@@ -9,9 +11,9 @@ the unclassified side, so the goal is SI inside the lab. A separate group orders
 work happens in the server room.
 
 **No staging server** (decided 2026-10-30). The money it would have cost bought gpu01's third and
-fourth GPUs, so the lab starts at the 50-user size ([02](02-budget-and-bom.md)).
+fourth GPUs, so the lab starts at the 50-user size ([02](../hardware/02-budget-and-bom.md)).
 
-**Plan for no internet during the build.** Unless the ISSM says otherwise ([07](07-open-questions.md), L5),
+**Plan for no internet during the build.** Unless the ISSM says otherwise ([security decisions](../cyber/README.md), L5),
 all software arrives on transfer media. A connected **build workstation** on the unclassified side does the
 downloading. It runs the scripts in `delivery/`, which write one checked bundle to the transfer drive.
 Any connected Linux machine with about 2 TB free disk will do; it doesn't need to be bought.
@@ -34,10 +36,10 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 
 ### P0. Order and prepare (week 0)
 
-- [ ] Send [01-facility-requirements.md](01-facility-requirements.md) to the lab. If an earlier version was
+- [ ] Send [01-facility-requirements.md](../hardware/01-facility-requirements.md) to the lab. If an earlier version was
       sent, send this one: the peak draw is now about 4.8 kW, not 3.6 kW.
-- [x] Send [08a](08a-quote-servers-submitted.md) (servers and GPUs) to purchasing. Submitted 2026-11-04.
-- [ ] Send [08b](08b-quote-network-and-rack.md) (network, rack, setup) to purchasing once the uplink design is settled.
+- [x] Send [08a](../hardware/08a-quote-servers-submitted.md) (servers and GPUs) to purchasing. Submitted 2026-11-04.
+- [ ] Send [08b](../hardware/08b-quote-network-and-rack.md) (network, rack, setup) to purchasing once the uplink design is settled.
 - [ ] Pick a build workstation on the unclassified side: Linux x86_64, internet access, about 2 TB
       free disk, 32 GB RAM or more (for the rehearsal VM). An existing machine is fine.
 - [ ] Get a Platform One account (Iron Bank images need one; BOM `Software` tab).
@@ -45,7 +47,7 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 ### P1. Build and rehearse a release (on the build workstation)
 
 - [ ] Run `delivery/pull-all.sh` ([06](06-software-delivery.md)). It writes the sealed bundle.
-- [ ] Create the rehearsal VM: same OS and version the lab will run ([07](07-open-questions.md), L1),
+- [ ] Create the rehearsal VM: same OS and version the lab will run ([security decisions](../cyber/README.md), L1),
       8 vCPU, 32 GB RAM, 400 GB disk. **No network access from the VM.** Attach the bundle as a disk.
 - [ ] In the VM, run exactly what the lab will run:
   - `./intake/verify.sh /path/to/bundle` must print PASS
@@ -60,16 +62,16 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 
 ### P2. Lab install
 
-- [ ] Optional, with ISSM approval ([07](07-open-questions.md), S2): burn in gpu01, svc01-03, and sw01 on the
+- [ ] Optional, with ISSM approval ([security decisions](../cyber/README.md), S2): burn in gpu01, svc01-03, and sw01 on the
       unclassified side for 24-48 h using `validate/hw-check.sh --gpus 4 --burn`. Then wipe the drives and
       move the hardware into the lab. One way only. Otherwise Thinkmate's factory burn-in (quote question 3)
       is the burn-in.
-- [ ] Rack and cable in the lab using [05-rack-build-guide.md](05-rack-build-guide.md).
+- [ ] Rack and cable in the lab using [05-rack-build-guide.md](../hardware/05-rack-build-guide.md).
 - [ ] Carry in the bundle that passed rehearsal. Run verify, then the full deploy sequence
       ([06](06-software-delivery.md), section 4).
 - [ ] Run `validate/hw-check.sh --gpus 4` on gpu01 and `validate/net-test.sh` between nodes.
 - [ ] Run `validate/llm-load-test.py --users 10` (the 50-user peak) and the checks in
-      [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md), section 5.
+      [03-network-and-switch-capacity.md](../hardware/03-network-and-switch-capacity.md), section 5.
 - [ ] Collect usage logs from the gateway. These replace the BOM's "20% at peak" planning figure
       (`Assumptions!C7`) with real numbers.
 
@@ -91,9 +93,9 @@ cybersecurity review first ([06](06-software-delivery.md), section 6). The hardw
 
 If GPU-side problems keep showing up first in the lab, add a single-GPU test machine on the unclassified
 side. At CDW prices the budget has only about $11,500 left after the order, before the switch license
-([02](02-budget-and-bom.md), section 3), so this needs the GPU or government-price savings listed there. It installs
+([02](../hardware/02-budget-and-bom.md), section 3), so this needs the GPU or government-price savings listed there. It installs
 with `deploy.sh apps --single-node` (one PostgreSQL instance, one model copy, no Whisper), from the same
 bundle the lab gets. Nothing in this plan changes to add it.
 
 Lab hardware never connects to unclassified machines. Hardware and media only move one way (into the
-lab). Check the exact rules with the lab ISSM ([07-open-questions.md](07-open-questions.md), S1-S3).
+lab). Check the exact rules with the lab ISSM ([07-open-questions.md](../cyber/README.md), S1-S3).

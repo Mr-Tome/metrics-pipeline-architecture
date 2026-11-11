@@ -1,6 +1,8 @@
 # 03. Network and switch capacity
 
-![Network cabling](diagrams/network-cabling.svg)
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+
+![Network cabling](../diagrams/network-cabling.svg)
 
 ## 1. What the lab told us
 

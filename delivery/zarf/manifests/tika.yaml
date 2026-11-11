@@ -4,7 +4,8 @@
 # gives the chat page nothing to search.
 #
 # Runs on CPU on the service nodes. OCR is slow: roughly a few seconds per scanned page (estimate, not measured),
-# so a 100-page scan takes minutes. The chat page's ingress allows 10 minutes per request (docs/11, W20).
+# so a 100-page scan takes minutes. The chat page talks to Tika inside the cluster; Traefik puts no time limit
+# on the chat page's answer (docs/11, W20).
 apiVersion: v1
 kind: ConfigMap
 metadata:

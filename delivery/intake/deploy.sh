@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs a verified release bundle in the lab (or a single-node test install). Run as root, from inside the bundle.
-# Run verify.sh first. Steps, in order (see docs/06-software-delivery.md):
+# Run verify.sh first. Steps, in order (see docs/software/06-software-delivery.md):
 #
 #   On svc01 (or the single node):          ./deploy.sh server-init
 #   On svc02 and svc03:                     ./deploy.sh server-join <svc01-ip>   (asks for the join token)
@@ -46,6 +46,7 @@ server-init)
 tls-san:
   - $(hostname -f)
 write-kubeconfig-mode: "0600"
+ingress-controller: traefik
 EOF
     systemctl enable --now rke2-server
     log "RKE2 server up. Join token for the other nodes (also in /var/lib/rancher/rke2/server/node-token):"
@@ -72,6 +73,8 @@ server-join|agent-join)
 server: https://${first}:9345
 token-file: ${tokfile}
 EOF
+    # Servers must agree on the ingress controller (Traefik is also the v1.37 default; this makes it explicit).
+    [[ "${type}" == server ]] && echo "ingress-controller: traefik" >> /etc/rancher/rke2/config.yaml
     systemctl enable --now "rke2-${type}"
     log "joined ${first} as ${type}"
     ;;
