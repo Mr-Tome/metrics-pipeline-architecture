@@ -50,11 +50,13 @@ A track that depends on another links to it instead of repeating it.
 
 | # | Document | For | Status |
 |---|---|---|---|
-| | [Cyber Security package](docs/cyber/README.md) | **Start here for Cyber.** What is in the package, and the decision register: every question for the ISSM and Cyber (S, L1, L5), with what each answer affects (hardware, software, models, process) | Draft, 2026-11-13 |
+| | [Cyber Security package](docs/cyber/README.md) | **Start here for Cyber.** What is in the package, and the decision register: every question for the ISSM and Cyber (S, L1), with what each answer affects (hardware, software, models, process) | Draft, 2026-11-13 |
 | 12 | [Software BOM](docs/cyber/12-software-bom.md) ([CSV](docs/cyber/12-software-bom.csv)) | Every software item phase 1 brings in, including the alternatives still being chosen: version, source, license, how it arrives | Draft, versions checked 2026-11-09 |
 | 13 | [Model BOM](docs/cyber/13-model-bom.md) | Every model and model data file, including alternatives: publisher, commit, license, format, size, how it is checked, and the models inside container images | Draft |
 | 14 | [Key and certificate inventory](docs/cyber/14-key-and-certificate-inventory.md) | Every key, password, token, and certificate: what it protects, who creates and holds it, expiry, what to do if it leaks | Draft, 2026-11-13 |
 | 15 | [Security review](docs/cyber/15-security-review.md) | Our own review of the plan before the ISSM meeting: 33 findings with fixes, and what to bring to the meeting | Draft, 2026-11-13 |
+| 16 | [Phased software list](docs/cyber/16-phased-sbom.md) ([CSV](docs/cyber/16-phased-sbom.csv)) | Everything by phase, with download links, for the ISSM | Draft, 2026-11-14 |
+| 17 | [First email to the ISSM](docs/cyber/17-issm-intro-email.md) | Introduction, quick questions, then detailed questions | Draft, 2026-11-14 |
 
 ## Diagrams
 

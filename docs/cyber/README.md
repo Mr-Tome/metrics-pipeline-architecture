@@ -24,6 +24,8 @@ it to be refused.
 | [13 Model BOM](13-model-bom.md) | Every model and model data file: publisher, country of origin, commit, license, file format, size, how it is checked, and the models that ride inside container images |
 | [14 Key and certificate inventory](14-key-and-certificate-inventory.md) | Every key, password, token, and certificate: what it protects, who creates and holds it, when it expires, what to do if it leaks |
 | [15 Security review](15-security-review.md) | Our own review of the plan before meeting the ISSM: 33 findings, each with how it could be misused, the fix, and when |
+| [16 Phased software list](16-phased-sbom.md) ([CSV](16-phased-sbom.csv)) | Everything by phase (0 to 4), each with the exact link it is downloaded from. This is the list to send the ISSM. Links checked 2026-11-14 |
+| [17 First email to the ISSM](17-issm-intro-email.md) | Draft introduction: goals, quick questions (hardware entry, OS, media), then the detailed questions |
 | Decision register (below) | Every question for the ISSM and Cyber, and what each answer affects |
 | Not yet covered (below) | Content that is not software, a model, or a key |
 

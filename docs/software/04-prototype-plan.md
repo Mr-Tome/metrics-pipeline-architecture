@@ -33,6 +33,10 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 
 ## 3. Phases
 
+P0 to P3 below are the work steps for **step one** (phase 0, approvals and hardware, and phase 1, SI chat).
+The phases themselves (0 to 4) and what each needs first are in the **Phases** tab of
+[`metrics_architecture.html`](../../metrics_architecture.html) and in [16](../cyber/16-phased-sbom.md).
+
 ### P0. Order and prepare (week 0)
 
 - [ ] Send [01-facility-requirements.md](../hardware/01-facility-requirements.md) to the lab. If an earlier version was

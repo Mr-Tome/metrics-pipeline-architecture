@@ -1,4 +1,4 @@
-"""Add the Security, Delivery, Keys, and Review views to metrics_architecture.html.
+"""Add the Phases, Security, Delivery, Keys, and Review views to metrics_architecture.html.
 
 Security and Delivery show phase 1 (SI through the chat page). Keys and Review are built from docs 14 and 15.
 
@@ -260,6 +260,110 @@ def defs(a, x):
             f'<marker id="{x}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--deny)"/></marker></defs>')
 
 
+# Phases view: what goes in when, and what each phase needs first
+PH = [
+ dict(key="p0", name="Phase 0", title="Approvals and hardware", color="pf",
+      info=[["Goal", "Get permission, then buy, rack, and power the servers with the lab's OS."], ["Analysts can", "Nothing yet."], ["Needs first", "Nothing. This is where everything starts."], ["Done when", "The ISSM has approved hardware entry, the OS, and transfer media, and the rack passes its hardware checks."], ["Work steps", "Doc 04, P0, and the rack build guide (05)."]],
+      get=("Nothing for users yet", "Approved, racked, powered"),
+      issm=[("Hardware entry process", "How new hardware is approved into the lab.", "S1"), ("Server OS baseline", "Which OS and hardening accreditation requires. We plan Rocky Linux 9; RHEL 9 if required. Is there a lab package mirror?", "L1"), ("Transfer media", "Approved media type, who provides it, how long a transfer takes.", "S3"), ("Secure Boot", "Required or not. It changes how the NVIDIA driver is installed.", "S4"), ("Switch setup cable", "A USB-to-console cable from svc01 to the switch, so no laptop is needed.", "S8"), ("Burn-in outside the lab", "May new hardware be tested on the unclassified side first, then wiped?", "S2")],
+      sw=[("Lab OS: Rocky or RHEL 9", "Installed on every server from the lab's image.", "16: P1"), ("OS packages from mirror", "gcc, kernel-devel, dkms, SELinux packages for the driver and Kubernetes.", "16: P2 to P5"), ("Firmware on the hardware", "Switch, BIOS, BMC, NIC, and drive firmware as shipped.", "16: H1 to H4")],
+      hw=[("gpu01: 4 GPUs", "One GPU server with four RTX PRO 6000 GPUs.", "08a"), ("svc01-03 service nodes", "Three service servers run Kubernetes and the services.", "08a"), ("Switches, console, cables", "sw01 data switch, oob01 management switch, rack console, cables, optics.", "08b")]),
+ dict(key="p1", name="Phase 1", title="SI chat", color="si",
+      info=[["Goal", "Analysts use SI through a chat page in their browser."], ["Analysts can", "Ask questions, dictate by voice, and upload a document to ask about it. About 50 users."], ["Needs first", "Phase 0, and the phase 1 software approved by the ISSM."], ["Done when", "The first signed bundle is installed and analysts are signed in."], ["Work steps", "Doc 04, P1 to P3: build and rehearse the bundle, install in the lab, then updates."]],
+      get=("Chat with SI in a browser", "Questions, voice, documents"),
+      issm=[("Upstream or Iron Bank images", "May we use upstream container images, or only Iron Bank where it has them?", "S6"), ("Model file formats", "We propose only formats that cannot run code when loaded.", "S20"), ("US-made rule: how far", "Publisher only, or also the base model and the converter?", "S22"), ("Bundle signing and key", "GPG or cosign, who holds the key, how the public key reaches the lab.", "S10"), ("Driver build packages", "From the lab mirror, or carried in the bundle?", "S11"), ("Speech-to-text server", "Which server runs faster-whisper.", "S12"), ("Chat page image", "Standard or slim Open WebUI image.", "S13"), ("Who is cluster admin", "Cluster admin can read every chat and log.", "S24"), ("Encryption at rest", "For chat history, uploads, databases, models.", "S25"), ("Audit log content", "What is recorded, how long, where it goes.", "S26"), ("Key lifetimes", "Gateway keys and the TLS certificate.", "S23")],
+      sw=[("Kubernetes (RKE2), Zarf", "The platform and the air-gap delivery tool.", "16: K1 to K9"), ("NVIDIA driver, GPU Operator", "GPU support.", "16: G1, G2"), ("Language model", "gpt-oss-120b (OpenAI), three copies.", "16: A1, M1"), ("Gateway (LiteLLM)", "Every model request goes through it and is logged.", "16: A2"), ("Chat page (Open WebUI)", "The web page analysts use.", "16: A3"), ("Speech-to-text (Whisper)", "Voice input.", "16: A4, M2"), ("Document upload", "Text extraction and OCR (Tika) and embeddings.", "16: A5, A6, M3"), ("Database (PostgreSQL)", "The gateway's request log.", "16: A7, A8"), ("Scanner (Trivy)", "Scans every image, before and after transfer.", "16: S1, S2")],
+      hw=[("Phase 0 hardware", "Nothing new.", "")]),
+ dict(key="p2", name="Phase 2", title="Analyst tools", color="wb",
+      info=[["Goal", "Analysts call SI from their own tools."], ["Analysts can", "Use SI from Jupyter, VS Code, MATLAB, and Python scripts."], ["Needs first", "Phase 1."], ["Done when", "Each analyst has a personal key and the tools work from lab PCs."], ["Status", "The scripts can already do this. It stays off until approved."]],
+      get=("SI in Jupyter, VS Code, MATLAB", "Personal key per analyst"),
+      issm=[("Open an API address", "Lets analyst tools reach the gateway from desks.", "15: R19"), ("Tools on analyst PCs", "Python packages and a VS Code extension on lab PCs.", "15: R4"), ("Handing out personal keys", "How keys reach analysts and how long they last.", "S23"), ("Keys kept in files", "Guidance so keys stay out of shared notebooks.", "15: R28")],
+      sw=[("Jupyter AI + libraries", "Python packages for Jupyter.", "16: C1, C2, C4"), ("Continue for VS Code", "VS Code extension.", "16: C5"), ("OpenAI Python client", "For scripts.", "16: C3"), ("MATLAB (already there)", "Calls the gateway with webwrite. Nothing added.", "16: C6")],
+      hw=[("No new hardware", "", "")]),
+ dict(key="p3", name="Phase 3", title="Platform services", color="k8",
+      info=[["Goal", "Shared services that later phases need: lab sign-in, a registry, a change process, monitoring."], ["Analysts can", "Sign in with their lab account. Changes go through review in GitLab."], ["Needs first", "Phase 1's cluster. Does not need phase 2."], ["Status", "Not chosen or pinned yet."]],
+      get=("Sign in with lab account", "Reviewed changes, monitoring"),
+      issm=[("Platform One / Iron Bank", "Account and use of Big Bang and Iron Bank.", "S6"), ("Single sign-on", "Connect Keycloak to the lab's accounts.", "15"), ("GitLab in the lab", "A code and change system inside the lab.", "")],
+      sw=[("Big Bang baseline", "Platform One's package of the services below.", "16: X1, X2"), ("Keycloak sign-in", "Replaces local accounts.", "16: X3"), ("Harbor registry", "Replaces the Zarf registry.", "16: X4"), ("GitLab and Runner", "Code and change review.", "16: X5"), ("Argo CD", "Deploys approved changes.", "16: X6"), ("Prometheus, Grafana", "Monitoring.", "16: X7")],
+      hw=[("Same servers", "Capacity on svc01-03 to check when it is planned.", "")]),
+ dict(key="p4", name="Phase 4", title="Metrics pipeline", color="z3",
+      info=[["Goal", "The metrics pipeline in the Data flow tab."], ["Analysts can", "Run metrics on lab data and see results on pages and in notebooks."], ["Needs first", "Phase 3 (change process) and phase 2 (notebooks calling SI), plus approval to read lab data."], ["Status", "Not chosen or pinned yet. None of this code exists yet."]],
+      get=("Metrics on lab data", "Pages and notebooks"),
+      issm=[("Read access to lab data", "Read-only access to the lab's post-processed data.", ""), ("Code written in the lab", "Metric plugins written and reviewed inside the lab.", ""), ("Notebook per analyst", "JupyterHub in the cluster.", "")],
+      sw=[("Dagster", "Runs the pipeline.", "16: X8"), ("Readers, metric plugins", "Ours, written in the lab.", "16: X11"), ("Evidence pages", "Published metric pages.", "16: X10"), ("JupyterHub", "Analyst notebooks.", "16: X9")],
+      hw=[("More servers likely", "Memory-heavy jobs; to size when planned.", "")]),
+]
+CW, CG, CX0 = 232, 12, 16
+LANES = [("get", "What analysts get", "wb"), ("issm", "ISSM decides", "deny"), ("sw", "Software it brings", "k8"), ("hw", "Hardware", "pf")]
+CH, CGAP = 26, 4
+pv = []
+y_head = 150
+y = y_head + 64 + 24
+lane_y = {}
+for k, _, _ in LANES:
+    n = 1 if k == "get" else max(len(p[k]) for p in PH)
+    h = 46 if k == "get" else n * (CH + CGAP) - CGAP
+    lane_y[k] = (y + 20, h)
+    y += 20 + h + 22
+grow_y = y
+height = grow_y + 70
+pv.append(f'<svg id="phs" viewBox="0 0 1240 {height}" role="img" aria-label="Phases view: what goes in when, and what each phase needs first">')
+pv.append(defs("pa", "px"))
+pv.append(ifilt("get", 16, 296, "What analysts get", "When each phase is finished"))
+pv.append(ifilt("issm", 320, 296, "ISSM decides", "Approvals each phase needs"))
+pv.append(ifilt("sw", 624, 296, "Software it brings", "Full list with links: doc 16"))
+pv.append(ifilt("hw", 928, 296, "Hardware", "What has to be bought or racked"))
+pv.append(f'<g class="zone-item"><rect x="8" y="88" width="{2*CW+CG+16}" height="{height-96}" rx="16" fill="var(--z3-f)" fill-opacity="0.45" stroke="var(--z3)" stroke-width="2"/>'
+          f'<text x="22" y="110" class="zone-label halo" text-anchor="start" fill="var(--z3)">Step one: get approved, then SI chat</text></g>')
+for i, p in enumerate(PH):
+    x = CX0 + i * (CW + CG)
+    INFO[p["key"]] = dict(title=f'{p["name"]}. {p["title"]}', kind="", rows=p["info"])
+    pv.append(f'<g class="tnode vi" tabindex="0" role="button" data-iid="{p["key"]}" data-p="get issm sw hw" aria-label="{X(p["name"])}">'
+              f'<rect x="{x}" y="{y_head}" width="{CW}" height="64" rx="12" fill="var(--{p["color"]}-f)" stroke="var(--{p["color"]})" stroke-width="2.2" class="box"/>'
+              f'<text x="{x+14}" y="{y_head+26}" class="promise-t" text-anchor="start" fill="var(--ink)">{X(p["name"])}</text>'
+              f'<text x="{x+14}" y="{y_head+48}" class="srv-t" text-anchor="start">{X(p["title"])}</text></g>')
+    for k, _, c in LANES:
+        ly, lh = lane_y[k]
+        if k == "get":
+            gt, s = p["get"]
+            key = f'{p["key"]}_get'
+            INFO[key] = dict(title=gt, kind="", rows=[["When", f'{p["name"]} is finished'], ["Detail", s]])
+            pv.append(node(key, x, ly, CW, 46, gt, s, "", attr="data-iid", cls="vi").replace('data-p=""', 'data-p="get"', 1))
+            continue
+        for j, (ct, d, ref) in enumerate(p[k]):
+            key = f'{p["key"]}_{k}{j}'
+            rows = [["What", d]] if d else []
+            if ref:
+                rows.append(["Listed in", ref if not ref[0] == "S" and not ref[0] == "L" else f"Decision register, {ref}"])
+            INFO[key] = dict(title=ct, kind="", rows=rows or [["What", ct]])
+            cy = ly + j * (CH + CGAP)
+            fill, stroke = {"issm": ("var(--deny-f)", "var(--deny)"), "sw": ("var(--k8-f)", "var(--k8)"), "hw": ("var(--panel)", "var(--pf)")}[k]
+            pv.append(f'<g class="tnode vi" tabindex="0" role="button" data-iid="{key}" data-p="{k}" aria-label="{X(ct)}">'
+                      f'<rect x="{x+6}" y="{cy}" width="{CW-12}" height="{CH}" rx="7" fill="{fill}" stroke="{stroke}" stroke-width="1.4" class="box"/>'
+                      f'<text x="{x+16}" y="{cy+17}" class="edge-label" text-anchor="start" fill="var(--ink)">{X(ct)}</text></g>')
+for k, lab, c in LANES:
+    ly, _ = lane_y[k]
+    pv.append(label(CX0 + 2*(CW+CG) + 8, ly - 6, lab, "start", f"var(--{c})"))
+    pv.append(label(CX0 + 4, ly - 6, lab, "start", f"var(--{c})"))
+# dependencies
+pv.append(flow(f"M{CX0+CW},{y_head+32} H{CX0+CW+CG}", marker="pa"))
+pv.append(flow(f"M{CX0+2*CW+CG},{y_head+32} H{CX0+2*(CW+CG)}", marker="pa"))
+pv.append(flow(f"M{CX0+4*CW+3*CG},{y_head+32} H{CX0+4*(CW+CG)}", marker="pa"))
+x1 = CX0 + (CW + CG) + 180; x3 = CX0 + 3 * (CW + CG) + 60
+pv.append(flow(f"M{x1},{y_head} V{y_head-20} H{x3} V{y_head}", marker="pa"))
+pv.append(label(x1 + 8, y_head - 26, "phase 3 needs phase 1, not 2", "start"))
+x2 = CX0 + 2 * (CW + CG) + 180; x4 = CX0 + 4 * (CW + CG) + 120
+pv.append(f'<path class="tflow" style="stroke-dasharray:6 5" d="M{x2},{y_head} V{y_head-44} H{x4} V{y_head}" marker-end="url(#pa)"/>')
+pv.append(label(x4 - 8, y_head - 50, "phase 4 also needs phase 2", "end"))
+# grow
+INFO["grow1"] = dict(title="100 users: add gpu02", kind="", rows=[["When", "Any time after phase 1."], ["What", "A second GPU server with 4 GPUs in rack 2. Same software bundle, no design change."], ["Listed in", "02, section 5; 16: X12"]])
+INFO["grow2"] = dict(title="Better document search", kind="", rows=[["When", "Any time after phase 1."], ["What", "Add IBM's reranker model (US-made)."], ["Listed in", "16: M9"]])
+pv.append(label(CX0 + 2*(CW+CG) + 8, grow_y + 4, "Any time after phase 1", "start", "var(--muted)"))
+pv.append(node("grow1", CX0 + 2*(CW+CG), grow_y + 14, 2*CW+CG, 46, "100 users: add gpu02", "Same bundle, no design change", "", attr="data-iid", cls="vi", dash="6 4").replace('data-p=""', 'data-p="hw"', 1))
+pv.append(node("grow2", CX0 + 4*(CW+CG), grow_y + 14, CW, 46, "Better document search", "IBM reranker model", "", attr="data-iid", cls="vi", dash="6 4").replace('data-p=""', 'data-p="sw"', 1))
+pv.append("</svg>")
+phs_svg = "\n".join(pv)
+
 # Security view
 sv = ['<svg id="sec" viewBox="0 0 1240 612" role="img" aria-label="Security view: how phase 1 keeps the chat service closed and recorded">', defs("sa", "sx")]
 sv.append(ifilt("net", 16, 296, "No internet", "The lab has no outside connection"))
@@ -417,7 +521,7 @@ del_svg = "\n".join(dv)
 
 
 # ---------- 4. CSS, radios, JS ----------
-VIEWS = ["sec", "del", "keys", "rev"]
+VIEWS = ["phs", "sec", "del", "keys", "rev"]
 hide = []
 for v in VIEWS:
     others = ", ".join(f"body:has(#m-{v}:checked) #{o}" for o in ["svg", "topo"] + [w for w in VIEWS if w != v])
@@ -446,6 +550,7 @@ css = """<!-- GEN:CSS START -->
 t = t.replace("</head>", css + "</head>", 1)
 
 radios = ('<!-- GEN:RADIO START -->'
+          '<input type="radio" name="mode" id="m-phs"><label for="m-phs">Phases</label>'
           '<input type="radio" name="mode" id="m-sec"><label for="m-sec">Security</label>'
           '<input type="radio" name="mode" id="m-del"><label for="m-del">Delivery</label>'
           '<input type="radio" name="mode" id="m-keys"><label for="m-keys">Keys</label>'
@@ -455,7 +560,7 @@ anchor = '<input type="radio" name="mode" id="m-deploy"><label for="m-deploy">De
 assert anchor in t
 t = t.replace(anchor, anchor + radios, 1)
 
-svgs = "<!-- GEN:SVG START -->\n" + sec_svg + "\n" + del_svg + "\n" + keys_svg + "\n" + rev_svg + "\n<!-- GEN:SVG END -->"
+svgs = "<!-- GEN:SVG START -->\n" + phs_svg + "\n" + sec_svg + "\n" + del_svg + "\n" + keys_svg + "\n" + rev_svg + "\n<!-- GEN:SVG END -->"
 del_end = t.index("</svg>", t.index("<svg id=\"topo\""))
 t = t[:del_end + len("</svg>")] + svgs + t[del_end + len("</svg>"):]
 
@@ -503,6 +608,12 @@ function revOverview() {
   <p>Use the buttons at the top to see what needs an ISSM decision, or what must be fixed before the transfer or before users. Select any issue for how it could be misused and the fix. Full list: docs/cyber/15.</p>`;
 }
 const OVER = {
+  phs: `<h2>Phases view</h2><p class="kind">What goes in when, and what each phase needs first</p>
+  <p>Each column is a phase, named by what analysts can do when it is finished. Arrows show what a phase needs first.</p>
+  <p><b>Step one</b> (shaded) is phases 0 and 1: get the ISSM's approvals and the hardware in, then give analysts SI through the chat page. Everything else waits.</p>
+  <p>Red boxes are what the ISSM decides. Phase 0's questions are the first ones to ask, because nothing can start without them.</p>
+  <p>Phases 2 and 3 do not depend on each other. Doc 04's P0 to P3 are the work steps inside step one.</p>
+  <p>Select any box for details. The software list with download links is doc 16.</p>`,
   sec: `<h2>Security view</h2><p class="kind">Phase 1: SI through the chat page</p>
   <p>How phase 1 keeps the chat service closed and recorded. Each box is one part of the system, placed where it runs.</p>
   <p>Use the four buttons at the top to see which parts carry each promise. Red dashed lines are paths that are blocked.</p>
@@ -516,7 +627,7 @@ function showInfo(svg, id, g) {
   const d = INFO[id]; select(svg, g);
   panel.innerHTML = `<h2>${e(d.title)}</h2><dl class="facts">${d.rows.map(([a, b]) => `<dt>${e(a)}</dt><dd>${e(b)}</dd>`).join("")}</dl>`;
 }
-["sec", "del"].forEach(v => {
+["phs", "sec", "del"].forEach(v => {
   const svg = document.getElementById(v);
   svg.querySelectorAll(".tnode[data-iid]").forEach(g => bind(g, () => { focus(svg, "vi", null); svg.querySelectorAll(".filt.sel").forEach(x => x.classList.remove("sel")); showInfo(svg, g.dataset.iid, g); }));
   svg.querySelectorAll(".filt").forEach(g => bind(g, () => {
@@ -554,7 +665,7 @@ svgR.querySelectorAll(".filt").forEach(g => bind(g, () => {
 }));
 document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", () => {
   focus(svgK, "key-item", null); focus(svgR, "rev-item", null); select(svgK, null); select(svgR, null);
-  ["sec", "del"].forEach(v => { const s = document.getElementById(v); focus(s, "vi", null); select(s, null); if (document.getElementById("m-" + v).checked) panel.innerHTML = OVER[v]; });
+  ["phs", "sec", "del"].forEach(v => { const s = document.getElementById(v); focus(s, "vi", null); select(s, null); if (document.getElementById("m-" + v).checked) panel.innerHTML = OVER[v]; });
   if (document.getElementById("m-keys").checked) panel.innerHTML = keysOverview();
   if (document.getElementById("m-rev").checked) panel.innerHTML = revOverview();
 }));
