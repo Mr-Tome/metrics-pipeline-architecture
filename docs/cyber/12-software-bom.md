@@ -108,7 +108,7 @@ dcgm-exporter, operator-validator, and mig-manager. `package/IMAGES.txt` in the 
 | A2 | LiteLLM, gateway (keys, logging, usage limits) | image v1.108.4-lts, chart 1.89.2 | ghcr.io/berriai/litellm | MIT core. The image also carries an `enterprise/` folder under BerriAI's commercial license; we don't enable it. | service nodes |
 | A3 | Open WebUI, chat page, standard image | image v0.12.5, chart 17.5.0 | ghcr.io/open-webui/open-webui | Open WebUI License (BSD-3 based, with a clause that keeps its branding) | service nodes |
 | A3s | **Alternative to A3:** Open WebUI `slim` image | v0.12.5-slim, same chart | ghcr.io/open-webui/open-webui | Same as A3 | service nodes |
-| A4 | speaches (faster-whisper server), speech-to-text. **Alternative:** vLLM (A1) serves Whisper instead, with no extra image (S12). | 0.8.3-cuda | ghcr.io/speaches-ai/speaches | MIT | gpu01 |
+| A4 | speaches (faster-whisper server), speech-to-text. **Alternatives (S12):** a maintained server such as whisper-asr-webservice, our own small faster-whisper server, or vLLM (A1) serving Whisper. | 0.8.3-cuda | ghcr.io/speaches-ai/speaches | MIT | gpu01 |
 | A5 | Text Embeddings Inference, CPU | cpu-1.9.4 | ghcr.io/huggingface/text-embeddings-inference | Apache-2.0 | gpu01 (CPU) |
 | A6 | Apache Tika server, full image with Tesseract OCR | 3.3.3.0-full | docker.io/apache/tika | Apache-2.0 | service nodes |
 | A7 | CloudNativePG operator | chart 0.29.1 (operator 1.30.1) | cloudnative-pg.github.io/charts | Apache-2.0 | service nodes |
@@ -139,7 +139,7 @@ The full model list, including the models built into container images, is in the
 | M3 | snowflake-arctic-embed-l-v2.0 | safetensors only | huggingface.co/Snowflake/snowflake-arctic-embed-l-v2.0 | Apache-2.0 | 568M parameters |
 | M4 | tiktoken vocabularies `o200k_base`, `cl100k_base` | text | openaipublic.blob.core.windows.net | distributed with tiktoken (MIT); to confirm | small |
 
-The model BOM also lists the alternative and later models we are asking about (M5 to M8).
+The model BOM also lists the alternative and later models we are asking about (M5, M6, M9 to M11). Models must be made in the USA (S22); bge-m3 and the BAAI reranker were removed for that reason.
 
 Weights are meant to be data, not code. How the intake keeps it that way:
 
@@ -161,7 +161,8 @@ Weights are meant to be data, not code. How the intake keeps it that way:
 | S1 | Trivy scanner | 0.76.2 | github.com/aquasecurity/trivy | Apache-2.0 |
 | S2 | Trivy vulnerability DB and Java DB (data) | download date in `MANIFEST.txt` | ghcr.io/aquasecurity | Apache-2.0; advisory sources have their own terms |
 
-**Analyst workstations** (installed by analysts on their own Windows and Linux machines, from the bundle)
+**Analyst workstations: later phase only.** Phase 1 is the chat page in a browser, so the phase 1 bundle leaves these
+out (`pull-all.sh` includes them only with `WITH_CLIENTS=1`). Listed so Cyber can review them ahead of that phase.
 
 | ID | Component | Version | Source | License |
 |---|---|---|---|---|
@@ -250,5 +251,5 @@ Listed so the Cyber team can plan reviews. None of this is in the phase 1 bundle
 |---|---|
 | Big Bang (Platform One): Harbor, GitLab, Argo CD, Keycloak, Prometheus/Grafana | Iron Bank images; Harbor replaces the Zarf registry |
 | JupyterHub, Dagster, Evidence, metrics plugins | The metrics pipeline ([`metrics_architecture.html`](../../metrics_architecture.html)) |
-| Reranker model `BAAI/bge-reranker-v2-m3` | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20) |
-| Typed decision model (Cloudflare Clef) with SGLang | Deferred. Ships a Python code file that runs at load time; needs ISSM review (S9). |
+| Reranker model `ibm-granite/granite-embedding-reranker-english-r2` (M9) | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20) |
+| Typed decision model (Cloudflare Clef) with SGLang | Deferred. Ships a Python code file that runs at load time; needs ISSM review (S9). Its Qwen base model is from China, so the USA-only rule (S22) rules it out. |

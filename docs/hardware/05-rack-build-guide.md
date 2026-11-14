@@ -99,7 +99,7 @@ Install heaviest first, at the bottom, so the rack can't tip.
 | 21 | con01 rack console | Eye height for a seated or kneeling person. Cage nuts (square holes). |
 | 22-39 | blanking | |
 | 40 | oob01 | Ports to the rear |
-| 41 | sw01 | Ports to the rear, power supplies and fans to the front. Cisco 4-post rack-mount kit, cage nuts. |
+| 41 | sw01 | Ports to the rear, power supplies and fans to the front. Cisco 4-post rack-mount kit (NXK-ACC-KIT-1RU), cage nuts. |
 | 42 | blanking | No patch panel in our racks. The uplink fiber runs straight from sw01 to the lab C9500X-28C8D. |
 
 **Rack 2** (held for growth): fill all 42U with blanking panels now, so it doesn't leak cool air out of
@@ -206,7 +206,9 @@ the QSFP28 ports `Ethernet1/49` to `Ethernet1/54`.
 
 ## 6. First power-on checks
 
-1. **Switch:** console in, set the management IP, then confirm `show interface status` shows each D-cable
+1. **Switch:** console in (no laptop: plug the rack console into svc01 over VGA and USB, run the USB-to-RJ45
+   console cable from svc01 to the switch's console port, and open it from svc01 with
+   `screen /dev/ttyUSB0 9600`; svc01 needs its OS installed first; pending ISSM approval, S8), set the management IP, then confirm `show interface status` shows each D-cable
    link up at 25G. Enable `feature lacp` and put Ethernet1/49-1/50 in one LACP port-channel (VLAN plan from
    the lab); check with `show port-channel summary`. oob01's uplink (M06) goes to the lab directly, not through sw01.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the

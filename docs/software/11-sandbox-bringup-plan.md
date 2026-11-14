@@ -10,7 +10,8 @@ before the bundle crosses into the lab.
 
 | In scope | What it is |
 |---|---|
-| SI workbench | Model server (vLLM), gateway (LiteLLM, per-user keys), chat page (Open WebUI), speech-to-text (Whisper), and analyst access from Jupyter AI, VS Code (Continue), MATLAB, and Python |
+| SI chat service (phase 1) | Model server (vLLM), gateway (LiteLLM), chat page (Open WebUI), speech-to-text (Whisper), document upload. Analysts use the chat page in a browser; nothing else. |
+| Later phase, tested only if asked | Analyst tools through the gateway API: Jupyter AI, VS Code (Continue), MATLAB, Python, with per-user keys. Needs `--api-host` and a bundle pulled with `WITH_CLIENTS=1` (checks C6 and C12 to C15). |
 | Pipeline functions it depends on | The delivery pipeline (pull, seal, verify, deploy) and the platform under the apps: RKE2, Zarf registry, local-path storage, CloudNativePG |
 | Not built yet | The metrics pipeline itself (Dagster, readers, metric plugins, Evidence pages), JupyterHub, GitLab, Harbor, Argo CD. They exist only in `metrics_architecture.html`. Section 6 says what a minimal sandbox slice would be. |
 
@@ -65,9 +66,9 @@ VMs from a script (kickstart or cloud-init) for every release so nothing carries
 |---|---|---|
 | Node VM | Same OS, version, **and hardening** as the lab ([security decisions](../cyber/README.md) L1). If the lab uses STIG: SELinux enforcing, FIPS mode, fapolicyd, `noexec` on `/tmp`. 12 vCPU, 48 GB RAM, 400 GB disk. | A plain OS install hides the failures that a STIG'd host causes (SELinux policy for RKE2, binaries blocked by fapolicyd). More CPU and RAM than doc 04 because the stand-in model runs on CPU. |
 | Bundle disk | Attached **read-only** | Proves nothing in the install writes into the bundle |
-| Client VMs | One Windows and one Linux, with Python 3.9 and 3.13, VS Code, and MATLAB if a license is free. No internet. | Analysts are mostly on Windows (L3). This is the only way to test the workbench side. |
+| Client VMs | One Windows and one Linux, each with the lab's standard browser. No internet. (Python 3.9 and 3.13, VS Code, and MATLAB only when testing the later analyst tools.) | Analysts are mostly on Windows (L3). This tests the chat page as analysts see it. |
 | Network | Host-only network (example `10.99.0.0/24`), no NAT. The host is `10.99.0.1` and is the default route, but it does not forward traffic. | RKE2 gets its default route, and nothing reaches the internet |
-| DNS | dnsmasq on the host, or `/etc/hosts` on every VM: `chat.sandbox.lab` and `api.sandbox.lab` point to the node | Same name-based setup as the lab |
+| DNS | dnsmasq on the host, or `/etc/hosts` on every VM: `chat.sandbox.lab` points to the node (plus `api.sandbox.lab` when testing the later analyst tools) | Same name-based setup as the lab |
 | Certificates | A sandbox CA, imported into the client VMs' trust stores, issues one certificate for both names (commands below) | Rehearses the lab CA steps on the clients, which a self-signed certificate skips |
 | Egress tripwire | `tcpdump -ni <host-only bridge> 'not dst net 10.99.0.0/24'` on the host, plus the CoreDNS `log` plugin | Every attempt to reach the internet (telemetry, a runtime download) is recorded, even when the component fails over quietly |
 
@@ -97,7 +98,7 @@ COSIGN_PUB=cosign.pub ./intake/verify.sh /mnt/bundle    # must print PASS; unsig
 ./intake/deploy.sh server-init
 ./intake/deploy.sh models
 ./intake/deploy.sh platform
-./intake/deploy.sh apps --chat-host chat.sandbox.lab --api-host api.sandbox.lab \
+./intake/deploy.sh apps --chat-host chat.sandbox.lab \
     --tls-cert si.crt --tls-key si.key --rehearsal
 ./intake/deploy.sh gateway-key
 # then deploy the rehearsal add-on package from its own disk
@@ -119,24 +120,25 @@ must pass before the bundle goes on the transfer drive.
 | C3 | **The real vLLM image loads gpt-oss's tokenizer and vocabulary offline** (F2) | One-off pod: the bundle's vLLM image, `/var/lib/models` mounted, runs `AutoTokenizer.from_pretrained('/models/gpt-oss-120b')` and `load_harmony_encoding(HARMONY_GPT_OSS)`. No GPU needed. |
 | C4 | Trivy scans one image offline with the shipped database | `trivy image --skip-db-update --skip-java-db-update --offline-scan ...` |
 
-**Gateway and model path**
+**Gateway and model path** (phase 1 has no API address, so run these on svc01 through `kubectl -n si port-forward svc/litellm 14000:4000`)
 
 | # | Check | How |
 |---|---|---|
 | C5 | Gateway health and model list | `GET /health/liveliness`; `GET /v1/models` lists `gpt-oss-120b` |
-| C6 | Per-user key works, streaming and non-streaming | `deploy.sh user-key smoke`, then a chat completion both ways |
+| C6 | Later phase: per-user key works, streaming and non-streaming | `deploy.sh user-key smoke`, then a chat completion both ways |
 | C7 | A revoked key is refused | Delete the key; the next call returns 401 |
 | C8 | The request is logged against the user | A row for `smoke` in LiteLLM's spend log table in PostgreSQL |
 | C9 | Light load holds | `validate/llm-load-test.py --users 4 --ca ca.crt` against the stand-in model |
 | C10 | Whisper transcribes through the gateway | `POST /v1/audio/transcriptions` with a short WAV file |
 | C10b | Embeddings through the gateway | `POST /v1/embeddings` with model `arctic-embed` returns a 1,024-number vector. Runs in the rehearsal VM (CPU). |
 
-**Workbench (from the client VMs)**
+**Chat page (from the client VMs)**
 
 | # | Check | How |
 |---|---|---|
 | C11 | Chat page | HTTPS opens with no certificate warning; create the admin; ask a question; answer streams. Restart the pod; history is still there. |
 | C11b | Document upload | Attach a 100-page PDF and a 5 MB log; time the indexing. Ask about a fact on one page only; the answer cites it. Switch the file to "Using Entire Document" and ask for a summary. Admin Panel, Settings, Documents shows engine `openai`, model `arctic-embed`, and a non-empty key (W23). Upload a scanned (image-only) 20-page PDF: its text is found, and record how long it takes. |
+| | **Later phase: analyst tools** (only with `--api-host` and `WITH_CLIENTS=1`) | |
 | C12 | Jupyter AI | `pip install --no-index --find-links wheels-<os>` on Python 3.9 **and** 3.13; configure per [06](06-software-delivery.md); one chat turn |
 | C13 | VS Code | Install the Continue VSIX offline; configure; one chat turn. Telemetry is off in the config. |
 | C14 | MATLAB | The [06](06-software-delivery.md) `webwrite` example. If no license is free, run the same request in PowerShell `Invoke-RestMethod`. |
@@ -211,7 +213,7 @@ dataset, see the metric on the page" test.
 | ID | Item | When | What to do |
 |---|---|---|---|
 | W19 | **No server-side notebooks.** Phase 1 assumes analysts can `pip install` on their own lab machines. Managed lab desktops often block that. | Before users | Ask lab IT now whether analysts may install Python packages. If not, bring JupyterHub forward from the later phase. |
-| W20 | **Document indexing runs on CPU.** Fine for questions; a large upload takes about a minute (estimate, not measured). No reranker, so exact terms like test IDs can rank below looser matches. OCR of a long scan takes minutes and can pass the 10-minute request limit. Tika ships English and a few European OCR languages only. Spreadsheets and CSVs get cut into text pieces, so totals and trends over a large table come out wrong; that work belongs in Jupyter. | Sandbox (timing), first lab week (real load) | Time C11b. If slow, split the Whisper GPU with MIG and move the embedding model there. Add `BAAI/bge-reranker-v2-m3` (safetensors, Apache 2.0) with hybrid search. Time OCR in C11b; if long scans time out, raise the chat ingress timeout or have analysts split them. Tell analysts to analyze tables in Jupyter. |
+| W20 | **Document indexing runs on CPU.** Fine for questions; a large upload takes about a minute (estimate, not measured). No reranker, so exact terms like test IDs can rank below looser matches. OCR of a long scan takes minutes and can pass the 10-minute request limit. Tika ships English and a few European OCR languages only. Spreadsheets and CSVs get cut into text pieces, so totals and trends over a large table come out wrong; that work belongs in Jupyter. | Sandbox (timing), first lab week (real load) | Time C11b. If slow, split the Whisper GPU with MIG and move the embedding model there. Add IBM `granite-embedding-reranker-english-r2` (safetensors, Apache 2.0, USA; English only) with hybrid search. The BAAI reranker is out under the USA-only model rule. Time OCR in C11b; if long scans time out, raise the chat ingress timeout or have analysts split them. Tell analysts to analyze tables in Jupyter. |
 | W23 | **Chat page settings are copied into its database on first start.** If the gateway key isn't there yet, document upload and chat can keep an empty key after `gateway-key`. Vectors live on the chat page's volume (Chroma), not in PostgreSQL. | Sandbox | C11b checks the key. Later, move the chat page's data and vectors into PostgreSQL (pgvector is already enabled), which also puts them under the database's failover. |
 | W21 | **gpt-oss is a reasoning model.** How Jupyter AI and Continue show `reasoning_content` varies by version, and the stand-in model can't show it. | First lab week | Check C12 and C13 again against the real model in the lab |
 | W22 | **The metrics pipeline and the in-lab change loop don't exist yet.** No GitLab, Runner, Argo CD, Dagster, plugins, or golden datasets. On day 1, analysts can talk to SI but can't use it to build and deploy metric plugins as the architecture describes. | Later | Section 6. Plan this as the next release, not part of phase 1. |

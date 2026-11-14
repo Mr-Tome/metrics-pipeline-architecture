@@ -1,7 +1,7 @@
 # 13. Model bill of materials (initial, for Cyber Security and program approval)
 
 **Track:** Cyber Security ([package index and decision register](README.md)).
-**Status:** Draft, 2026-11-11. Companion to the software BOM ([12](12-software-bom.md)).
+**Status:** Draft, 2026-11-13. Companion to the software BOM ([12](12-software-bom.md)).
 **Scope:** every machine-learning model and model-related data file that phase 1 brings into the lab. That
 includes the ones we deliver on purpose, the alternatives we are still choosing between, and the ones that come
 along inside container images. Cyber decides which are allowed; nothing has been left off because we expected it
@@ -12,6 +12,9 @@ are licensed and approved for, and how we know the files are the ones the publis
 code, but they decide what the system says, they can be very large opaque files, and some file formats can run
 code when loaded. That is why they get their own list.
 
+**Program rule (2026-11-13): models must be made in the USA** (register S22). Each model below shows its country
+of origin, for the publisher and for its lineage. Section 1a shows where each one stands.
+
 ## 1. Models we deliver (bundle `models/`, through the model intake checks)
 
 All three come from Hugging Face. At pull time, `30-pull-models.sh` turns `main` into a commit hash and records
@@ -20,13 +23,14 @@ it in `MODELS.txt`. The commits below are the current `main` on 2026-11-09, for 
 | | M1 | M2 | M3 |
 |---|---|---|---|
 | **Model** | gpt-oss-120b | faster-whisper-large-v3 | snowflake-arctic-embed-l-v2.0 |
-| **Job in the system** | Language model behind chat, Jupyter, VS Code, MATLAB | Speech-to-text (voice notes, chat-page microphone) | Embeddings for chat-page document search |
+| **Job in the system** | Language model behind the chat page (Jupyter, VS Code, MATLAB in a later phase) | Speech-to-text (voice notes, chat-page microphone) | Embeddings for chat-page document search |
 | **Publisher** | OpenAI | Systran (conversion of OpenAI's Whisper large-v3) | Snowflake |
 | **Repository** | huggingface.co/openai/gpt-oss-120b | huggingface.co/Systran/faster-whisper-large-v3 | huggingface.co/Snowflake/snowflake-arctic-embed-l-v2.0 |
 | **Commit (2026-11-09)** | `b5c939de8f754692c1647ca79fbf85e8c1e70f8a` | `edaa852ec7e145841d8ffdb056a99866b5f0a478` | `ac6544c8a46e00af67e330e85a9028c66b8cfd9a` |
 | **Last changed upstream** | 2025-08-26 | 2023-11-23 | 2025-07-28 |
 | **License** | Apache-2.0, plus OpenAI's gpt-oss usage policy (`USAGE_POLICY` file) | MIT | Apache-2.0 |
-| **Lineage** | Trained by OpenAI; no base model | Weights of `openai/whisper-large-v3`, converted to CTranslate2 | Snowflake's own; multilingual retrieval model |
+| **Lineage** | Trained by OpenAI; no base model | Weights of `openai/whisper-large-v3`, converted to CTranslate2 | **Built on `BAAI/bge-m3-retromae`** (BAAI, China), then trained further by Snowflake (stated in its model card); multilingual retrieval model |
+| **Country of origin (S22)** | USA (OpenAI) | Weights: USA (OpenAI). Converted and published by Systran: **France**. | Publisher: USA (Snowflake). Base model: **China** (BAAI). |
 | **Size** | 116.8B parameters total (mixture of experts; about 5.1B active per token) | about 1.55B parameters | 568M parameters |
 | **Precision** | MXFP4 (4-bit) expert weights, BF16 for the rest | FP16 | FP32 |
 | **Format** | safetensors | CTranslate2 `model.bin` (flat binary, not pickle) | safetensors |
@@ -47,6 +51,20 @@ lists, not weights. vLLM needs the first one for gpt-oss and would otherwise dow
 general terms. That is normal for open-weight models, and it is a question for program approval (S5), not
 something we can close ourselves.
 
+## 1a. USA-only rule: where each model stands
+
+| Model | If the rule covers the publisher only | If it covers the whole lineage | What we would do |
+|---|---|---|---|
+| M1 gpt-oss-120b | Meets | Meets | Nothing |
+| M2 faster-whisper-large-v3 | **Fails** (Systran, France) | **Fails** | Convert OpenAI's own `whisper-large-v3` (M6) or `-turbo` (M5) to the faster-whisper format ourselves on the build side (M11). The weights are then OpenAI's, the conversion is ours, and the conversion tool reads safetensors, so no pickle is loaded. Or use vLLM with M5 or M6 directly (S12). |
+| M3 snowflake-arctic-embed-l-v2.0 | Meets | **Fails** (BAAI base) | Replace with IBM's `granite-embedding-278m-multilingual` (M10): USA, Apache-2.0, safetensors, covers all six of our OCR languages. Retest document search quality in the sandbox. |
+| M5, M6 Whisper (OpenAI) | Meets | Meets | |
+| E2 in the standard chat page image | Meets? (TaylorAI) | **Fails** (distilled from a BAAI model) | Use the slim chat page image (S13), which leaves E1 to E3 out |
+| E1, E3 in the standard chat page image | **Unclear** (E1: sentence-transformers, from UKP Lab, Germany. E3: Systran, France) | **Fails** | Same: slim image |
+
+The safest reading, the whole lineage, needs three changes: M11 instead of M2, M10 instead of M3, and the slim
+chat page image. All three need a sandbox run.
+
 ## 2. Models that come inside container images (not through the model intake)
 
 The model intake (safetensors only, a checksum for every file) applies to the bundle's `models/` folder. These
@@ -61,6 +79,8 @@ come inside images instead, so the image scan and the Zarf SBOM list them only a
 | E5 | Tesseract OCR language models: English, Italian, French, Spanish, German, Japanese, plus script detection | Tika image (A6), from Debian packages | Apache-2.0 | Yes, OCR on scanned PDFs |
 | E6 | Anthropic tokenizer file and model price list (data) | LiteLLM image (A2) | MIT (LiteLLM) | Price list only (local copy, no download) |
 
+Under the USA-only rule, E1 to E3 are a problem whether or not we use them (section 1a).
+
 E1 to E3 are copied into the image when Open WebUI builds it. They sit under `/app/backend/data/cache`, which
 our chat-page volume covers at run time, so they are shipped but not used. Some of these repositories also hold
 pickle-format copies. Which files are in the image will be confirmed from the image itself.
@@ -74,6 +94,7 @@ code. The difference is what is inside.
 | Libraries to run models inside the chat page (PyTorch, transformers, sentence-transformers, faster-whisper, ONNX runtime) | Included, unused: our models run on vLLM and Text Embeddings Inference | Left out |
 | Browser automation (Playwright) and storage clients we don't use | Included | Left out |
 | Built-in vector store (Chroma) for uploaded documents | Included, and our current settings use it | **Not included.** Document vectors must go to PostgreSQL with pgvector (A8). |
+| USA-only rule (S22) | Carries E1 to E3, which don't meet it (section 1a) | Meets it |
 | Effect on Cyber's review | Larger image, more packages for the scanner to report, model files that never pass the model intake | Smaller image, fewer packages, no hidden models |
 | Effect on our work | None. This is what the sandbox plan is built around. | New settings to point the chat page at PostgreSQL ([11](../software/11-sandbox-bringup-plan.md), W23). It also puts the vectors under the database's three copies, instead of a single volume. |
 
@@ -88,9 +109,12 @@ Commits are the current `main` on 2026-11-11. "Can loading run code?" refers to 
 |---|---|---|---|---|---|
 | M5 | `openai/whisper-large-v3-turbo`, commit `41f01f3f` | Speech-to-text on vLLM instead of speaches + M2 (S12). Faster, slightly less accurate than large-v3. | OpenAI, MIT | safetensors, 1.62 GB (809M parameters) | No |
 | M6 | `openai/whisper-large-v3`, commit `06f233fe` | Same as M5, full-size model. These are the weights M2 was converted from. | OpenAI, Apache-2.0 | safetensors (1.55B parameters). The repository also has pickle copies; the pull leaves them out. | No |
-| M7 | `BAAI/bge-m3`, commit `5617a9f6` | Widely used multilingual embedding model; alternative to M3. We don't need it, but it is the clearest example of a model published only in pickle form. | BAAI, MIT | pickle (`pytorch_model.bin`, plus two small `.pt` files) and ONNX. No safetensors. | **Yes** (pickle) |
-| M8 | `BAAI/bge-reranker-v2-m3`, commit `953dc6f6` | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20). Later, not the first bundle. | BAAI, Apache-2.0 | safetensors, 2.27 GB | No |
-| | Cloudflare Clef (typed decision model, Qwen base) | Deferred ([decision register](README.md) S9) | Cloudflare, Apache-2.0 | Ships a Python file that runs at load time | **Yes** (Python code) |
+| ~~M7~~ | ~~`BAAI/bge-m3`~~ | **Removed 2026-11-13: not made in the USA (S22).** | | | |
+| ~~M8~~ | ~~`BAAI/bge-reranker-v2-m3`~~ | **Removed 2026-11-13: not made in the USA (S22).** Replaced by M9. | | | |
+| M9 | `ibm-granite/granite-embedding-reranker-english-r2`, commit `d09d3d69` | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20). Later, not the first bundle. **English only.** | IBM (USA), Apache-2.0. Lineage IBM. | safetensors, 0.6 GB | No |
+| M10 | `ibm-granite/granite-embedding-278m-multilingual`, commit `a9cb5338` | Replaces M3 if S22 covers lineage. Covers English, German, Spanish, French, Japanese, Italian, and six more. | IBM (USA), Apache-2.0 | safetensors, 0.56 GB (the repository's pickle copy is left out) | No |
+| M11 | Our conversion of `openai/whisper-large-v3` (M6) or `-turbo` (M5) to faster-whisper's format | Replaces M2 if we keep faster-whisper (S12) and S22 rules out Systran's copy | Weights OpenAI (USA); conversion done by us with CTranslate2's converter, recorded with its version and the source commit | CTranslate2, about 3.1 GB (large-v3) | No |
+| | Cloudflare Clef (typed decision model, Qwen base) | Deferred ([decision register](README.md) S9). Ruled out by the USA-only rule: Qwen is from Alibaba (China). | Cloudflare, Apache-2.0 | Ships a Python file that runs at load time | **Yes** (Python code) |
 | | Sandbox stand-in model (small instruct model) | Rehearsal only. **Never sealed into the lab bundle.** | to be named | safetensors | No |
 
 ## 4. File formats: where the line is, and why
@@ -122,7 +146,7 @@ whoever made it."**
 
 | Option | What it allows | What it rules out |
 |---|---|---|
-| (a) No code on load (our recommendation) | safetensors, CTranslate2, tokenizer and config files | Pickle, and anything with Python that runs at load (M7, Clef) |
+| (a) No code on load (our recommendation) | safetensors, CTranslate2, tokenizer and config files | Pickle, and anything with Python that runs at load (for example Clef) |
 | (b) Safetensors only | safetensors, tokenizer and config files | Also M2 and the faster-whisper route (S12 would have to go to vLLM with M5 or M6) |
 | (c) Also pickle, with controls | Everything in this document | Nothing. Controls would be: scan each pickle file (for example with `modelscan` or `picklescan`, which we would add to the bundle), load only in restricted mode, and if possible convert to safetensors on an isolated build machine. Converting breaks the match to the publisher's checksums, so the provenance record has to show the conversion. |
 

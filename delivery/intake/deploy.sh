@@ -8,7 +8,7 @@
 #                                           ./deploy.sh driver
 #                                           ./deploy.sh models
 #   On svc01:                               ./deploy.sh platform
-#                                           ./deploy.sh apps --chat-host H --api-host H --tls-cert F --tls-key F [--llm-gpus N] [--single-node | --rehearsal]
+#                                           ./deploy.sh apps --chat-host H [--api-host H] --tls-cert F --tls-key F [--llm-gpus N] [--single-node | --rehearsal]
 #                                           ./deploy.sh gateway-key
 #   Any time on svc01:                      ./deploy.sh user-key <name>
 #                                           ./deploy.sh status
@@ -136,8 +136,10 @@ apps)
             *) die "unknown option $1" ;;
         esac
     done
-    [[ -n "${chat}" && -n "${api}" && -f "${cert}" && -f "${key}" ]] \
-        || die "need --chat-host, --api-host, --tls-cert, --tls-key (certificate from the lab CA)"
+    [[ -n "${chat}" && -f "${cert}" && -f "${key}" ]] \
+        || die "need --chat-host, --tls-cert, --tls-key (certificate from the lab CA)"
+    # Phase 1 is the chat page only. --api-host opens the gateway API to analyst tools (a later phase).
+    api_on=false; [[ -n "${api}" ]] && api_on=true || api="unused.invalid"
     kubectl create namespace si --dry-run=client -o yaml | kubectl apply -f -
     kubectl -n si create secret tls si-tls --cert "${cert}" --key "${key}" --dry-run=client -o yaml | kubectl apply -f -
     kubectl -n si get secret litellm-masterkey >/dev/null 2>&1 \
@@ -147,7 +149,7 @@ apps)
     if [[ ${single} -eq 1 ]]; then pg=1 llm=1 components=""; fi  # one GPU: no room for whisper
     if [[ ${rehearse} -eq 1 ]]; then pg=1 llm=0 components=""; fi  # no GPU: images load, nothing waits for one
     ( cd "${BUNDLE}/zarf" && ./zarf package deploy "${pkg}" --confirm \
-        --set CHAT_HOST="${chat}" --set API_HOST="${api}" --set PG_INSTANCES="${pg}" --set VLLM_REPLICAS="${llm}" \
+        --set CHAT_HOST="${chat}" --set API_HOST="${api}" --set API_INGRESS="${api_on}" --set PG_INSTANCES="${pg}" --set VLLM_REPLICAS="${llm}" \
         ${components:+--components="${components}"} )
     log "deployed. Next: ./deploy.sh gateway-key"
     ;;

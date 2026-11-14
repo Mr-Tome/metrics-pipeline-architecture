@@ -40,7 +40,9 @@ proxy_config:
   litellm_settings:
     telemetry: false
 ingress:
-  enabled: true
+  # Phase 1 is the chat page only, so the API address is off (API_INGRESS=false). The chat page reaches the
+  # gateway inside the cluster.
+  enabled: ###ZARF_VAR_API_INGRESS###
   # RKE2's Traefik. HTTPS only. Traefik has no limit on how long the gateway takes to answer and no body
   # size limit by default, so non-streaming calls (MATLAB webwrite) and long reasoning answers need no
   # annotations. Its only default limit is 60 s to receive the request itself.

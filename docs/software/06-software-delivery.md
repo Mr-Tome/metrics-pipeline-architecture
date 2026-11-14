@@ -2,7 +2,7 @@
 
 **Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
-This follows the **Delivery** view in `FUTURE_NEED_TO_WORK_metrics_architecture_with_Sec_Dep.html`:
+This follows the **Delivery** view in [`metrics_architecture.html`](../../metrics_architecture.html):
 
 1. A connected build environment pulls everything.
 2. It packs everything into one sealed release bundle.
@@ -22,7 +22,7 @@ The scripts are in [`delivery/`](../../delivery) and [`validate/`](../../validat
 | `models/` | gpt-oss-120b (safetensors only), faster-whisper-large-v3 (CTranslate2 `model.bin`, header-checked), snowflake-arctic-embed-l-v2.0 (document upload), the tiktoken vocabulary gpt-oss needs offline, with SHA256SUMS per model | `30-pull-models.sh` |
 | `scanner/` | Trivy and its vulnerability databases | `40-pull-vuln-db.sh` |
 | `scanner/reports/` | Vulnerability report for every packaged image, `SUMMARY.txt` (counts by severity), `IMAGE-DIGESTS.txt` | `45-scan-images.sh` |
-| `clients/` | Python wheels (Linux and Windows, Python 3.9 to 3.15; see `clients/SUPPORT.txt`) for Jupyter AI and the OpenAI client; the Continue VS Code extension | `50-pull-client-tools.sh` |
+| `clients/` | **Later phase only, left out unless `WITH_CLIENTS=1`.** Python wheels (Linux and Windows, Python 3.9 to 3.15; see `clients/SUPPORT.txt`) for Jupyter AI and the OpenAI client; the Continue VS Code extension | `50-pull-client-tools.sh` |
 | `nvidia-driver/` | NVIDIA data center driver installer | `60-pull-nvidia-driver.sh` |
 | `intake/` | `verify.sh` and `deploy.sh`, shipped with the bundle | `90-seal.sh` |
 | `SHA256SUMS` + `.sig` / `.asc` | Checksum of every file, signed. `verify.sh` refuses an unsigned bundle. | `90-seal.sh` |
@@ -98,7 +98,7 @@ Then, as root ([`delivery/intake/deploy.sh`](../../delivery/intake/deploy.sh) ha
 | gpu01 | `./intake/deploy.sh agent-join <svc01-ip>` (same) |
 | gpu01 | `./intake/deploy.sh driver`, then `./intake/deploy.sh models` |
 | svc01 | `./intake/deploy.sh platform` |
-| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --api-host api.<lab-domain> --tls-cert si.crt --tls-key si.key` (3 language model copies by default; `--llm-gpus N` to change) |
+| svc01 | `./intake/deploy.sh apps --chat-host chat.<lab-domain> --tls-cert si.crt --tls-key si.key` (3 language model copies by default; `--llm-gpus N` to change) |
 | svc01 | `./intake/deploy.sh gateway-key` |
 | svc01 | `./intake/deploy.sh status` |
 
@@ -114,7 +114,18 @@ running kernel (to build the driver), rsync, openssl, iperf3, and optionally DCG
 
 ## 5. Connecting users
 
-Give each user (or team) their own gateway key, so usage is logged per person:
+Phase 1 is the chat page only. Analysts open `https://chat.<lab-domain>/` in a browser and sign in.
+Nothing is installed on their machines, and there is no API address for their own tools.
+
+`https://chat.<lab-domain>/`. The first account created becomes the admin, so the installer creates it right after `apps`. Voice input goes to Whisper through the gateway. **Document upload:** attach a file with the paperclip. By default the chat page finds the pieces of the file that match the question (good for long documents and several files). Click the attached file and choose "Using Entire Document" to send all of it instead (best for "summarize this" on a document under about 40,000 words). Up to 50 MB per file. Scanned PDFs are read with OCR, which takes minutes for a long scan. Spreadsheets and CSVs work poorly in the chat page; they wait for the later analyst tools.
+
+### Later phase: analyst tools (not in phase 1)
+
+Jupyter, VS Code, MATLAB, and Python scripts would reach the gateway API at `https://api.<lab-domain>/v1`
+with a personal key per analyst. The scripts can already do this, but it stays off in phase 1:
+`apps` without `--api-host` exposes no API address, and `pull-all.sh` leaves out `clients/` unless
+`WITH_CLIENTS=1` is set. Turning it on is a separate decision for the ISSM (the gateway API and per-user keys are
+listed in the [Cyber Security package](../cyber/README.md)). Each user would get their own key:
 
 ```bash
 ./intake/deploy.sh user-key jsmith
@@ -122,7 +133,6 @@ Give each user (or team) their own gateway key, so usage is logged per person:
 
 | Tool | Setup |
 |---|---|
-| Browser | `https://chat.<lab-domain>/`. The first account created becomes the admin, so the installer creates it right after `apps`. Voice input goes to Whisper through the gateway. **Document upload:** attach a file with the paperclip. By default the chat page finds the pieces of the file that match the question (good for long documents and several files). Click the attached file and choose "Using Entire Document" to send all of it instead (best for "summarize this" on a document under about 40,000 words). Up to 50 MB per file. Scanned PDFs are read with OCR, which takes minutes for a long scan. For spreadsheets and CSVs, use Jupyter. |
 | Jupyter | `pip install --no-index --find-links clients/wheels-linux jupyter-ai langchain-openai` (Windows: `wheels-windows`). `clients/SUPPORT.txt` lists the Python versions covered (3.9 to 3.14 in full; a newer Python may get the OpenAI client only). The chat sidebar needs JupyterLab 4. On anything else (JupyterLab 3, classic Notebook, VS Code notebooks), install `jupyter-ai-magics` instead of `jupyter-ai` and use the `%%ai` magic. In the Jupyter AI settings, choose an OpenAI-compatible provider, base URL `https://api.<lab-domain>/v1`, model `gpt-oss-120b`, and the user's key. **Anaconda users:** don't install into `base` or a working environment, because pip can replace packages conda installed. From the Anaconda Prompt: `python -m venv --system-site-packages si-env`, activate it (`si-env\Scripts\activate`, or `source si-env/bin/activate` on Linux), then the `pip install` above. Their existing libraries stay visible; ours install only into `si-env`. |
 | VS Code | Extensions, then "Install from VSIX", then `clients/continue-*.vsix`. Add a model with provider `openai`, `apiBase: https://api.<lab-domain>/v1`, model `gpt-oss-120b`, and the user's key. Set `allowAnonymousTelemetry: false` in the Continue config. |
 | MATLAB | See below. |
@@ -145,7 +155,7 @@ disp(r.choices(1).message.content)
 |---|---|
 | Big Bang (Harbor, GitLab, Argo CD, Keycloak, monitoring) | Installs onto the same RKE2 cluster. Harbor replaces the Zarf registry as the long-term registry. LiteLLM and Open WebUI move to Keycloak sign-in. |
 | Iron Bank images | Swap image references in `versions.env` to `registry1.dso.mil/...` where Iron Bank has them. The scripts don't change. |
-| Better document search | Add a reranker (`BAAI/bge-reranker-v2-m3`) and turn on hybrid search, and move the embedding model to a GPU slice if indexing is slow ([11](11-sandbox-bringup-plan.md), W20). PostgreSQL already has pgvector for when the chat page's vectors move there. |
-| Renovate | Points at `delivery/versions.env` to open update merge requests (Delivery view). |
+| Better document search | Add a reranker (IBM `granite-embedding-reranker-english-r2`, M9 in [13](../cyber/13-model-bom.md)) and turn on hybrid search, and move the embedding model to a GPU slice if indexing is slow ([11](11-sandbox-bringup-plan.md), W20). PostgreSQL already has pgvector for when the chat page's vectors move there. |
+| Renovate | Points at `delivery/versions.env` to open update merge requests. |
 | Metrics pipeline | Runs on the same platform. See `metrics_architecture.html`. |
-| Typed decision model (Cloudflare Clef, https://huggingface.co/Cloudflare/clef) | **Deferred to a future phase (decided 2026-10-30).** The Tech stack names it for the typed decision API. It is a 27B model (about 55 GB, Apache 2.0) that needs its own GPU, so gpu01 would run 2 gpt-oss copies instead of 3 (`--llm-gpus 2`). Open before adding it: SGLang support for the RTX PRO 6000 (tested only on H200), routing `/v1/systemone` through the gateway with per-user keys and logging, ISSM review of the model's `joint_schema_model.py` code file, and model-origin approval (Qwen base). No hardware change. |
+| Typed decision model (Cloudflare Clef, https://huggingface.co/Cloudflare/clef) | **Deferred to a future phase (decided 2026-10-30).** Its base model (Qwen, China) fails the USA-only rule (S22). The Tech stack names it for the typed decision API. It is a 27B model (about 55 GB, Apache 2.0) that needs its own GPU, so gpu01 would run 2 gpt-oss copies instead of 3 (`--llm-gpus 2`). Open before adding it: SGLang support for the RTX PRO 6000 (tested only on H200), routing `/v1/systemone` through the gateway with per-user keys and logging, ISSM review of the model's `joint_schema_model.py` code file, and model-origin approval (Qwen base). No hardware change. |

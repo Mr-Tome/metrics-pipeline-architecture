@@ -3,8 +3,7 @@
 **Track:** Software (SI service delivery). Questions for Lab IT. Each has an owner and a default. If the
 question is not answered, the plan proceeds with the default.
 
-L1 (server OS and accreditation baseline) and L5 (internet access during the build) are answered by the ISSM,
-so they are in the [Cyber Security package](../cyber/README.md) with the other security decisions. Hardware and
+L1 (server OS and accreditation baseline) is answered by the ISSM, so it is in the [Cyber Security package](../cyber/README.md) with the other security decisions. Hardware and
 site questions (F, N, V) are in [hardware/07](../hardware/07-open-questions.md).
 
 ## Lab IT (L)

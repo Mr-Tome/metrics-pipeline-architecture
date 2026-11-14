@@ -37,7 +37,7 @@ lengths because the cable route is not measured yet; the unused length is the sp
 
 | # | Item | Part / model | Qty | Est. each | Est. total | Link |
 |---|---|---|---|---|---|---|
-| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack. License: NX-OS (DCN) Essentials, shortest term offered (3 years); we do not need Advantage. 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3, with 2 x NXA-PAC-650W-PE and NXA-FAN-35CFM-PE fans | 1 | $30,993.93 (switch $29,297.99, 2 x power supply $487.99, 4 x fan $179.99) + license | $30,993.93 + license | https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067 (power supply: https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988, fan: https://www.cdw.com/product/cisco-network-device-fan-module/5497378) |
+| 4 | Top-of-rack switch, 48 x 1/10/25G SFP28, 6 x 40/100G QSFP28, NX-OS. **Airflow: port-side exhaust** (2 x NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans). Rack-mount kit for a 4-post rack: Cisco NXK-ACC-KIT-1RU= (front and rear brackets, slider rails); confirm it is in the box or add it as its own line. License: NX-OS (DCN) Essentials, shortest term offered (3 years); we do not need Advantage. 2 x C14-to-C13 power cords. New, not refurbished. | Cisco Nexus N9K-C93180YC-FX3, with 2 x NXA-PAC-650W-PE and NXA-FAN-35CFM-PE fans | 1 | $30,993.93 (switch $29,297.99, 2 x power supply $487.99, 4 x fan $179.99) + license | $30,993.93 + license | https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067 (rack-mount kit NXK-ACC-KIT-1RU=: https://www.cdw.com/product/cisco-network-device-accessory-kit-1u/6057737; power supply: https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988, fan: https://www.cdw.com/product/cisco-network-device-fan-module/5497378) |
 | 5 | 25G SFP28 passive direct attach cable, 3 m. Inside the rack: server 25G ports to our switch (item 4). 8 used, 2 spare. | Cisco SFP-H25G-CU3M= | 10 | $129.99 | $1,299.90 | https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569 |
 | 6a | 100G optic, QSFP28 BiDi, multimode, LC duplex. Two go in the lab C9500X-28C8D, two in our switch (item 4): one at each end of each data link. | Cisco QSFP-40/100-SRBD= | 4 | $2,014.99 | $8,059.96 | https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042 |
 | 6b | Fiber cord, LC-LC duplex, OM4 multimode, **8 m**. Two for the data links (6a to 6a), one for the management link (6e to 6e). Plenum or riser rated if the lab requires. | any (example: Axiom) | 3 | $35.99 | $107.97 | https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521 |
@@ -69,7 +69,11 @@ license and contingency. Please flag it if your quote for items 4-12, license in
 **Questions**
 
 1. **Rails.** The racks are Vertiv VR3300 with square holes, vertical rails adjustable, currently 29 in
-   apart. Does the rack-mount kit for item 4 fit?
+   apart. Item 4's rack-mount kit is Cisco NXK-ACC-KIT-1RU=
+   ([CDW](https://www.cdw.com/product/cisco-network-device-accessory-kit-1u/6057737)). Cisco's
+   [installation guide](https://www.cisco.com/c/en/us/td/docs/dcn/hw/nx-os/nexus9000/93180yc-fx3/cisco-nexus-93180yc-fx3-nx-os-mode-switch-hardware-installation-guide/m_installing-the-switch-chassis-new-1ru-rack-mount.html)
+   installs the 93180YC-FX3 with this kit in a 4-post rack 24 to 32 in deep between the front and rear
+   rails, so 29 in fits. Please confirm the kit ships with the switch, or add it as its own line.
 2. **Lead time** for each item, especially item 4.
 3. **Switch configuration (item 4).** Please confirm the quote is for port-side exhaust airflow
    (NXA-PAC-650W-PE power supplies and NXA-FAN-35CFM-PE fans, not the -PI parts), that the power supplies

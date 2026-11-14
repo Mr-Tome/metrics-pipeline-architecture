@@ -13,8 +13,7 @@ work happens in the server room.
 **No staging server** (decided 2026-10-30). The money it would have cost bought gpu01's third and
 fourth GPUs, so the lab starts at the 50-user size ([02](../hardware/02-budget-and-bom.md)).
 
-**Plan for no internet during the build.** Unless the ISSM says otherwise ([security decisions](../cyber/README.md), L5),
-all software arrives on transfer media. A connected **build workstation** on the unclassified side does the
+**The lab has no internet.** All software arrives on transfer media. A connected **build workstation** on the unclassified side does the
 downloading. It runs the scripts in `delivery/`, which write one checked bundle to the transfer drive.
 Any connected Linux machine with about 2 TB free disk will do; it doesn't need to be bought.
 
@@ -86,7 +85,7 @@ transfer drive. That replaces most of what staging did. What it cannot test is a
 The platform is the same one the full architecture (`metrics_architecture.html`) uses. Big Bang (Harbor,
 GitLab, Argo CD, Keycloak, monitoring) and the metrics pipeline go on top of it. They do not replace it.
 
-The typed decision model (Clef) is part of this later phase, not phase 1. It needs architecture and
+The typed decision model (Clef) is part of this later phase, not phase 1, and its Chinese base model (Qwen) fails the USA-only rule ([S22](../cyber/README.md)). It needs architecture and
 cybersecurity review first ([06](06-software-delivery.md), section 6). The hardware already has room for it.
 
 ## 4. If rehearsal is not enough

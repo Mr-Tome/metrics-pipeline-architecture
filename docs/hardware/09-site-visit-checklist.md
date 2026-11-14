@@ -85,12 +85,11 @@ supply the optics, IOS XE 17.15.06, a third port for management (2026-11-06). St
 
 ### Security (ISSM)
 
-1. Will we have internet access during the initial build and debug? (Plan assumes no.)
-2. What transfer media is approved, and does the lab provide it?
-3. Is a laptop allowed in the room for the first switch setup over a console cable? If not, what does
-   the lab use?
-4. May the build workstation's rehearsal VM run on the unclassified side with internet access? (There is no staging server.)
-5. May photos be taken of our racks for the as-built record?
+1. What transfer media is approved, and does the lab provide it?
+2. First switch setup without a laptop: may we plug a USB-to-RJ45 console cable into svc01 and set up the
+   switch from the rack console (con01)? (S8 in the [security decisions](../cyber/README.md))
+3. May the build workstation on the unclassified side run the rehearsal install in an offline VM? (There is no staging server.)
+4. May photos be taken of our racks for the as-built record?
 
 ### Lab IT
 
