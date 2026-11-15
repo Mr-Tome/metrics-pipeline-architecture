@@ -9,30 +9,20 @@ decision register so answers can be recorded there.
 
 ---
 
-**Subject:** Introduction and first questions: SI chat service for analysts in [lab name]
+**Subject:** Introduction and first questions: SI chat service for analysts in RF
 
 Hi [ISSM name],
 
-I'm [your name], [your role] on the metrics analysis pipeline. We're preparing to install a small GPU
-system in the lab, and I'd like to bring you in now, before anything goes into the lab, so the security
-review shapes the plan instead of catching up with it.
+I'm [your name], I am working under [] and have recently been mapped into RF, under the leadership of []. I am a [your role], and I am working with a large group of individuals on the metrics analysis pipeline. We're preparing to install a small GPU system in the lab (PR is being worked by [] and []) and I'd like to bring you in now, before anything goes into the lab, so the security review has the ability to shape the plan and implementation.
 
 **What we're building**
 
-- **Goal:** give analysts a language model ("SI") they can use inside the lab, on our own servers. The lab
-  has no internet connection, nothing leaves the lab, and nothing is downloaded inside it.
-- **First phase (what this email is about):** analysts use SI through a chat page in their browser. They can
-  ask questions, dictate by voice, and upload a document to ask about it. About 50 users. Nothing is
-  installed on analysts' PCs.
+- **Initial Goal:** give analysts, a Radar Engineer, and others within the lab a language model ("SI") that they can use inside the lab. 
+- **First phase (what this email is about):** analysts use SI through a chat page in their browser. They can ask questions, dictate by voice, and upload a document to ask about it. I'm hoping that the server will adequately provide these basic capabilities for about 20 users. Note: during the first phase, nothing is intended to be installed on analysts' PCs.
 - **Hardware:** one GPU server (four GPUs), three service servers, a Cisco Nexus switch, and a small
   management switch, in the existing racks next to ACE 15.
-- **How software gets in:** everything is downloaded on a build workstation outside the lab, scanned, and
-  installed once in an offline test machine. It is then sealed into one signed bundle and carried in on
-  approved media. Inside the lab, a check script refuses the bundle unless the signature and every file's
-  checksum match.
-- **Later phases (not part of this request):** letting analysts call SI from Jupyter, VS Code, and MATLAB;
-  shared platform services (lab sign-in, GitLab, monitoring); and the metrics pipeline itself. Each would
-  come to you as its own request. They're in the attached list so you can see where this is going.
+- **How I was planning for software to get in:** everything would be downloaded on a build workstation outside the lab, scanned, and installed tested in an "offline" test machine (probably going to be the same as the build machine with the internet disconnected). The package would then be prepared for transfer in a single signed bundle, then provided to your team (or whoever is approved to do this) on  approved media. Once your team approved the contents, we would work through standing up the software stach on the aforementioned hardware.
+- **Future phase (not part of this request):** letting analysts call SI from Jupyter, VS Code, and MATLAB. Connecting shared platform services (lab sign-in, GitLab, monitoring) and the metrics pipeline itself. When we can prove out the hardened workflows, installations of SI Agents on individuals machines. Note: I intend to present each of these future concepts to you as its own request & capability, but they'll all be building off of eachother. They're in the attached list so you can see where this is going.
 
 **What's attached**
 
