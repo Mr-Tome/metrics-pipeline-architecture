@@ -278,18 +278,18 @@ const STEPS = [
 
  {ph:4, type:"choice", title:"The TLS certificate", ref:["06","§4"],
   q:"<code>apps</code> needs <code>--tls-cert</code> and <code>--tls-key</code>. Which certificate?",
-  opts:[["One from the lab CA with both names, chat.lab.example and api.lab.example, in its subject alternative names", true, "Lab machines already trust the lab CA, so browsers, Jupyter, VS Code, and MATLAB connect with no warning and no extra setup."],
-        ["A self-signed certificate made on svc01", false, "Browsers warn, and Python, VS Code, and MATLAB refuse the connection unless every analyst installs it by hand."],
+  opts:[["One from the lab CA with chat.lab.example in its subject alternative names", true, "Lab browsers already trust the lab CA, so the chat page opens with no warning and nothing to install on analysts' PCs."],
+        ["A self-signed certificate made on svc01", false, "Every browser warns, and analysts learn to click past certificate warnings."],
         ["The sandbox CA certificate from the rehearsal", false, "Only the rehearsal VMs trust the sandbox CA. It is never used in the lab."],
-        ["One for chat.lab.example only", false, "Jupyter, VS Code, and MATLAB call api.lab.example. Both names need to be on it."]]},
+        ["Wait for one that also has api.lab.example on it", false, "Phase 1 has no API address. The api name is only needed when the analyst tools phase is approved; a new certificate can be issued then."]]},
 
  {ph:4, type:"choice", title:"Deploy the SI apps", ref:["06","§4"],
   q:"Which command?",
-  opts:[["<code>svc01# ./intake/deploy.sh apps --chat-host chat.lab.example --api-host api.lab.example --tls-cert si.crt --tls-key si.key</code>", true, "The default is three language model copies (GPUs 0–2) and Whisper on GPU 3."],
+  opts:[["<code>svc01# ./intake/deploy.sh apps --chat-host chat.lab.example --tls-cert si.crt --tls-key si.key</code>", true, "No --api-host, so the gateway has no address outside the cluster: phase 1 is the chat page only. The default is three language model copies (GPUs 0–2) and Whisper on GPU 3."],
+        ["The same, with <code>--api-host api.lab.example</code> so analysts can use it from Jupyter later", false, "That opens the gateway API to the lab network now. Analyst tools are a later phase that needs ISSM approval first. Leave it off."],
         ["The same, with <code>--llm-gpus 4</code> for more capacity", false, "Four model copies plus Whisper needs five GPUs. One pod would wait forever, and voice input would never start."],
-        ["The same, with <code>--rehearsal</code>", false, "--rehearsal is for the VM on the build workstation: no GPU, zero model copies."],
-        ["The same, with <code>--single-node</code>", false, "--single-node is for a one-GPU test machine: one model copy and no Whisper."]],
-  out:{h:"svc01", c:"./intake/deploy.sh apps --chat-host chat.lab.example --api-host api.lab.example --tls-cert si.crt --tls-key si.key", o:["zarf package deploy zarf-package-si-phase1-amd64-2026.11.20.tar.zst","  gpu-operator ... ok","  database ... waiting for PostgreSQL ... ok","  model-server ... ok","  transcription ... ok","  embedding ... ok","  ocr ... ok","  gateway ... ok","  chat ... ok","deployed. Next: ./deploy.sh gateway-key"]},
+        ["The same, with <code>--rehearsal</code>", false, "--rehearsal is for the VM on the build workstation: no GPU, zero model copies."]],
+  out:{h:"svc01", c:"./intake/deploy.sh apps --chat-host chat.lab.example --tls-cert si.crt --tls-key si.key", o:["zarf package deploy zarf-package-si-phase1-amd64-2026.11.20.tar.zst","  gpu-operator ... ok","  database ... waiting for PostgreSQL ... ok","  model-server ... ok","  transcription ... ok","  embedding ... ok","  ocr ... ok","  gateway ... ok","  chat ... ok","deployed. Next: ./deploy.sh gateway-key"]},
   fx: () => { S.k.apps = 1; }},
 
  {ph:4, type:"multi", title:"What runs where", ref:["06","§4"],
@@ -338,46 +338,29 @@ const STEPS = [
         ["Put the gateway master key in the Documents settings", false, "Never the master key. Use a key that can be revoked on its own."]],
   fx: () => {}},
 
- {ph:5, type:"choice", title:"A key for each analyst", ref:["06","§5"],
-  q:"J. Smith needs to use Jupyter and VS Code. How do they get a key?",
-  opts:[["<code>svc01# ./intake/deploy.sh user-key jsmith</code>, then give them the key over an approved channel. It is shown once.", true, "One key per person (or team) means every request is logged against them, and one key can be revoked without affecting anyone else."],
-        ["Give them the chat page's key", false, "Their use would be logged as the chat page's, and revoking it would break uploads and chat for everyone."],
-        ["Give every analyst the same team key from a shared file", false, "No per-person logging, and one leak means re-keying everyone."]]},
-
  {ph:6, type:"multi", title:"Checks before hand-over", ref:["11","§4"],
-  q:"Tick what has to pass before anyone else uses it.",
+  q:"Tick what has to pass before anyone else uses it. Gateway checks run on svc01 through <code>kubectl -n si port-forward svc/litellm 14000:4000</code>, because phase 1 has no API address.",
   opts:[["<code>deploy.sh status</code>: every pod Running or Completed (C1)", true],
-        ["<code>/v1/models</code> lists gpt-oss-120b, whisper, and arctic-embed (C5)", true],
-        ["A revoked key gets 401 (C7), and a request appears in the log against the user (C8)", true],
+        ["<code>/v1/models</code> through the port-forward lists gpt-oss-120b, whisper, and arctic-embed (C5)", true],
+        ["https://chat.lab.example opens with no certificate warning, and an answer streams (C11)", true],
         ["A short WAV file transcribes through the gateway (C10)", true],
         ["An uploaded PDF answers a question about one page, and \"Using Entire Document\" summarizes it (C11b)", true],
         ["<code>validate/llm-load-test.py --users 10</code>: first token in under about 2 s", true],
         ["Reboot gpu01: everything comes back with no manual steps (C17)", true],
         ["The Trivy summary shows zero high findings", false, "The scan ran on the build side and was reviewed before sealing. Findings are judged, not required to be zero."],
-        ["The chat page fetched its embedding model from the internet", false, "Nothing reaches the internet. The embedding model came in the bundle and is served by the embed pod."]]},
+        ["The chat page fetched its embedding model from the internet", false, "Nothing reaches the internet. The embedding model came in the bundle and is served by the embed pod."],
+        ["https://api.lab.example/v1/models answers from an analyst's PC", false, "Phase 1 has no API address. If it answers, apps was run with --api-host by mistake: run it again without."]]},
 
- {ph:7, type:"choice", title:"An Anaconda user", ref:["06","§5"],
-  q:"An analyst uses Anaconda on Windows with Python 3.11 and many libraries they've collected. How do they install Jupyter AI from the bundle?",
-  opts:[["From the Anaconda Prompt: <code>python -m venv --system-site-packages si-env</code>, <code>si-env\\Scripts\\activate</code>, then <code>pip install --no-index --find-links clients\\wheels-windows jupyter-ai langchain-openai</code>", true, "Their libraries stay visible, and ours install only into si-env, so pip can't replace anything conda installed."],
-        ["<code>pip install --no-index --find-links clients\\wheels-windows jupyter-ai</code> straight into base", false, "pip can replace packages conda installed in base and break their setup."],
-        ["<code>conda install jupyter-ai</code>", false, "There is no conda channel in the bundle and no internet. The bundle has pip wheels."],
-        ["<code>pip install jupyter-ai langchain-openai</code>", false, "Without --no-index pip tries the internet and fails. --find-links points at the bundle's wheels."]]},
+ {ph:7, type:"choice", title:"Can I use it from Jupyter?", ref:["06","§5"],
+  q:"On day one, J. Smith asks for an API key so they can call SI from Jupyter and VS Code. What do you tell them?",
+  opts:[["Not yet. Phase 1 is the chat page only. Jupyter, VS Code, and MATLAB are a later phase that needs ISSM approval. Note the request for that phase.", true, "There is no API address and no analyst keys in phase 1. Requests like this one help make the case for the next phase."],
+        ["<code>svc01# ./intake/deploy.sh user-key jsmith</code>, and give them the key", false, "A key alone does nothing without an API address, and turning one on is the later phase the ISSM hasn't approved."],
+        ["Give them the chat page's gateway key", false, "Never. Their use would be logged as the chat page's, and revoking it would break chat and uploads for everyone."],
+        ["Run <code>apps</code> again with <code>--api-host</code> just for them", false, "That opens the API to the whole lab network. It's a phase decision for the ISSM, not a per-user favor."]]},
 
- {ph:7, type:"choice", title:"Older JupyterLab, newer Python", ref:["06","§5"],
-  q:"Another analyst is on JupyterLab 3 with Python 3.15. <code>clients/SUPPORT.txt</code> says 3.15 got the OpenAI client only. What do you tell them?",
-  opts:[["Use the <code>openai</code> client from notebooks now (or a Python 3.14 environment for Jupyter AI). Jupyter AI's chat sidebar needs JupyterLab 4; on JupyterLab 3 it's <code>jupyter-ai-magics</code> and <code>%%ai</code>.", true, "Some packages Jupyter AI needs have no 3.15 builds yet. The next bundle picks them up when they exist."],
-        ["Install jupyter-ai anyway with --no-deps", false, "It would install but fail at import without the packages that have no 3.15 builds."],
-        ["Upgrade to JupyterLab 4 from the internet", false, "No internet in the lab."]]},
-
- {ph:7, type:"choice", title:"VS Code", ref:["06","§5"],
-  q:"Which Continue model setup is right?",
-  opts:[["provider <code>openai</code>, apiBase <code>https://api.lab.example/v1</code>, model <code>gpt-oss-120b</code>, the user's own key, and <code>allowAnonymousTelemetry: false</code>", true, "Same gateway as everything else, logged per user, and no telemetry attempts from inside the lab."],
-        ["provider <code>ollama</code> on localhost", false, "No model runs on the analyst's machine. Everything goes to the gateway."],
-        ["The right model and URL, telemetry left at the default", false, "Continue's telemetry is on by default. Turn it off in the config."]]},
-
- {ph:7, type:"choice", title:"Which tool for which job", ref:["06","§5"],
-  q:"An analyst has an 80 MB CSV of test metrics and wants the trend in one channel across all runs. Where should they work?",
-  opts:[["Jupyter: load it with pandas and let the SI assistant write and explain the code", true, "Code reads every row. The chat page only reads the pieces of a file that match the question, so totals and trends over a big table come out wrong, and 80 MB is over the 50 MB upload limit."],
+ {ph:7, type:"choice", title:"A big table", ref:["06","§5"],
+  q:"An analyst has an 80 MB CSV of test metrics and wants the trend in one channel across all runs. What do you tell them?",
+  opts:[["Don't upload it. Ask the chat page to write the pandas code for the trend, then run that code in their own Python on the full file.", true, "Code reads every row. The chat page only reads the pieces of a file that match the question, so totals and trends over a big table come out wrong, and 80 MB is over the 50 MB upload limit. SI inside Jupyter comes in a later phase."],
         ["Upload it to the chat page and ask", false, "The chat page finds the ten pieces of text that best match the question. A trend needs all the rows."],
         ["Upload it with \"Using Entire Document\"", false, "80 MB is far beyond the model's 65k-token context, and over the 50 MB upload limit."]]},
 
@@ -397,9 +380,9 @@ const STEPS = [
   q:"Tick only what is true for a finished hand-over.",
   opts:[["Check results recorded with the bundle's SOURCE_COMMIT and date", true],
         ["The admin password stored the way the lab requires", true],
-        ["Every analyst key given out over an approved channel", true],
-        ["Open items logged: indexing time on CPU (W20), how reasoning shows in Jupyter and VS Code (W21), OCR time for long scans, Continue agent mode", true],
-        ["Continue's agent mode switched on for everyone", false, "Agent mode edits files and runs commands on the analyst's machine. It needs an ISSM decision first."],
+        ["Analysts told the chat page address, the 50 MB upload limit, and that their own tools come in a later phase", true],
+        ["Open items logged: indexing time on CPU (W20), OCR time for long scans, and analysts' requests for the analyst tools phase", true],
+        ["Every analyst given a personal API key", false, "No analyst keys in phase 1. Analysts sign in to the chat page; per-user keys come with the analyst tools phase."],
         ["ALLOW_UNSIGNED=1 noted in the runbook for next time", false, "Never in the lab. Every bundle is signed and verified."]]},
 
  {ph:9, type:"end", title:"Done"}
@@ -455,7 +438,7 @@ R.intro = () => `<div class="eyebrow"><span>Briefing</span></div><h2>Bring up th
   <div class="intro-grid">
     <div><b>svc01–svc03</b>Kubernetes control plane (RKE2), PostgreSQL, the LiteLLM gateway, and the Open WebUI chat page.</div>
     <div><b>gpu01</b>4 × RTX PRO 6000. Three copies of gpt-oss-120b and one Whisper. The embedding model for document upload runs on its CPUs.</div>
-    <div><b>Names</b>chat.lab.example for the chat page, api.lab.example for Jupyter, VS Code, MATLAB, and scripts.</div>
+    <div><b>Phase 1</b>Analysts use SI through the chat page at chat.lab.example, in their browser. No API address, and nothing installed on their PCs. Jupyter, VS Code, and MATLAB come in a later phase.</div>
     <div><b>Faults</b>Three things go wrong on each run, as they could on the day. Run it again for different ones.</div>
   </div>
   <div class="row"><button class="primary" id="go">Start bring-up</button></div>`;
@@ -526,7 +509,7 @@ R.end = () => { const n = S.mistakes.length, t = elapsed();
   return `<div class="eyebrow"><span>Result</span></div><h2>SI service handed over</h2>
     <p class="grade">${grade}</p>${S.from ? `<p class="lead">You jumped to <b>${esc(S.steps[S.from].title)}</b>, so only the steps from there on are graded.</p>` : ""}<p class="mono">${n} mistake${n===1?"":"s"} · ${t} · faults this run: ${S.faults.map(f=>names[f]).join(", ")}</p>
     ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 06 on the day anyway.</p>"}
-    <p class="lead">Still open before the real bring-up: the signing key and how the lab gets its public key (ISSM), the lab CA certificate for chat and api, the subnet gateway for the default route, and the Continue agent-mode decision (doc 11, section 7).</p>
+    <p class="lead">Still open before the real bring-up: the signing key and how the lab gets its public key (ISSM), the lab CA certificate for chat.lab.example, and the subnet gateway for the default route (doc 11, section 7).</p>
     <div class="row"><button class="primary" id="again">Run it again</button><a href="rack1-install-sim.html">Back to the Rack 1 Install Sim</a></div>`; };
 B.end = () => { $("#again").onclick = () => { S = fresh(); render(); }; };
 
