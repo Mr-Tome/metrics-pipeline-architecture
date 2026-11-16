@@ -56,8 +56,9 @@ filtering it ourselves. Please tell us what is and isn't allowed.
    reach the lab.
 10. **Driver build:** installing the NVIDIA driver needs a few OS packages (gcc, kernel-devel, and dkms from
     EPEL). Should they come from the lab mirror, or in our bundle?
-11. **Switch setup:** may we connect a USB-to-console cable from one of our servers to the new switch for its
-    first setup, so no laptop is needed?
+11. **Switch setup:** to set up our own rack switch (sw01) the first time, we'd plug a USB-to-serial console
+    cable into svc01 for about an hour, then remove it. It stays inside our rack and touches no lab network.
+    Is a USB serial adapter allowed on svc01, or would you rather we use an approved laptop?
 12. **Testing hardware first:** may new servers be tested outside the lab before they go in (then wiped), or
     should all testing happen inside?
 13. **Admin access:** who may hold full admin rights on the cluster? That role can read every chat and log.
