@@ -14,11 +14,11 @@ P0, P1, P1o, P2, P3, P4, GR = ("0. Approvals and hardware", "1. SI chat", "1. SI
                                "2. Analyst tools", "3. Platform services", "4. Metrics pipeline", "Grow (any time after 1)")
 # id, phase, download URL(s) (what the scripts fetch), project page, extra note
 U = [
- ("P1", P0, "https://rockylinux.org/download (lab-provided image; RHEL: https://access.redhat.com/downloads)", "https://rockylinux.org", ""),
- ("P2", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/ and https://dl.fedoraproject.org/pub/epel/9/ (dkms)", "https://docs.fedoraproject.org/en-US/epel/", ""),
- ("P3", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/", "https://rockylinux.org", ""),
- ("P4", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/ (container-selinux) and https://rpm.rancher.io/ (rke2-selinux)", "https://github.com/rancher/rke2-selinux", ""),
- ("P5", P0, "Lab mirror. Upstream: https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/ (DCGM)", "https://github.com/NVIDIA/DCGM", ""),
+ ("OS1", P0, "https://rockylinux.org/download (lab-provided image; RHEL: https://access.redhat.com/downloads)", "https://rockylinux.org", ""),
+ ("OS2", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/ and https://dl.fedoraproject.org/pub/epel/9/ (dkms)", "https://docs.fedoraproject.org/en-US/epel/", ""),
+ ("OS3", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/", "https://rockylinux.org", ""),
+ ("OS4", P0, "Lab mirror. Upstream: https://dl.rockylinux.org/pub/rocky/9/ (container-selinux) and https://rpm.rancher.io/ (rke2-selinux)", "https://github.com/rancher/rke2-selinux", ""),
+ ("OS5", P0, "Lab mirror. Upstream: https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/ (DCGM)", "https://github.com/NVIDIA/DCGM", ""),
  ("H1", P0, "Ships on the switch. Updates: https://software.cisco.com/download/home (Cisco account)", "https://www.cisco.com/c/en/us/products/switches/nexus-9000-series-switches/index.html", ""),
  ("H2", P0, "Ships on the servers. Updates from Thinkmate / board vendor", "https://www.thinkmate.com", ""),
  ("H3", P0, "Ships on the cards. Updates from Intel / Broadcom / drive vendor", "", ""),
@@ -51,8 +51,8 @@ U = [
  ("M6", P1o, "https://huggingface.co/openai/whisper-large-v3", "https://huggingface.co/openai/whisper-large-v3", ""),
  ("M10", P1o, "https://huggingface.co/ibm-granite/granite-embedding-278m-multilingual", "https://huggingface.co/ibm-granite/granite-embedding-278m-multilingual", "US replacement for M3."),
  ("M11", P1o, "Made by us from M5 or M6 with the CTranslate2 converter: https://pypi.org/project/ctranslate2/", f"{GH}/OpenNMT/CTranslate2", "US-only lineage replacement for M2."),
- ("S1", P1, f"{GH}/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz ; {GH}/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt", f"{GH}/aquasecurity/trivy", ""),
- ("S2", P1, "images ghcr.io/aquasecurity/trivy-db:2 and ghcr.io/aquasecurity/trivy-java-db:1 (fetched by trivy)", f"{GH}/aquasecurity/trivy-db", ""),
+ ("Sec1", P1, f"{GH}/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz ; {GH}/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt", f"{GH}/aquasecurity/trivy", ""),
+ ("Sec2", P1, "images ghcr.io/aquasecurity/trivy-db:2 and ghcr.io/aquasecurity/trivy-java-db:1 (fetched by trivy)", f"{GH}/aquasecurity/trivy-db", ""),
  ("F1", P1, "Ours. In the bundle (intake/), no download", "", ""),
  ("F2", P1, "Ours. In the bundle, no download", "", ""),
  ("C1", P2, "https://pypi.org/project/jupyter-ai/2.31.7/", f"{GH}/jupyterlab/jupyter-ai", ""),

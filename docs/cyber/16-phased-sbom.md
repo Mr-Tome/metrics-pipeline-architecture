@@ -27,11 +27,11 @@ Lab-provided or shipped on the hardware. Not in our bundle. Listed so the review
 
 | ID | Component | Version | License | Download from | Notes |
 |---|---|---|---|---|---|
-| P1 | Rocky Linux 9 (default) or RHEL 9 if accreditation requires | 9.x (TBD) | GPL-2.0 and mixed open source (Rocky); Red Hat subscription (RHEL) | <https://rockylinux.org/download> (lab-provided image; RHEL: <https://access.redhat.com/downloads>) |  |
-| P2 | gcc, make, kernel-devel (matching running kernel), dkms | OS mirror version | GPL family | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> and <https://dl.fedoraproject.org/pub/epel/9/> (dkms) |  |
-| P3 | rsync, openssl, python3, gnupg2, iperf3 | OS mirror version | Mixed open source | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> |  |
-| P4 | container-selinux, rke2-selinux | OS mirror / Rancher RPM repo | GPL-2.0 / Apache-2.0 | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> (container-selinux) and <https://rpm.rancher.io/> (rke2-selinux) |  |
-| P5 | ipmitool, NVIDIA DCGM (datacenter-gpu-manager) | OS mirror version | BSD-3 / Apache-2.0 | Lab mirror. Upstream: <https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/> (DCGM) |  |
+| OS1 | Rocky Linux 9 (default) or RHEL 9 if accreditation requires | 9.x (TBD) | GPL-2.0 and mixed open source (Rocky); Red Hat subscription (RHEL) | <https://rockylinux.org/download> (lab-provided image; RHEL: <https://access.redhat.com/downloads>) |  |
+| OS2 | gcc, make, kernel-devel (matching running kernel), dkms | OS mirror version | GPL family | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> and <https://dl.fedoraproject.org/pub/epel/9/> (dkms) |  |
+| OS3 | rsync, openssl, python3, gnupg2, iperf3 | OS mirror version | Mixed open source | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> |  |
+| OS4 | container-selinux, rke2-selinux | OS mirror / Rancher RPM repo | GPL-2.0 / Apache-2.0 | Lab mirror. Upstream: <https://dl.rockylinux.org/pub/rocky/9/> (container-selinux) and <https://rpm.rancher.io/> (rke2-selinux) |  |
+| OS5 | ipmitool, NVIDIA DCGM (datacenter-gpu-manager) | OS mirror version | BSD-3 / Apache-2.0 | Lab mirror. Upstream: <https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/> (DCGM) |  |
 | H1 | Cisco NX-OS on sw01 (N93180YC-FX3) + NX-OS Essentials license | TBD (factory or lab-approved image) | Cisco EULA | Ships on the switch. Updates: <https://software.cisco.com/download/home> (Cisco account) |  |
 | H2 | Server BIOS/UEFI and BMC firmware (Thinkmate GPU server and service nodes) | TBD at delivery | Vendor proprietary | Ships on the servers. Updates from Thinkmate / board vendor |  |
 | H3 | NIC firmware (Intel E810-XXVDA2, Broadcom N225P), NVMe firmware, GPU VBIOS | TBD at delivery | Vendor proprietary | Ships on the cards. Updates from Intel / Broadcom / drive vendor |  |
@@ -66,8 +66,8 @@ The first bundle. Analysts chat with SI in a browser. This is what we ask to rev
 | M2 | faster-whisper-large-v3 | main, resolved to a commit at pull time | MIT | <https://huggingface.co/Systran/faster-whisper-large-v3> | Converter is Systran (France); see S22 and M11. |
 | M3 | snowflake-arctic-embed-l-v2.0 | main, resolved to a commit at pull time | Apache-2.0 | <https://huggingface.co/Snowflake/snowflake-arctic-embed-l-v2.0> (safetensors only) | Built on a BAAI model (China); see S22 and M10. |
 | M4 | tiktoken vocabularies o200k_base, cl100k_base | fixed files | Distributed with tiktoken (MIT); confirm | <https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken> ; <https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken> |  |
-| S1 | Trivy scanner | 0.76.2 | Apache-2.0 | <https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz> ; <https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt> |  |
-| S2 | Trivy vulnerability DB and Java DB | downloaded at pull time (date in MANIFEST.txt) | Apache-2.0 (advisory sources have own terms) | images ghcr.io/aquasecurity/trivy-db:2 and ghcr.io/aquasecurity/trivy-java-db:1 (fetched by trivy) |  |
+| Sec1 | Trivy scanner | 0.76.2 | Apache-2.0 | <https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz> ; <https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt> |  |
+| Sec2 | Trivy vulnerability DB and Java DB | downloaded at pull time (date in MANIFEST.txt) | Apache-2.0 (advisory sources have own terms) | images ghcr.io/aquasecurity/trivy-db:2 and ghcr.io/aquasecurity/trivy-java-db:1 (fetched by trivy) |  |
 | F1 | Delivery and intake scripts (verify.sh, deploy.sh), Zarf template, chart values, manifests | git commit in SOURCE_COMMIT | Program-owned (repo LICENSE) | Ours. In the bundle (intake/), no download |  |
 | F2 | validate/ (hw-check.sh, net-test.sh, llm-load-test.py) | git commit in SOURCE_COMMIT | Program-owned (repo LICENSE) | Ours. In the bundle, no download |  |
 

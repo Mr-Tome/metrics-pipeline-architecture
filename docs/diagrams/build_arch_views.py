@@ -266,13 +266,13 @@ PH = [
       info=[["Goal", "Get permission, then buy, rack, and power the servers with the lab's OS."], ["Analysts can", "Nothing yet."], ["Needs first", "Nothing. This is where everything starts."], ["Done when", "The ISSM has approved hardware entry, the OS, and transfer media, and the rack passes its hardware checks."], ["Work steps", "Doc 04, P0, and the rack build guide (05)."]],
       get=("Nothing for users yet", "Approved, racked, powered"),
       issm=[("Hardware entry process", "How new hardware is approved into the lab.", "S1"), ("Server OS baseline", "Which OS and hardening accreditation requires. We plan Rocky Linux 9; RHEL 9 if required. Is there a lab package mirror?", "L1"), ("Transfer media", "Approved media type, who provides it, how long a transfer takes.", "S3"), ("Secure Boot", "Required or not. It changes how the NVIDIA driver is installed.", "S4"), ("Switch setup cable", "A USB-to-serial console cable from svc01 to our own rack switch (sw01) for first setup, then removed. No laptop, no lab network.", "S8"), ("Burn-in outside the lab", "May new hardware be tested on the unclassified side first, then wiped?", "S2")],
-      sw=[("Lab OS: Rocky or RHEL 9", "Installed on every server from the lab's image.", "16: P1"), ("OS packages from mirror", "gcc, kernel-devel, dkms, SELinux packages for the driver and Kubernetes.", "16: P2 to P5"), ("Firmware on the hardware", "Switch, BIOS, BMC, NIC, and drive firmware as shipped.", "16: H1 to H4")],
+      sw=[("Lab OS: Rocky or RHEL 9", "Installed on every server from the lab's image.", "16: OS1"), ("OS packages from mirror", "gcc, kernel-devel, dkms, SELinux packages for the driver and Kubernetes.", "16: OS2 to OS5"), ("Firmware on the hardware", "Switch, BIOS, BMC, NIC, and drive firmware as shipped.", "16: H1 to H4")],
       hw=[("gpu01: 4 GPUs", "One GPU server with four RTX PRO 6000 GPUs.", "08a"), ("svc01-03 service nodes", "Three service servers run Kubernetes and the services.", "08a"), ("Switches, console, cables", "sw01 data switch, oob01 management switch, rack console, cables, optics.", "08b")]),
  dict(key="p1", name="Phase 1", title="SI chat", color="si",
       info=[["Goal", "Analysts use SI through a chat page in their browser."], ["Analysts can", "Ask questions, dictate by voice, and upload a document to ask about it. About 50 users."], ["Needs first", "Phase 0, and the phase 1 software approved by the ISSM."], ["Done when", "The first signed bundle is installed and analysts are signed in."], ["Work steps", "Doc 04, P1 to P3: build and rehearse the bundle, install in the lab, then updates."]],
       get=("Chat with SI in a browser", "Questions, voice, documents"),
       issm=[("Upstream or Iron Bank images", "May we use upstream container images, or only Iron Bank where it has them?", "S6"), ("Model file formats", "We propose only formats that cannot run code when loaded.", "S20"), ("US-made rule: how far", "Publisher only, or also the base model and the converter?", "S22"), ("Bundle signing and key", "GPG or cosign, who holds the key, how the public key reaches the lab.", "S10"), ("Driver build packages", "From the lab mirror, or carried in the bundle?", "S11"), ("Speech-to-text server", "Which server runs faster-whisper.", "S12"), ("Chat page image", "Standard or slim Open WebUI image.", "S13"), ("Who is cluster admin", "Cluster admin can read every chat and log.", "S24"), ("Encryption at rest", "For chat history, uploads, databases, models.", "S25"), ("Audit log content", "What is recorded, how long, where it goes.", "S26"), ("Key lifetimes", "Gateway keys and the TLS certificate.", "S23")],
-      sw=[("Kubernetes (RKE2), Zarf", "The platform and the air-gap delivery tool.", "16: K1 to K9"), ("NVIDIA driver, GPU Operator", "GPU support.", "16: G1, G2"), ("Language model", "gpt-oss-120b (OpenAI), three copies.", "16: A1, M1"), ("Gateway (LiteLLM)", "Every model request goes through it and is logged.", "16: A2"), ("Chat page (Open WebUI)", "The web page analysts use.", "16: A3"), ("Speech-to-text (Whisper)", "Voice input.", "16: A4, M2"), ("Document upload", "Text extraction and OCR (Tika) and embeddings.", "16: A5, A6, M3"), ("Database (PostgreSQL)", "The gateway's request log.", "16: A7, A8"), ("Scanner (Trivy)", "Scans every image, before and after transfer.", "16: S1, S2")],
+      sw=[("Kubernetes (RKE2), Zarf", "The platform and the air-gap delivery tool.", "16: K1 to K9"), ("NVIDIA driver, GPU Operator", "GPU support.", "16: G1, G2"), ("Language model", "gpt-oss-120b (OpenAI), three copies.", "16: A1, M1"), ("Gateway (LiteLLM)", "Every model request goes through it and is logged.", "16: A2"), ("Chat page (Open WebUI)", "The web page analysts use.", "16: A3"), ("Speech-to-text (Whisper)", "Voice input.", "16: A4, M2"), ("Document upload", "Text extraction and OCR (Tika) and embeddings.", "16: A5, A6, M3"), ("Database (PostgreSQL)", "The gateway's request log.", "16: A7, A8"), ("Scanner (Trivy)", "Scans every image, before and after transfer.", "16: Sec1, Sec2")],
       hw=[("Phase 0 hardware", "Nothing new.", "")]),
  dict(key="p2", name="Phase 2", title="Analyst tools", color="wb",
       info=[["Goal", "Analysts call SI from their own tools."], ["Analysts can", "Use SI from Jupyter, VS Code, MATLAB, and Python scripts."], ["Needs first", "Phase 1."], ["Done when", "Each analyst has a personal key and the tools work from lab PCs."], ["Status", "The scripts can already do this. It stays off until approved."]],
@@ -533,139 +533,134 @@ def dfilt(key, x, w, title, sub):
     return filt(key, x, 14, w, title, sub, "", "data-df").replace('width="396"', f'width="{w}"')
 
 
-cv = ['<svg id="dchat" viewBox="0 0 1240 732" role="img" aria-label="Deployment view, chat feature: how our rack ties into the lab network">', defs("ca", "cx")]
-cv.append(dfilt("path", 16, 296, "Analyst's path", "Browser to the model and back"))
-cv.append(dfilt("mgmt", 320, 296, "Admin and management", "Kept off the analysts' path"))
-cv.append(dfilt("lab", 624, 296, "Lab provides", "Addresses, names, time, certificate"))
-cv.append(dfilt("ask", 928, 296, "Still to ask the lab", "Network team, after the order"))
+cv = ['<svg id="dchat" viewBox="0 0 1240 732" role="img" aria-label="Deployment view, chat feature: proposed physical and logical connections for the metrics pipeline">', defs("ca", "cx")]
+cv.append(dfilt("path", 16, 296, "General user's access point", "Browser to the model and back"))
+cv.append(dfilt("mgmt", 320, 296, "Admin and management", "Separate from general users' access"))
+cv.append(dfilt("lab", 624, 296, "Lab provides", "Addresses, names, time, and certificates"))
+cv.append(dfilt("ask", 928, 296, "Questions for the lab", "RF Network and Admin teams"))
 cv.append(izone(16, 84, 436, 540, "Lab (existing)", "in", None, "9 6"))
-cv.append(izone(464, 84, 760, 540, "Our rack (new, next to ACE 15)", "pf", "pf-f"))
+cv.append(izone(464, 84, 760, 540, "Our rack (3221A, next to ACE 15)", "pf", "pf-f"))
 cv.append(izone(680, 124, 530, 396, "Cluster (RKE2)", "k8", "k8-f"))
 cv.append(izone(694, 156, 250, 352, "svc01-03", "k8", None, "6 4"))
 cv.append(izone(958, 156, 240, 352, "gpu01", "si", "si-f"))
-# lab, analyst side
-cv.append(dnode("u_browser", 30, 120, 196, "Analyst's browser", "Lab desk, nothing installed", "path", [
-    ["What it is", "The analyst's normal lab browser. Nothing is installed on the desk."],
-    ["How it connects", "Over the lab network to https://chat.<lab-domain>. That is the only address the chat feature opens."],
-    ["Later", "Jupyter, VS Code, and MATLAB come with the analyst tools feature, not this one."]]))
+# lab, user side
+cv.append(dnode("u_browser", 30, 120, 196, "User's browser", "User's workstation", "path", [
+    ["What it is", "The user's normal lab browser. Nothing new is installed on the desk."],
+    ["How it connects", "Over the lab network to https://chat.<lab-domain>. This is the only address that the cluster exposes for the chat feature."]]))
 cv.append(dnode("l_net", 30, 258, 196, "Lab network", "1G desks, 10G core uplink", "path", [
-    ["What it is", "The lab's existing network between the analysts' desks and the lab core."],
-    ["Load", "50 users chatting use well under 1% of the 10G uplink. Model weights never cross it: they load from gpu01's own disk."],
-    ["Listed in", "03, section 2; 07, N4"]]))
+    ["What it is", "The lab's existing network between general users' machines and the lab core."],
+    ["Load", "IDT's iDSO team has 200 users chatting and using SI agents, and uses about 10% of a 10G uplink at nominal peak load."]]))
 cv.append(dnode("l_core", 30, 460, 196, "C9500X-28C8D", "Lab core, 3 ports for us", "path mgmt", [
-    ["What it is", "The lab's core switch above rows 2 and 3, running IOS XE 17.15.06."],
-    ["Decided", "Three ports for us: 2 x 100G data to sw01 and 1 x 10G management to oob01. We supply the optics for both ends (Cisco, on Cisco's compatibility list)."],
-    ["Listed in", "03, section 3; 10, round 3"]], h=64))
+    ["What it is", "The lab's core switch above rows 2 and 3 of 3221A, running IOS XE 17.15.06 (per Mr. Watkins)."],
+    ["Decided", "Three ports between the lab core and the metrics analysis pipeline cluster: 2 x 100G data to sw01 and 1 x 10G management to oob01 (Mr. Watkins)."]], h=64))
 cv.append(flow("M128,170 V258", marker="ca"))
 cv.append(label(136, 218, "1G desk port"))
+cv.append(label(136, 234, "(assumed)"))
 cv.append(flow("M128,308 V460", marker="ca"))
 cv.append(label(136, 388, "10G uplink"))
+cv.append(label(136, 404, "(assumed)"))
 # lab services
 cv.append(dnode("l_dns", 242, 120, 196, "DNS name", "chat.<lab-domain>", "lab ask", [
-    ["What it is", "The name analysts type. The chat page's certificate is issued for this name."],
-    ["To ask", "The name, which addresses it points to, and the lab's DNS servers for every node."],
-    ["Our default", "One name pointing at the three service nodes (svc01-03), so one node can be down. Confirm in the rehearsal that the front door answers on each node's address."],
-    ["Listed in", "07, N5, N6"]], dash="6 4"))
+    ["What it is", "The address users type in their browser to reach the chat page. The chat page's certificate must be issued for this address."],
+    ["Questions", "What is the chat name, and which addresses does it point to? Which DNS servers should our servers use?"],
+    ["Our default", "One name pointing at the three service nodes (svc01-03), so the chat page stays up if one node is down. Confirm in the rehearsal that the ingress answers on each node's address."]], dash="6 4"))
 cv.append(dnode("l_ip", 242, 182, 196, "Addresses and VLANs", "Servers /27, BMCs /28", "lab ask", [
-    ["What it is", "Data addresses for the four servers, and separate management addresses for the BMCs, oob01, and sw01."],
-    ["Why it matters", "RKE2 will not start without a default route on each node, even with no internet. The bring-up sim covers this."],
-    ["To ask", "Both subnets, the default gateway for each, and the VLAN IDs."],
-    ["Listed in", "07, N5, N14"]], dash="6 4"))
+    ["What it is", "The data addresses for the four servers (svc01-03 and gpu01), and separate management addresses for the BMCs, oob01, and sw01."],
+    ["Why it matters", "RKE2 will not start without a default route on each node."],
+    ["Questions", "Guidance on the server and BMC subnets, their default gateways, and the VLAN IDs. The VLANs are not decided yet."]], dash="6 4"))
 cv.append(dnode("l_ntp", 242, 244, 196, "Time (NTP)", "Same clock on every node", "lab ask", [
     ["What it is", "The lab's time servers."],
     ["Why it matters", "The cluster database (etcd) and the certificates fail when the servers' clocks drift apart."],
-    ["To ask", "The NTP server addresses."],
-    ["Listed in", "07, N6"]], dash="6 4"))
+    ["Question", "What are the NTP server addresses?"]], dash="6 4"))
 cv.append(dnode("l_ca", 242, 306, 196, "Lab CA", "Signs the chat certificate", "lab ask", [
-    ["What it is", "The lab's certificate authority. Lab browsers already trust it, so the chat page opens with no warning."],
-    ["To ask", "Who issues the certificate for the chat name (KC4), how long it lasts, and how it is renewed."],
-    ["Listed in", "07, N6; cyber 14, KC3, KC4"]], dash="6 4"))
+    ["What it is", "The lab's certificate authority. When it signs the chat certificate, users' browsers open the chat page without a warning."],
+    ["Questions", "Does the lab have a CA? Who issues the certificate for the chat name? How long does it last? How is it renewed?"]], dash="6 4"))
 cv.append(dnode("l_mgmt", 242, 368, 196, "Management access", "Who may reach the BMCs", "mgmt lab ask", [
     ["What it is", "The lab side of the 10G management link."],
-    ["To ask", "Which lab VLAN it joins and who may reach it."],
-    ["Our default", "Lab admins only. No user access."],
-    ["Listed in", "07, N7"]], dash="6 4"))
+    ["Questions", "Which VLAN will the BMCs join, and who can reach it?"],
+    ["Our default", "Only lab admins can reach it. General users cannot."]], dash="6 4"))
 # links into the rack
 cv.append(flow("M226,479 H480", marker="ca"))
 cv.append(label(350, 471, "2 x 100G, bonded (LACP)", "middle"))
+cv.append(label(350, 497, "(discussed with Mr. Watkins)", "middle"))
 cv.append(flow("M226,512 H458 V581 H480", marker="ca"))
 cv.append(label(236, 530, "10G management link"))
-cv.append(label(30, 600, "Dashed: not given to us yet."))
+cv.append(label(236, 546, "(discussed with Mr. Watkins)"))
+cv.append(label(30, 600, "Dashed boxes are assumed to exist."))
 # our rack: switches and console
-cv.append(dnode("con", 480, 150, 180, "Rack console (con01)", "svc01's screen, admin work", "mgmt", [
+cv.append(dnode("con", 480, 150, 180, "Rack console (con01)", "svc01's screen and admin work", "mgmt", [
     ["What it is", "The StarTech rack console, cabled to svc01. It is svc01's screen and keyboard."],
-    ["Used for", "First switch setup, verify.sh and deploy.sh, and cluster admin (kubectl). No laptop, and no admin work from an analyst desk."],
-    ["Open items", "Who may be cluster admin (S24)."],
-    ["Listed in", "05, section 6"]]))
+    ["Used for", "First switch setup, approved software setup, and RKE2 cluster admin (kubectl). In the current plan, all admin work is done here."],
+    ["Question", "Who may be a cluster admin?"]]))
 cv.append(flow("M660,175 H694", marker="ca"))
 cv.append(dnode("sw01", 480, 454, 180, "sw01 data switch", "Nexus N93180YC-FX3", "path", [
-    ["What it is", "Our data switch. 2 x 100G to the lab core, bonded (LACP on Ethernet1/49-1/50). Each server has 2 x 25G to it, also bonded."],
-    ["Why our own switch", "Traffic between the chat page, gateway, and model stays inside the rack and never crosses the lab network."],
-    ["First setup", "From svc01 over a console cable, then the cable is removed (S8)."],
-    ["Listed in", "03, section 3; 05, section 6"]]))
+    ["What it is", "Our rack's data switch. It has 2 x 100G uplinks to the lab's C9500X, bonded (LACP). Inside the rack, each server has 2 x 25G data links to it, also bonded."],
+    ["Why our own switch", "Traffic between the chat page, gateway, and model stays inside the rack. This reduces attack vectors by giving each feature a single way in and out of the rack. It also allows performance tuning and load balancing inside the rack, and room for multi-server GPU work later."],
+    ["First setup", "From svc01 over a USB-A to RJ45 console cable (on the HBOM). The cable can be removed after first setup if desired."]]))
 cv.append(flow("M570,454 V213 H706", marker="ca"))
 cv.append(label(578, 330, "2 x 25G to"))
 cv.append(label(578, 346, "each server"))
-cv.append(dnode("oob01", 480, 556, 180, "oob01 management", "C1300, BMC ports only", "mgmt", [
-    ["What it is", "Cisco C1300-24T-4X. Every server's BMC port and sw01's management port plug in here."],
-    ["Why separate", "Remote management still works if sw01 or the data links go down (the network team's recommendation, 2026-11-06)."],
-    ["Listed in", "03, section 3; 07, N7"]]))
+cv.append(dnode("oob01", 480, 556, 180, "oob01 management", "C1300, BMC ports", "mgmt", [
+    ["What it is", "A small Cisco C1300-24T-4X switch (on the HBOM), used as the out-of-band management switch. Each server's BMC port and sw01's management port connect to it."],
+    ["Why separate", "Remote management still works if sw01 or the data links go down (Mr. Watkins's recommendation)."]]))
 cv.append(line("M570,504 V556"))
 cv.append(label(578, 534, "sw01 mgmt port"))
-cv.append(dnode("bmc", 706, 556, 480, "Server BMCs", "gpu01, svc01-03: power, screen, reinstall", "mgmt", [
-    ["What it is", "Each server's built-in remote management. It works even when the OS is down."],
-    ["Control", "Reachable only through oob01, on its own VLAN, with no user access."],
-    ["Listed in", "05, section 6; cyber 14, KC14"]]))
+cv.append(dnode("bmc", 706, 556, 480, "Server BMCs", "gpu01 and svc01-03: power, screen, and software management", "mgmt", [
+    ["What it is", "Each server's built-in remote management chip. It lets admins connect to the server remotely, even when the OS is down."],
+    ["Power", "Admins can power each server on, off, or restart it from here."],
+    ["Control", "Reachable only through oob01, on its own VLAN (a /28 suggested to Mr. Watkins, awaiting concurrence). It gives remote access and diagnostics when a server OS is down or fails, or when software must be installed or reinstalled."]]))
 cv.append(line("M660,581 H706"))
+cv.append('<path d="M819,556 V508 M1078,556 V508" fill="none" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="4 4"/>')
+cv.append(label(827, 536, "one BMC in each server"))
 # cluster
-cv.append(dnode("fd", 706, 188, 226, "Front door (Traefik)", "HTTPS 443, chat address only", "path lab", [
-    ["What it is", "RKE2's ingress. The only way into the cluster from the lab network."],
-    ["Opens", "HTTPS on port 443 for the chat address only. The chat feature opens no API address (R19)."],
-    ["Certificate", "From the lab CA, loaded at install: deploy.sh apps --chat-host --tls-cert --tls-key."]]))
-cv.append(dnode("chat", 706, 252, 226, "Chat page (Open WebUI)", "Sign-in, chats, uploads", "path", [
-    ["What it is", "The web page analysts use: chat, voice input, and document upload."],
-    ["Sign-in", "Local accounts the admin creates. Sign-up is off (R17)."],
-    ["Where it runs", "Kubernetes picks the node. Chats and uploads stay on its own disk (R24)."]]))
+cv.append(dnode("fd", 706, 188, 226, "Ingress (Traefik)", "HTTPS 443 for the SI-Chat address", "path lab", [
+    ["What it is", "RKE2's ingress controller. It is the only way for general users to reach SI-Chat from the lab network."],
+    ["Control", "HTTPS on port 443 for the chat address only."],
+    ["API address", "(Future phases) A second address that lets tools such as Jupyter or MATLAB call the model directly. It is not opened for the chat feature."],
+    ["Certificate", "Comes from the lab CA and is loaded at install."]]))
+cv.append(dnode("chat", 706, 252, 226, "Chat page (Open WebUI)", "Sign-in, chats, and uploads", "path", [
+    ["What it is", "The web page general users open for SI-Chat and document uploads."],
+    ["Sign-in", "Local accounts that the admin creates. Users cannot sign themselves up."],
+    ["Where it runs", "Kubernetes picks the node. Chats and uploads are stored on the chat page's own volume."]]))
 cv.append(dnode("gw", 706, 316, 226, "Gateway (LiteLLM)", "Inside the cluster only", "path", [
-    ["What it is", "Every model request from the chat page goes through it and is logged with the user."],
-    ["Control", "No address outside the cluster in the chat feature."]]))
+    ["What it is", "Every model request from the chat page goes through this gateway and is logged with the user."],
+    ["Control", "LiteLLM has no address outside the cluster in the chat feature."]]))
 cv.append(dnode("db", 706, 380, 226, "Database (PostgreSQL)", "Gateway's request log", "", [
-    ["What it is", "PostgreSQL, run by the CloudNativePG operator. Holds the gateway's request log."],
-    ["Where it runs", "Pinned to the service nodes."]]))
+    ["What it is", "PostgreSQL, run by the CloudNativePG operator. Holds the gateway's log of user requests."],
+    ["Where it runs", "On the service nodes (svc01-03)."]]))
 cv.append(dnode("tika", 706, 444, 226, "Text extraction (Tika)", "Uploaded documents, OCR", "", [
-    ["What it is", "Apache Tika. The chat page sends it uploaded documents and gets the text back, with OCR for scanned PDFs."],
-    ["Where it runs", "Pinned to the service nodes."]]))
+    ["What it is", "Apache Tika extracts text. When a user uploads documents, the chat page sends them to Tika. Tika separates the text from the file's formatting and metadata so the language model gets clean text."],
+    ["Where it runs", "On the service nodes (svc01-03)."]]))
 cv.append(flow("M819,238 V252", marker="ca"))
 cv.append(flow("M819,302 V316", marker="ca"))
 cv.append(flow("M819,366 V380", marker="ca"))
-cv.append(dnode("llm", 970, 188, 216, "Language model (vLLM)", "gpt-oss-120b, 3 GPUs", "path", [
-    ["What it is", "vLLM serving gpt-oss-120b. Three copies, one per GPU, so an update keeps two serving."],
-    ["Weights", "About 65 GB, loaded from gpu01's own NVMe. Never on the lab network."]]))
-cv.append(dnode("stt", 970, 252, 216, "Speech-to-text", "Whisper, fourth GPU", "", [
-    ["What it is", "faster-whisper. Turns the chat page's microphone input into text."],
-    ["Open items", "Which server runs it (S12)."]]))
+cv.append(dnode("llm", 970, 188, 216, "Language model (vLLM)", "gpt-oss-120b on 3 GPUs", "path", [
+    ["What it is", "vLLM serving gpt-oss-120b. Three copies share the load, which keeps the chat available and response times low. During an update, two copies keep serving."],
+    ["Weights", "About 65 GB, loaded from gpu01's NVMe."]]))
+cv.append(dnode("stt", 970, 252, 216, "Speech-to-text", "Whisper on the fourth GPU", "", [
+    ["What it is", "faster-whisper turns audio into text. Many of our systems record audio, and today someone has to listen to the playback. Where Tika pulls text from documents, faster-whisper pulls text from audio, so important times and events can be noted from the actual voices on the system. Users can also give it audio files such as .mp3."],
+    ["Open items", "Which server program runs faster-whisper. The ready-made options are either no longer maintained or do not speak the API the chat page uses. The likely choice is a small server we write around faster-whisper."]]))
 cv.append(dnode("emb", 970, 316, 216, "Embeddings", "Document search, on CPU", "", [
-    ["What it is", "Finds the parts of an uploaded document that match the question."],
-    ["Where it runs", "On gpu01's CPU, the node that holds the model files."],
-    ["Open items", "Which model, under the USA-only rule (S22)."]]))
+    ["What it is", "A small separate model that finds the parts of an uploaded document that match the question. gpt-oss-120b then writes the answer from those parts."],
+    ["Where it runs", "On gpu01's CPU."],
+    ["Open items", "Which embedding model meets the USA-only rule."]]))
 cv.append(flow("M932,341 H970", marker="ca"))
 cv.append(label(972, 400, "4 x RTX PRO 6000"))
 cv.append(label(972, 416, "Model files on its own NVMe"))
 cv.append(flow("M946,341 V213 H970", marker="ca"))
 cv.append(flow("M946,277 H970", marker="ca"))
 # questions for the network team
-cv.append(label(16, 652, "To work through with the network team. We held these until after the order (07: N5, N6, N14)."))
-QS = [("q1", "Addresses", "Subnets, gateways, VLAN IDs",
-       "Subnets for the servers (/27) and the BMCs (/28), the default gateway for each, and the VLAN IDs.", "Assigned at install.", "07, N5, N14"),
-      ("q2", "Names and time", "Chat name, DNS and NTP servers",
-       "The chat name and which addresses it points to, the lab's DNS servers, and its NTP servers.", "The lab provides all three.", "07, N5, N6"),
+cv.append(label(16, 652, "These items need to be worked through with the Network and Admin teams. We deferred these discussions until after the HBOM was finalized."))
+QS = [("q1", "Addresses", "Subnets, gateways, and VLAN IDs",
+       "Requested subnets for the servers (/27) and BMCs (/28), their default gateways, and the VLAN IDs. These are needed to complete the install."),
+      ("q2", "Names and time", "Chat name, DNS, and NTP servers",
+       "The chat name and which addresses it points to, the lab's DNS servers, and the lab's NTP servers."),
       ("q3", "Certificate", "Lab CA signs chat.<lab-domain>",
-       "Who issues the chat certificate from the lab CA, how long it lasts, and how it is renewed.", "Signed before install.", "07, N6; cyber 14, KC4"),
+       "Who issues the chat's certificate from the lab's CA? How long will it last? How will it be renewed?"),
       ("q4", "Switch and access rules", "LACP, trunk, MTU, 802.1X, 443",
-       "Single port-channel or vPC, L2 trunk or routed, MTU, 802.1X/NAC and port security, and which lab networks may reach port 443 on the chat address.",
-       "L2 trunk, LACP, lab gateway.", "07, N14")]
-for i, (k, ti, su, ask, dflt, ref) in enumerate(QS):
-    cv.append(dnode(k, 16 + i * 304, 664, 296, ti, su, "ask", [["Ask", ask], ["Our default", dflt], ["Listed in", ref]], h=52, sev="high"))
+       "One lab switch or a vPC pair? L2 trunk or routed link? What MTU? Does the lab use 802.1X/NAC or port security on these ports? Which lab networks may reach port 443 on the chat address?")]
+for i, (k, ti, su, ask) in enumerate(QS):
+    cv.append(dnode(k, 16 + i * 304, 664, 296, ti, su, "ask", [["Questions" if ask.count("?") != 1 else "Question", ask]], h=52, sev="high"))
 cv.append("</svg>")
 dchat_svg = "\n".join(cv)
 
@@ -706,7 +701,7 @@ html:not([data-deployment="off"]) body:has(#m-deploy:checked) #dchat { display: 
 t = t.replace("</head>", css + "</head>", 1)
 
 dswitch = ('<!-- GEN:DSWITCH START --><div class="modes dmodes" role="radiogroup" aria-label="Deployment view">'
-           '<input type="radio" name="dview" id="d-chat" checked><label for="d-chat">Chat feature</label>'
+           '<input type="radio" name="dview" id="d-chat" checked><label for="d-chat">Chat feature (Proposed)</label>'
            + "".join(f'<input type="radio" name="dview" id="d-{k}" disabled><label for="d-{k}" class="todo">{n}</label>'
                      for k, n in [("tools", "Analyst tools"), ("plat", "Platform services"), ("pipe", "Metrics pipeline")]) +
            '</div><!-- GEN:DSWITCH END -->')
@@ -724,11 +719,11 @@ const INFO = %s;
 const panel = document.getElementById("panel");
 const svg = document.getElementById("dchat");
 const e = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
-const OVER = `<h2>Deployment: chat feature</h2><p class="kind">How our rack ties into the lab network (work in progress)</p>
-  <p>Left is what the lab already has. Right is our rack. Analysts reach the chat page from their normal browser, through the lab network and the lab core, into sw01 and the cluster. Nothing else is opened to them.</p>
-  <p>Management has its own link through oob01, so the BMCs can still be reached if the data side goes down. Admin work is done at the rack console on svc01.</p>
-  <p>Dashed boxes are what the lab provides that we don't have yet. The amber boxes at the bottom are the questions to work through with the network team.</p>
-  <p>Use the buttons at the top to highlight each path. Select any box for details. Physical cabling: doc 03 and network-cabling.svg.</p>`;
+const OVER = `<h2>Deployment: chat feature (Proposed)</h2><p class="kind">Proposed connection between our rack and the existing lab infrastructure</p>
+  <p>Users reach the chat page from their browser. The traffic goes through the lab network and the lab core identified by Mr. Watkins, then into sw01 and the cluster. The chat page is intended to be the only thing users can reach.</p>
+  <p>Management has its own link through oob01, the small out-of-band management switch in our rack, so the BMCs can still be reached if the data side goes down. Mr. Watkins asked us to keep the data and management links separate. In this setup, admin work is done at the rack console on svc01.</p>
+  <p>The amber boxes at the bottom are items to work through with the RF Network and Admin teams, so our setup fits their existing schemes. Dashed boxes are assumed to exist.</p>
+  <p>Use the buttons at the top to highlight a path or a group of boxes. Select any box for details.</p>`;
 function select(g) { svg.querySelectorAll(".tnode.sel").forEach(x => x.classList.remove("sel")); if (g) g.classList.add("sel"); }
 function focus(p) { svg.querySelectorAll(".vi").forEach(x => x.classList.toggle("sdim", !!p && !(x.dataset.p || "").split(" ").includes(p))); }
 function bind(g, go) {

@@ -49,13 +49,13 @@ the firmware on the hardware, and MATLAB (already in the lab).
 
 | ID | Component | Version | License | Where | Notes |
 |---|---|---|---|---|---|
-| P1 | Rocky Linux 9 (default), or RHEL 9 if accreditation requires it | 9.x, TBD | Open source (Rocky); Red Hat subscription (RHEL) | svc01-03, gpu01 | Open question [decision register](README.md) L1, including the hardening baseline (STIG or not) |
-| P2 | gcc, make, kernel-devel for the running kernel, dkms | lab mirror | GPL family | gpu01 | Builds the NVIDIA kernel module. **dkms is in EPEL, not base Rocky/RHEL.** |
-| P3 | rsync, openssl, python3, gnupg2, iperf3 | lab mirror | open source | all nodes | Used by `intake/deploy.sh` and `validate/` |
-| P4 | container-selinux, rke2-selinux | lab mirror or Rancher RPM repo | GPL-2.0 / Apache-2.0 | all nodes | Needed with SELinux enforcing |
-| P5 | ipmitool, NVIDIA DCGM (optional) | lab mirror | BSD-3 / Apache-2.0 | all / gpu01 | Hardware checks and burn-in only |
+| OS1 | Rocky Linux 9 (default), or RHEL 9 if accreditation requires it | 9.x, TBD | Open source (Rocky); Red Hat subscription (RHEL) | svc01-03, gpu01 | Open question [decision register](README.md) L1, including the hardening baseline (STIG or not) |
+| OS2 | gcc, make, kernel-devel for the running kernel, dkms | lab mirror | GPL family | gpu01 | Builds the NVIDIA kernel module. **dkms is in EPEL, not base Rocky/RHEL.** |
+| OS3 | rsync, openssl, python3, gnupg2, iperf3 | lab mirror | open source | all nodes | Used by `intake/deploy.sh` and `validate/` |
+| OS4 | container-selinux, rke2-selinux | lab mirror or Rancher RPM repo | GPL-2.0 / Apache-2.0 | all nodes | Needed with SELinux enforcing |
+| OS5 | ipmitool, NVIDIA DCGM (optional) | lab mirror | BSD-3 / Apache-2.0 | all / gpu01 | Hardware checks and burn-in only |
 
-If the lab has no OS mirror, P2 to P4 must be added to the bundle as RPMs matched to the lab's kernel
+If the lab has no OS mirror, OS2 to OS4 must be added to the bundle as RPMs matched to the lab's kernel
 ([11](../software/11-sandbox-bringup-plan.md), W3).
 
 ## 3. Kubernetes platform and air-gap tooling
@@ -158,8 +158,8 @@ Weights are meant to be data, not code. How the intake keeps it that way:
 
 | ID | Component | Version | Source | License |
 |---|---|---|---|---|
-| S1 | Trivy scanner | 0.76.2 | github.com/aquasecurity/trivy | Apache-2.0 |
-| S2 | Trivy vulnerability DB and Java DB (data) | download date in `MANIFEST.txt` | ghcr.io/aquasecurity | Apache-2.0; advisory sources have their own terms |
+| Sec1 | Trivy scanner | 0.76.2 | github.com/aquasecurity/trivy | Apache-2.0 |
+| Sec2 | Trivy vulnerability DB and Java DB (data) | download date in `MANIFEST.txt` | ghcr.io/aquasecurity | Apache-2.0; advisory sources have their own terms |
 
 **Analyst workstations: later phase only.** Phase 1 is the chat page in a browser, so the phase 1 bundle leaves these
 out (`pull-all.sh` includes them only with `WITH_CLIENTS=1`). Listed so Cyber can review them ahead of that phase.
@@ -204,7 +204,7 @@ The sandbox rehearsal records every outbound attempt (tcpdump plus CoreDNS loggi
 | LiteLLM (A2) | Fetches its price list from GitHub at start | `LITELLM_LOCAL_MODEL_COST_MAP=True`. Prisma engine download at migration: to confirm in the sandbox. |
 | vLLM (A1) | Downloads tokenizer vocabularies | `TIKTOKEN_ENCODINGS_BASE` points at the shipped copy (M4) |
 | Continue (C5) | Anonymous telemetry | `allowAnonymousTelemetry: false` in each user's config (user-side setting) |
-| Trivy (S1) | Updates its databases | Run with `--skip-db-update --skip-java-db-update --offline-scan` |
+| Trivy (Sec1) | Updates its databases | Run with `--skip-db-update --skip-java-db-update --offline-scan` |
 | RKE2 (K1) | Ships `rke2-security-responder`, which looks to be SUSE's version-reporting component | To check: what it contacts, and whether to turn it off in the RKE2 config. The sandbox tripwire (C16) shows whether it tries. |
 
 ## 9. Machine-readable records in every bundle
