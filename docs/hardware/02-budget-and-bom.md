@@ -2,18 +2,20 @@
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
-Target: **$250,000.00**. Source of the base numbers: `Metrics_Analysis_Pipeline_Hardware_BOM.xlsx`.
+Target: **$250,000.00**. Source of the base numbers: `Metrics_Analysis_Pipeline_Hardware_BOM.xlsx`. Since
+2026-11-17 the workbook matches this page: the Nexus switch, the additions A1-A6, staging at 0, and a
+budget line on its Summary tab.
 
 ## 1. Which tier fits
 
 The BOM tiers include a staging environment (one GPU server with one GPU, $66,038). The lab decided
 not to have staging, so the lab-only figures are what count.
 
-| Tier | BOM with staging | Lab only (no staging) | Lab only + additions (section 2) | Fits $250k? |
+| Tier | Original BOM with staging | Original BOM, lab only | Workbook now (lab, Nexus switch, additions) | Fits $250k? |
 |---|---|---|---|---|
-| 20 users | $221,086 | $155,048 | about $202,000 | Yes |
-| **50 users** | $257,578 | **$191,540** | **$238,517 + switch license** | **Yes, $11,483 left** |
-| 100 users | $382,869 | $316,831 | about $364,000 | No |
+| 20 users | $221,086 | $155,048 | $202,024.59 | Yes |
+| **50 users** | $257,578 | **$191,540** | **$238,516.59 + switch license** | **Yes, $11,483 left** |
+| 100 users | $382,869 | $316,831 | $391,586.42 (two Nexus switches) | No |
 
 **Decision: buy the 50-user tier, no staging.** It fills all four GPU slots in gpu01 and keeps all three
 service nodes. The money that was staging pays for the two extra GPUs, the Cisco Nexus switch, and the install items,
@@ -101,9 +103,11 @@ Three things can add margin:
    partners also often quote the switch below CDW's advertised price.
 3. **Transfer drives (A4).** If the lab supplies approved drives, drop A4 and save $5,550.
 
-## 4. Items to fix in the BOM workbook
+## 4. Items fixed in the BOM workbook
 
-These are corrections, not new scope:
+**Done 2026-11-17.** The workbook now has items 1-3 and 5-8, plus the additions A1-A6 as their own rows
+(the setup kit row names the USB-to-RJ45 console cable). Item 4 is still a question for Thinkmate.
+These were corrections, not new scope:
 
 1. **Server link.** The reference system, "GPX GE95-2206-41", is at
    https://www.thinkmate.com/system/gpx-ge95-2206-41. The base system has dual 10GbE RJ45 and 4 x 2000 W PSUs.
@@ -134,5 +138,5 @@ These are corrections, not new scope:
 | Step | Add | Est. cost | Reuses |
 |---|---|---|---|
 | 50 users | Bought now: all 4 GPU slots in gpu01 filled | in the budget | |
-| 100 users | gpu02, 4 GPUs, 2 NVMe, second 25G switch, cables | about $125,300 | Rack 2 (held next to rack 1) and its PDUs, same software. gpu02 can go in rack 1 at U3-U4 instead if the PSUs use C14 inlets, since each PDU has only three C19 outlets. |
+| 100 users | gpu02, 4 GPUs, 2 NVMe, second Nexus switch, 10 more DACs | about $153,100 | Rack 2 (held next to rack 1) and its PDUs, same software. gpu02 can go in rack 1 at U3-U4 instead if the PSUs use C14 inlets, since each PDU has only three C19 outlets. |
 | Rest of the pipeline | CPU workloads on the lab's existing CPU servers (BOM scope note) | n/a | Same Kubernetes platform, Harbor, GitLab, Argo CD |
