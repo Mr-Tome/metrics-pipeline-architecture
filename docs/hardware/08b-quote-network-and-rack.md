@@ -63,7 +63,8 @@ license and contingency. Please flag it if your quote for items 4-12, license in
 - M6 cage nuts and screws, 50-pack, plus cage nut tool (the racks have square holes)
 - ESD wrist strap
 - Fiber cleaner, one-click, LC 1.25 mm
-- Console cable: USB to RJ45 serial (the Nexus and C1300 consoles are both RJ45)
+- Console cable: USB-A to RJ45 serial, at least 3 m (10 ft), FTDI chipset (the Nexus and C1300 consoles
+  are both RJ45; it runs from svc01 at U5 to sw01's console port at U41)
 - #2 Phillips screwdriver, flashlight, 25 ft tape measure
 
 **Questions**

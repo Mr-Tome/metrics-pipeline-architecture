@@ -206,11 +206,22 @@ the QSFP28 ports `Ethernet1/49` to `Ethernet1/54`.
 
 ## 6. First power-on checks
 
-1. **Switch:** console in (no laptop: plug the rack console into svc01 over VGA and USB, run the USB-to-RJ45
-   console cable from svc01 to the switch's console port, and open it from svc01 with
-   `screen /dev/ttyUSB0 9600`; svc01 needs its OS installed first; pending ISSM approval, S8), set the management IP, then confirm `show interface status` shows each D-cable
-   link up at 25G. Enable `feature lacp` and put Ethernet1/49-1/50 in one LACP port-channel (VLAN plan from
-   the lab); check with `show port-channel summary`. oob01's uplink (M06) goes to the lab directly, not through sw01.
+1. **Switch (sw01), set up from svc01.** The switch has no screen. Its console is a serial port, so
+   something has to run a terminal program on the other end of the cable. With no laptop, svc01 does that
+   job, and the rack console is svc01's screen and keyboard (pending ISSM approval, S8):
+   1. Install the OS on svc01 from the transfer drive first. The other nodes get theirs in step 4.
+   2. Plug the rack console's VGA/USB cable into svc01. con01's screen and keyboard now belong to svc01.
+   3. Run the USB-to-RJ45 console cable from a USB port on svc01 to sw01's console port. On the
+      93180YC-FX3 the console port is on the power-supply side, which faces the front in this rack.
+      svc01 (U5) is about 1.6 m below sw01 (U41), so the cable must be at least 3 m (10 ft).
+   4. Log in to svc01 and run `screen /dev/ttyUSB0 9600`. The switch's prompt appears on con01's screen.
+   5. Set the management IP, then confirm `show interface status` shows each D-cable link up at 25G.
+      Enable `feature lacp` and put Ethernet1/49-1/50 in one LACP port-channel (VLAN plan from the lab);
+      check with `show port-channel summary`.
+   6. Leave `screen` (Ctrl-A, then K) and unplug the console cable, so root on svc01 doesn't also mean
+      the switch console.
+
+   oob01's uplink (M06) goes to the lab directly, not through sw01.
 2. **BMC:** each server's BMC gets an IP (DHCP or set at the BIOS screen using the rack console). Change the
    default password at first login. Record it in the lab's approved password store.
    **Set the BMC LAN mode to Dedicated** on every server (BIOS setup, or `ipmitool raw 0x30 0x70 0x0c 1 0`
@@ -226,7 +237,8 @@ the QSFP28 ports `Ethernet1/49` to `Ethernet1/54`.
    - Boot mode: UEFI
    - Secure Boot: per lab policy. With Secure Boot on, the NVIDIA driver must be signed, so tell the
      software team.
-4. Install the OS on every node, then run `validate/hw-check.sh` on each one:
+4. Install the OS on the other nodes (svc01 already has it from step 1), then run `validate/hw-check.sh`
+   on each one:
    - gpu01: `validate/hw-check.sh --gpus 4`
    - svc01, svc02, svc03: `validate/hw-check.sh --gpus 0` (no GPUs, so only the NVMe and NIC checks run)
 

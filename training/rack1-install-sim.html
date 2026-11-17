@@ -314,7 +314,7 @@ const CARTONS = [
    good:["80 × 1U tool-less blanking panels"], bad:["4 boxes: 40 × 1U panels"],
    why:"Rack 1 needs 34 and rack 2 needs 42. 40 panels leaves rack 2 open, leaking cool air out of the contained cold aisle. Flag it."},
   {id:"con", name:"con01 · rack console", pn:"StarTech RKCONS1701 · item 11", good:["17 in LCD, keyboard, touchpad, 1U drawer","VGA/USB cable, rails, mounting hardware"]},
-  {id:"kit", name:"Setup kit", pn:"item 12", good:["Cord labels, label maker, velcro","M6 cage nuts and screws, cage nut tool","ESD wrist strap, one-click LC fiber cleaner","Console cables (RJ45 and USB-C serial), hand tools"]},
+  {id:"kit", name:"Setup kit", pn:"item 12", good:["Cord labels, label maker, velcro","M6 cage nuts and screws, cage nut tool","ESD wrist strap, one-click LC fiber cleaner","Console cable (USB-A to RJ45 serial, 3 m), hand tools"]},
   {id:"usb", name:"Transfer drives", pn:"Apricorn A25-3PL256-S4000F × 2 · item 10", good:["2 × 4 TB encrypted SSD, FIPS 140-2","Hand to the ISSM process unopened if the lab requires it"]}
 ];
 const DEFECT_POOL = ["cords","airflow","dac","optics","fiber","blanks"];
@@ -492,9 +492,8 @@ const STEPS = [
 
  {ph:7, type:"order", title:"First power-on checks", ref:["05","§6"], view:"front",
   lead:"The rack console at U21 is your screen and keyboard. No laptop on the lab network, no internet.",
-  items:[["Console cable into sw01. Set its management IP. Run show license usage: Essentials is listed."],
-         ["On sw01, run show interface status: Ethernet1/1–1/8 up at 25G, Ethernet1/49–1/50 up at 100G in the port-channel (show port-channel summary). On oob01, X1 (M06) up at 10G to the lab"],
-         ["At the rack console, give each BMC an IP, change the default password, and store it in the lab's password store"]],
+  items:[["At the rack console, give each BMC an IP, change the default password, and store it in the lab's password store"],
+         ["On oob01, X1 (M06) up at 10G to the lab"]],
   bad:[["Leave the BMC default passwords until the software is installed","Change the default password at first login. Default BMC passwords are a known risk."],
        ["Plug a laptop into the lab network to pull drivers","Assume no internet. Drivers come in on the approved transfer drives, through the ISSM process."]]},
 
@@ -506,8 +505,22 @@ const STEPS = [
         ["Boot mode: Legacy/CSM", false, "Use UEFI."],["IOMMU: off for speed", false, "IOMMU stays on."],
         ["Secure Boot: off, without asking", false, "Secure Boot follows lab policy. If it's on, tell the software team so the NVIDIA driver is signed."]]},
 
+ {ph:7, type:"order", title:"Set up sw01 from svc01", ref:["05","§6 step 1"], view:"front",
+  lead:"sw01 has no screen. Its console is a serial port, so something has to run a terminal on the other end of the cable. With no laptop, svc01 does that job and the rack console is svc01's screen and keyboard. Put these in order.",
+  items:[["Install the OS on svc01 from the transfer drive (Rocky Linux 9 unless the lab requires RHEL)"],
+         ["Plug the rack console's VGA/USB cable into svc01"],
+         ["Run the USB-to-RJ45 console cable from a USB port on svc01 to sw01's console port (front, power-supply side)"],
+         ["Log in to svc01 and run screen /dev/ttyUSB0 9600: the switch's prompt appears on the rack console"],
+         ["Set sw01's management IP. Run show license usage: Essentials is listed"],
+         ["Run show interface status: Ethernet1/1–1/8 up at 25G, Ethernet1/49–1/50 up at 100G in the port-channel (show port-channel summary)"],
+         ["Leave screen (Ctrl-A, then K) and unplug the console cable"]],
+  bad:[["Plug the rack console's VGA cable straight into sw01","The switch has no video port. The rack console is only a screen and keyboard: it needs a computer (svc01) to run the terminal."],
+       ["Bring a laptop for the console port","No laptop on the lab network. svc01 plus the rack console does the same job (ISSM question S8)."],
+       ["Leave the console cable plugged in for next time","Then root on svc01 also means the switch console. Unplug it when setup is done."]],
+  facts:["<b>Console cable:</b> USB-A to RJ45 serial, at least 3 m (10 ft): svc01 is at U5, sw01 at U41","<b>Pending:</b> ISSM approval for a USB serial adapter on svc01 (S8)"]},
+
  {ph:7, type:"order", title:"Validate", ref:["05","§6 step 4–6"],
-  items:[["Install the OS from the transfer drive (Rocky Linux 9 unless the lab requires RHEL)"],
+  items:[["Install the OS on gpu01, svc02 and svc03 from the transfer drive (svc01 already has it)"],
          ["Run validate/hw-check.sh --gpus 4 on gpu01: GPU count, PCIe Gen5 x16, temperature, power limit, NVMe, NIC speed"],
          ["Run validate/hw-check.sh --gpus 0 on svc01–svc03"],
          ["Run validate/net-test.sh between the nodes"],
