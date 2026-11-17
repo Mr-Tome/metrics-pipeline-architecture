@@ -2,7 +2,7 @@
 
 **Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
-This follows the **Delivery** view in [`metrics_architecture.html`](../../metrics_architecture.html):
+This follows the **Delivery** view in [`program_views.html`](../../program_views.html):
 
 1. A connected build environment pulls everything.
 2. It packs everything into one sealed release bundle.

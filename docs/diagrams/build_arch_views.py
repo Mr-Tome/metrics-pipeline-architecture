@@ -1,4 +1,4 @@
-"""Add the Phases, Security, Delivery, Keys, and Review views to metrics_architecture.html.
+"""Build the chat feature Deployment view in metrics_architecture.html, and program_views.html (Phases, Security, Delivery, Keys, Review).
 
 Security and Delivery show phase 1 (SI through the chat page). Keys and Review are built from docs 14 and 15.
 
@@ -519,20 +519,162 @@ dv.append(inode("n_scope", 828, 500, 396, "Phase 1: chat service only", "Analyst
 dv.append("</svg>")
 del_svg = "\n".join(dv)
 
+# ---------- 3c. Deployment view: chat feature (goes in metrics_architecture.html) ----------
+DINFO = {}
 
-# ---------- 4. CSS, radios, JS ----------
+
+def dnode(key, x, y, w, title, sub, p, rows, h=50, sev="", dash="none"):
+    DINFO[key] = dict(title=title, rows=rows)
+    return node(key, x, y, w, h, title, sub, sev, attr="data-did", cls="vi", dash=dash).replace(
+        f'data-p="{sev}"', f'data-p="{p}"', 1)
+
+
+def dfilt(key, x, w, title, sub):
+    return filt(key, x, 14, w, title, sub, "", "data-df").replace('width="396"', f'width="{w}"')
+
+
+cv = ['<svg id="dchat" viewBox="0 0 1240 732" role="img" aria-label="Deployment view, chat feature: how our rack ties into the lab network">', defs("ca", "cx")]
+cv.append(dfilt("path", 16, 296, "Analyst's path", "Browser to the model and back"))
+cv.append(dfilt("mgmt", 320, 296, "Admin and management", "Kept off the analysts' path"))
+cv.append(dfilt("lab", 624, 296, "Lab provides", "Addresses, names, time, certificate"))
+cv.append(dfilt("ask", 928, 296, "Still to ask the lab", "Network team, after the order"))
+cv.append(izone(16, 84, 436, 540, "Lab (existing)", "in", None, "9 6"))
+cv.append(izone(464, 84, 760, 540, "Our rack (new, next to ACE 15)", "pf", "pf-f"))
+cv.append(izone(680, 124, 530, 396, "Cluster (RKE2)", "k8", "k8-f"))
+cv.append(izone(694, 156, 250, 352, "svc01-03", "k8", None, "6 4"))
+cv.append(izone(958, 156, 240, 352, "gpu01", "si", "si-f"))
+# lab, analyst side
+cv.append(dnode("u_browser", 30, 120, 196, "Analyst's browser", "Lab desk, nothing installed", "path", [
+    ["What it is", "The analyst's normal lab browser. Nothing is installed on the desk."],
+    ["How it connects", "Over the lab network to https://chat.<lab-domain>. That is the only address the chat feature opens."],
+    ["Later", "Jupyter, VS Code, and MATLAB come with the analyst tools feature, not this one."]]))
+cv.append(dnode("l_net", 30, 258, 196, "Lab network", "1G desks, 10G core uplink", "path", [
+    ["What it is", "The lab's existing network between the analysts' desks and the lab core."],
+    ["Load", "50 users chatting use well under 1% of the 10G uplink. Model weights never cross it: they load from gpu01's own disk."],
+    ["Listed in", "03, section 2; 07, N4"]]))
+cv.append(dnode("l_core", 30, 460, 196, "C9500X-28C8D", "Lab core, 3 ports for us", "path mgmt", [
+    ["What it is", "The lab's core switch above rows 2 and 3, running IOS XE 17.15.06."],
+    ["Decided", "Three ports for us: 2 x 100G data to sw01 and 1 x 10G management to oob01. We supply the optics for both ends (Cisco, on Cisco's compatibility list)."],
+    ["Listed in", "03, section 3; 10, round 3"]], h=64))
+cv.append(flow("M128,170 V258", marker="ca"))
+cv.append(label(136, 218, "1G desk port"))
+cv.append(flow("M128,308 V460", marker="ca"))
+cv.append(label(136, 388, "10G uplink"))
+# lab services
+cv.append(dnode("l_dns", 242, 120, 196, "DNS name", "chat.<lab-domain>", "lab ask", [
+    ["What it is", "The name analysts type. The chat page's certificate is issued for this name."],
+    ["To ask", "The name, which addresses it points to, and the lab's DNS servers for every node."],
+    ["Our default", "One name pointing at the three service nodes (svc01-03), so one node can be down. Confirm in the rehearsal that the front door answers on each node's address."],
+    ["Listed in", "07, N5, N6"]], dash="6 4"))
+cv.append(dnode("l_ip", 242, 182, 196, "Addresses and VLANs", "Servers /27, BMCs /28", "lab ask", [
+    ["What it is", "Data addresses for the four servers, and separate management addresses for the BMCs, oob01, and sw01."],
+    ["Why it matters", "RKE2 will not start without a default route on each node, even with no internet. The bring-up sim covers this."],
+    ["To ask", "Both subnets, the default gateway for each, and the VLAN IDs."],
+    ["Listed in", "07, N5, N14"]], dash="6 4"))
+cv.append(dnode("l_ntp", 242, 244, 196, "Time (NTP)", "Same clock on every node", "lab ask", [
+    ["What it is", "The lab's time servers."],
+    ["Why it matters", "The cluster database (etcd) and the certificates fail when the servers' clocks drift apart."],
+    ["To ask", "The NTP server addresses."],
+    ["Listed in", "07, N6"]], dash="6 4"))
+cv.append(dnode("l_ca", 242, 306, 196, "Lab CA", "Signs the chat certificate", "lab ask", [
+    ["What it is", "The lab's certificate authority. Lab browsers already trust it, so the chat page opens with no warning."],
+    ["To ask", "Who issues the certificate for the chat name (KC4), how long it lasts, and how it is renewed."],
+    ["Listed in", "07, N6; cyber 14, KC3, KC4"]], dash="6 4"))
+cv.append(dnode("l_mgmt", 242, 368, 196, "Management access", "Who may reach the BMCs", "mgmt lab ask", [
+    ["What it is", "The lab side of the 10G management link."],
+    ["To ask", "Which lab VLAN it joins and who may reach it."],
+    ["Our default", "Lab admins only. No user access."],
+    ["Listed in", "07, N7"]], dash="6 4"))
+# links into the rack
+cv.append(flow("M226,479 H480", marker="ca"))
+cv.append(label(350, 471, "2 x 100G, bonded (LACP)", "middle"))
+cv.append(flow("M226,512 H458 V581 H480", marker="ca"))
+cv.append(label(236, 530, "10G management link"))
+cv.append(label(30, 600, "Dashed: not given to us yet."))
+# our rack: switches and console
+cv.append(dnode("con", 480, 150, 180, "Rack console (con01)", "svc01's screen, admin work", "mgmt", [
+    ["What it is", "The StarTech rack console, cabled to svc01. It is svc01's screen and keyboard."],
+    ["Used for", "First switch setup, verify.sh and deploy.sh, and cluster admin (kubectl). No laptop, and no admin work from an analyst desk."],
+    ["Open items", "Who may be cluster admin (S24)."],
+    ["Listed in", "05, section 6"]]))
+cv.append(flow("M660,175 H694", marker="ca"))
+cv.append(dnode("sw01", 480, 454, 180, "sw01 data switch", "Nexus N93180YC-FX3", "path", [
+    ["What it is", "Our data switch. 2 x 100G to the lab core, bonded (LACP on Ethernet1/49-1/50). Each server has 2 x 25G to it, also bonded."],
+    ["Why our own switch", "Traffic between the chat page, gateway, and model stays inside the rack and never crosses the lab network."],
+    ["First setup", "From svc01 over a console cable, then the cable is removed (S8)."],
+    ["Listed in", "03, section 3; 05, section 6"]]))
+cv.append(flow("M570,454 V213 H706", marker="ca"))
+cv.append(label(578, 330, "2 x 25G to"))
+cv.append(label(578, 346, "each server"))
+cv.append(dnode("oob01", 480, 556, 180, "oob01 management", "C1300, BMC ports only", "mgmt", [
+    ["What it is", "Cisco C1300-24T-4X. Every server's BMC port and sw01's management port plug in here."],
+    ["Why separate", "Remote management still works if sw01 or the data links go down (the network team's recommendation, 2026-11-06)."],
+    ["Listed in", "03, section 3; 07, N7"]]))
+cv.append(line("M570,504 V556"))
+cv.append(label(578, 534, "sw01 mgmt port"))
+cv.append(dnode("bmc", 706, 556, 480, "Server BMCs", "gpu01, svc01-03: power, screen, reinstall", "mgmt", [
+    ["What it is", "Each server's built-in remote management. It works even when the OS is down."],
+    ["Control", "Reachable only through oob01, on its own VLAN, with no user access."],
+    ["Listed in", "05, section 6; cyber 14, KC14"]]))
+cv.append(line("M660,581 H706"))
+# cluster
+cv.append(dnode("fd", 706, 188, 226, "Front door (Traefik)", "HTTPS 443, chat address only", "path lab", [
+    ["What it is", "RKE2's ingress. The only way into the cluster from the lab network."],
+    ["Opens", "HTTPS on port 443 for the chat address only. The chat feature opens no API address (R19)."],
+    ["Certificate", "From the lab CA, loaded at install: deploy.sh apps --chat-host --tls-cert --tls-key."]]))
+cv.append(dnode("chat", 706, 252, 226, "Chat page (Open WebUI)", "Sign-in, chats, uploads", "path", [
+    ["What it is", "The web page analysts use: chat, voice input, and document upload."],
+    ["Sign-in", "Local accounts the admin creates. Sign-up is off (R17)."],
+    ["Where it runs", "Kubernetes picks the node. Chats and uploads stay on its own disk (R24)."]]))
+cv.append(dnode("gw", 706, 316, 226, "Gateway (LiteLLM)", "Inside the cluster only", "path", [
+    ["What it is", "Every model request from the chat page goes through it and is logged with the user."],
+    ["Control", "No address outside the cluster in the chat feature."]]))
+cv.append(dnode("db", 706, 380, 226, "Database (PostgreSQL)", "Gateway's request log", "", [
+    ["What it is", "PostgreSQL, run by the CloudNativePG operator. Holds the gateway's request log."],
+    ["Where it runs", "Pinned to the service nodes."]]))
+cv.append(dnode("tika", 706, 444, 226, "Text extraction (Tika)", "Uploaded documents, OCR", "", [
+    ["What it is", "Apache Tika. The chat page sends it uploaded documents and gets the text back, with OCR for scanned PDFs."],
+    ["Where it runs", "Pinned to the service nodes."]]))
+cv.append(flow("M819,238 V252", marker="ca"))
+cv.append(flow("M819,302 V316", marker="ca"))
+cv.append(flow("M819,366 V380", marker="ca"))
+cv.append(dnode("llm", 970, 188, 216, "Language model (vLLM)", "gpt-oss-120b, 3 GPUs", "path", [
+    ["What it is", "vLLM serving gpt-oss-120b. Three copies, one per GPU, so an update keeps two serving."],
+    ["Weights", "About 65 GB, loaded from gpu01's own NVMe. Never on the lab network."]]))
+cv.append(dnode("stt", 970, 252, 216, "Speech-to-text", "Whisper, fourth GPU", "", [
+    ["What it is", "faster-whisper. Turns the chat page's microphone input into text."],
+    ["Open items", "Which server runs it (S12)."]]))
+cv.append(dnode("emb", 970, 316, 216, "Embeddings", "Document search, on CPU", "", [
+    ["What it is", "Finds the parts of an uploaded document that match the question."],
+    ["Where it runs", "On gpu01's CPU, the node that holds the model files."],
+    ["Open items", "Which model, under the USA-only rule (S22)."]]))
+cv.append(flow("M932,341 H970", marker="ca"))
+cv.append(label(972, 400, "4 x RTX PRO 6000"))
+cv.append(label(972, 416, "Model files on its own NVMe"))
+cv.append(flow("M946,341 V213 H970", marker="ca"))
+cv.append(flow("M946,277 H970", marker="ca"))
+# questions for the network team
+cv.append(label(16, 652, "To work through with the network team. We held these until after the order (07: N5, N6, N14)."))
+QS = [("q1", "Addresses", "Subnets, gateways, VLAN IDs",
+       "Subnets for the servers (/27) and the BMCs (/28), the default gateway for each, and the VLAN IDs.", "Assigned at install.", "07, N5, N14"),
+      ("q2", "Names and time", "Chat name, DNS and NTP servers",
+       "The chat name and which addresses it points to, the lab's DNS servers, and its NTP servers.", "The lab provides all three.", "07, N5, N6"),
+      ("q3", "Certificate", "Lab CA signs chat.<lab-domain>",
+       "Who issues the chat certificate from the lab CA, how long it lasts, and how it is renewed.", "Signed before install.", "07, N6; cyber 14, KC4"),
+      ("q4", "Switch and access rules", "LACP, trunk, MTU, 802.1X, 443",
+       "Single port-channel or vPC, L2 trunk or routed, MTU, 802.1X/NAC and port security, and which lab networks may reach port 443 on the chat address.",
+       "L2 trunk, LACP, lab gateway.", "07, N14")]
+for i, (k, ti, su, ask, dflt, ref) in enumerate(QS):
+    cv.append(dnode(k, 16 + i * 304, 664, 296, ti, su, "ask", [["Ask", ask], ["Our default", dflt], ["Listed in", ref]], h=52, sev="high"))
+cv.append("</svg>")
+dchat_svg = "\n".join(cv)
+
+
+# ---------- 4. Shared CSS ----------
 VIEWS = ["phs", "sec", "del", "keys", "rev"]
-hide = []
-for v in VIEWS:
-    others = ", ".join(f"body:has(#m-{v}:checked) #{o}" for o in ["svg", "topo"] + [w for w in VIEWS if w != v])
-    hide.append(f"#{v} {{ display: none; }}\n{others} {{ display: none !important; }}\nbody:has(#m-{v}:checked) #{v} {{ display: block; }}")
-    hide.append(f"body:has(#m-{v}:checked) .legend, body:has(#m-{v}:checked) .js-only, body:has(#m-{v}:checked) ol.steps {{ display: none !important; }}")
-css = """<!-- GEN:CSS START -->
-<style>
-:root { --deny: #c0262d; --deny-f: #fdecec; }
+SHARED_CSS = """:root { --deny: #c0262d; --deny-f: #fdecec; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --deny: #ff7b7b; --deny-f: #3b1618; } }
 :root[data-theme="dark"] { --deny: #ff7b7b; --deny-f: #3b1618; }
-""" + "\n".join(hide) + """
 .promise-t { font-size: 15px; font-weight: 700; }
 .sflow-x { fill: none; stroke: var(--deny); stroke-width: 2.2; stroke-dasharray: 6 5; }
 .key-item, .rev-item, .vi { transition: opacity .25s; }
@@ -545,25 +687,74 @@ css = """<!-- GEN:CSS START -->
 #panel .b-med { color: var(--z3); border-color: var(--z3); background: var(--z3-f); }
 #panel .b-hi2 { color: var(--z3); border-color: var(--z3); background: var(--z3-f); }
 #panel .b-low, #panel .b-mod { color: var(--pf); border-color: var(--pf); background: var(--pf-f); }
+"""
+base_css = re.search(r"<style>.*?</style>", t, re.S).group(0)
+
+# ---------- 5. metrics_architecture.html: Deployment view, chat feature ----------
+css = """<!-- GEN:CSS START -->
+<style>
+""" + SHARED_CSS + """#dchat { display: none; }
+.dmodes { display: none; margin: 0 0 10px; }
+body:has(#m-deploy:checked) .dmodes { display: inline-flex; }
+html[data-deployment="off"] .dmodes { display: none !important; }
+body:has(#m-deploy:checked) #topo, body:has(#m-deploy:checked) label.toggle { display: none !important; }
+html:not([data-deployment="off"]) body:has(#m-deploy:checked) #dchat { display: block; }
+.dmodes label.todo { text-decoration: line-through; opacity: 0.55; pointer-events: none; cursor: not-allowed; }
+.dmodes label.todo::after { content: " (TODO)"; text-decoration: none; display: inline-block; margin-left: 4px; font-size: 0.8em; }
 </style>
 <!-- GEN:CSS END -->"""
 t = t.replace("</head>", css + "</head>", 1)
 
-radios = ('<!-- GEN:RADIO START -->'
-          '<input type="radio" name="mode" id="m-phs"><label for="m-phs">Phases</label>'
-          '<input type="radio" name="mode" id="m-sec"><label for="m-sec">Security</label>'
-          '<input type="radio" name="mode" id="m-del"><label for="m-del">Delivery</label>'
-          '<input type="radio" name="mode" id="m-keys"><label for="m-keys">Keys</label>'
-          '<input type="radio" name="mode" id="m-rev"><label for="m-rev">Review</label>'
-          '<!-- GEN:RADIO END -->')
-anchor = '<input type="radio" name="mode" id="m-deploy"><label for="m-deploy">Deployment</label>'
+dswitch = ('<!-- GEN:DSWITCH START --><div class="modes dmodes" role="radiogroup" aria-label="Deployment view">'
+           '<input type="radio" name="dview" id="d-chat" checked><label for="d-chat">Chat feature</label>'
+           + "".join(f'<input type="radio" name="dview" id="d-{k}" disabled><label for="d-{k}" class="todo">{n}</label>'
+                     for k, n in [("tools", "Analyst tools"), ("plat", "Platform services"), ("pipe", "Metrics pipeline")]) +
+           '</div><!-- GEN:DSWITCH END -->')
+anchor = '<div class="diagram"><svg id="svg"'
 assert anchor in t
-t = t.replace(anchor, anchor + radios, 1)
+t = t.replace(anchor, dswitch + anchor, 1)
 
-svgs = "<!-- GEN:SVG START -->\n" + phs_svg + "\n" + sec_svg + "\n" + del_svg + "\n" + keys_svg + "\n" + rev_svg + "\n<!-- GEN:SVG END -->"
-del_end = t.index("</svg>", t.index("<svg id=\"topo\""))
-t = t[:del_end + len("</svg>")] + svgs + t[del_end + len("</svg>"):]
+topo_end = t.index("</svg>", t.index("<svg id=\"topo\""))
+t = t[:topo_end + len("</svg>")] + "<!-- GEN:SVG START -->\n" + dchat_svg + "\n<!-- GEN:SVG END -->" + t[topo_end + len("</svg>"):]
 
+main_js = """<!-- GEN:JS START -->
+<script>
+(() => {
+const INFO = %s;
+const panel = document.getElementById("panel");
+const svg = document.getElementById("dchat");
+const e = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const OVER = `<h2>Deployment: chat feature</h2><p class="kind">How our rack ties into the lab network (work in progress)</p>
+  <p>Left is what the lab already has. Right is our rack. Analysts reach the chat page from their normal browser, through the lab network and the lab core, into sw01 and the cluster. Nothing else is opened to them.</p>
+  <p>Management has its own link through oob01, so the BMCs can still be reached if the data side goes down. Admin work is done at the rack console on svc01.</p>
+  <p>Dashed boxes are what the lab provides that we don't have yet. The amber boxes at the bottom are the questions to work through with the network team.</p>
+  <p>Use the buttons at the top to highlight each path. Select any box for details. Physical cabling: doc 03 and network-cabling.svg.</p>`;
+function select(g) { svg.querySelectorAll(".tnode.sel").forEach(x => x.classList.remove("sel")); if (g) g.classList.add("sel"); }
+function focus(p) { svg.querySelectorAll(".vi").forEach(x => x.classList.toggle("sdim", !!p && !(x.dataset.p || "").split(" ").includes(p))); }
+function bind(g, go) {
+  g.addEventListener("click", ev => { ev.stopPropagation(); go(); });
+  g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
+}
+svg.querySelectorAll(".tnode[data-did]").forEach(g => bind(g, () => {
+  focus(null); select(g); const d = INFO[g.dataset.did];
+  panel.innerHTML = `<h2>${e(d.title)}</h2><dl class="facts">${d.rows.map(([a, b]) => `<dt>${e(a)}</dt><dd>${e(b)}</dd>`).join("")}</dl>`;
+}));
+svg.querySelectorAll(".filt").forEach(g => bind(g, () => {
+  const on = !g.classList.contains("sel"); select(on ? g : null); focus(on ? g.dataset.df : null);
+  panel.innerHTML = OVER;
+}));
+function sync() {
+  if (!document.getElementById("m-deploy").checked) return;
+  focus(null); select(null); panel.innerHTML = OVER;
+}
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", sync));
+})();
+</script>
+<!-- GEN:JS END -->""" % json.dumps(DINFO)
+t = t.replace("</body>", main_js + "</body>", 1)
+page.write_text(t)
+
+# ---------- 6. program_views.html: Phases, Security, Delivery, Keys, Review ----------
 KEYDATA = {k: dict(title=v["title"], damage=v.get("damage", ""), rows=v["rows"], s=v.get("summary", {})) for k, v in keys.items()}
 EXTRA = {
     "bundle": dict(title="Release bundle", damage="", rows=[["What it is", "Everything phase 1 brings in, on one approved transfer drive, with a list of every file's checksum. The list is signed with KC1."], ["Why it matters", "The signature is what lets the lab trust the bundle. Without it, the checksums only prove the copy is complete, not who made it."]], s={}),
@@ -573,8 +764,7 @@ KEYDATA.update(EXTRA)
 REVDATA = {f["id"]: f for f in findings}
 AREANAME = dict(areas)
 
-js = """<!-- GEN:JS START -->
-<script>
+prog_js = """<script>
 (() => {
 const KEYS = %s;
 const REV = %s;
@@ -669,9 +859,49 @@ document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener(
   if (document.getElementById("m-keys").checked) panel.innerHTML = keysOverview();
   if (document.getElementById("m-rev").checked) panel.innerHTML = revOverview();
 }));
+{ const c = document.querySelector('input[name="mode"]:checked'); if (c) c.dispatchEvent(new Event("change")); }
 })();
-</script>
-<!-- GEN:JS END -->""" % (json.dumps(KEYDATA), json.dumps(REVDATA), json.dumps(AREANAME), json.dumps(SHORT), json.dumps(INFO))
-t = t.replace("</body>", js + "</body>", 1)
-page.write_text(t)
-print(f"info items {len(INFO)}; findings {len(findings)} areas {len(areas)} keys {len([k for k in keys if k.startswith('KC')])}")
+</script>""" % (json.dumps(KEYDATA), json.dumps(REVDATA), json.dumps(AREANAME), json.dumps(SHORT), json.dumps(INFO))
+
+hide = []
+for v in VIEWS:
+    hide.append(f"#{v} {{ display: none; }}\nbody:has(#m-{v}:checked) #{v} {{ display: block; }}")
+NAMES = {"phs": "Phases", "sec": "Security", "del": "Delivery", "keys": "Keys", "rev": "Review"}
+radios = "".join(f'<input type="radio" name="mode" id="m-{v}"{" checked" if v == "phs" else ""}><label for="m-{v}">{NAMES[v]}</label>' for v in VIEWS)
+prog = f"""<!DOCTYPE html>
+<!-- Generated by docs/diagrams/build_arch_views.py from docs/cyber/14 and 15. Edit those or the script, not this file. -->
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Program views</title>
+{base_css}
+<style>
+{SHARED_CSS}{chr(10).join(hide)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Program views</h1>
+    <p>Planning and security views for the chat feature, kept apart from the architecture page. Phases shows what goes in when. Security, Delivery, Keys, and Review show how the chat feature is kept closed, how a release gets into the lab, every key, and our own findings before the ISSM meeting.</p>
+  </header>
+  <div class="controls">
+    <div class="modes" role="radiogroup" aria-label="View">{radios}</div>
+  </div>
+  <div class="layout">
+    <div>
+      <div class="diagram">
+{phs_svg}
+{sec_svg}
+{del_svg}
+{keys_svg}
+{rev_svg}
+      </div>
+    </div>
+    <aside aria-live="polite"><div id="panel"></div></aside>
+  </div>
+</div>
+{prog_js}
+</body></html>
+"""
+(repo / "program_views.html").write_text(prog)
+print(f"deployment items {len(DINFO)}; info items {len(INFO)}; findings {len(findings)} areas {len(areas)} keys {len([k for k in keys if k.startswith('KC')])}")

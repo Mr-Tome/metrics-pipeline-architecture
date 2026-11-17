@@ -210,7 +210,7 @@ def box(x, y, w, h, title, sub, fill):
 def network_svg():
     b = [text(30, 34, "Network cabling: lab", 20, weight="bold"),
          text(30, 56, "sw01 connects to the lab's C9500X-28C8D with 2 x 100G. oob01 has its own 10G link, so management does not depend on the data side.", 12, fill="#444")]
-    b.append(box(80, 80, 250, 62, "Analyst workstations", ["Jupyter, VS Code, MATLAB, browser"], "#f3e5f5"))
+    b.append(box(80, 80, 250, 62, "Analyst workstations", ["browser (chat feature)", "Jupyter, VS Code, MATLAB later"], "#f3e5f5"))
     b.append(box(80, 180, 250, 62, "Lab network", ["existing"], "#e0e0e0"))
     b.append(box(80, 380, 250, 70, "Cisco C9500X-28C8D", ["lab core, above rows 2 and 3", "3 ports for us, IOS XE 17.15"], "#e0e0e0"))
     b.append(line(205, 142, 205, 180, C["cu"], 2))
@@ -263,17 +263,18 @@ def proto_svg():
     b.append(path("M700 178 L800 178", "#795548", 2, "6 4"))
     b.append(text(60, 260, "Rehearsal without a GPU catches most problems: missing images, checksum errors, script bugs, wrong versions.", 11))
     b.append(text(60, 278, "GPU driver and model problems first show up in the lab. The 4-GPU rolling update keeps users served while a new version proves itself.", 11))
-    b.append(rect(30, 340, 1040, 200, "#ffebee", "#b71c1c", 2, 8))
+    b.append(rect(30, 340, 1040, 212, "#ffebee", "#b71c1c", 2, 8))
     b.append(text(46, 362, "LAB (AIR-GAPPED)", 13, weight="bold", fill="#b71c1c"))
-    b.append(box(60, 390, 300, 96, "Rack 1, production", ["gpu01: 4 x RTX PRO 6000", "svc01-03: RKE2, gateway, database", "sw01 2 x 100G + oob01 10G to the lab C9500X"], C["gpu"]))
+    b.append(box(60, 390, 300, 96, "Rack 1, production", ["gpu01: 4 x RTX PRO 6000", "svc01-03: RKE2, chat page, gateway, database", "sw01 2 x 100G + oob01 10G to the lab C9500X"], C["gpu"]))
     b.append(box(460, 390, 240, 96, "Update, one GPU at a time", ["vLLM replicas 3 -> new version on 1", "other 2 keep serving", "stalls if the new one fails"], C["svc"]))
-    b.append(box(800, 390, 240, 96, "Lab users", ["browser, Jupyter, VS Code, MATLAB", "https://api.&lt;lab-domain&gt;/v1", "per-user gateway keys"], "#f3e5f5"))
+    b.append(box(800, 390, 240, 96, "Analysts (chat feature)", ["lab browser, nothing installed", "https://chat.&lt;lab-domain&gt;", "sign in to the chat page"], "#f3e5f5"))
     b.append(path("M920 226 L920 300 L210 300 L210 390", "#795548", 2, "6 4"))
     b.append(text(565, 294, "sealed release bundle on approved media", 11, "middle", "bold", "#795548"))
     b.append(path("M360 438 L460 438", C["dac"], 2))
     b.append(path("M700 438 L800 438", C["cu"], 2))
     b.append(text(60, 520, "Lab hardware never connects to unclassified machines. Hardware and media only move one way: in.", 12))
-    return svg(1100, 570, "".join(b), "Software path")
+    b.append(text(60, 536, "Jupyter, VS Code, MATLAB, and the API address come with the analyst tools feature, not the chat feature.", 11, fill="#444"))
+    return svg(1100, 580, "".join(b), "Software path")
 
 os.makedirs(OUT, exist_ok=True)
 for name, fn in [("rack-elevation", rack_svg), ("power-wiring", power_svg), ("network-cabling", network_svg), ("prototype-topology", proto_svg)]:

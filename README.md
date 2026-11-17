@@ -72,7 +72,8 @@ To change a diagram, edit `docs/diagrams/make_diagrams.py` and run `python3 docs
 ```
 README.md                                      this page
 Metrics_Analysis_Pipeline_Hardware_BOM.xlsx    hardware BOM (Summary, BOM, Assumptions, Software tabs)
-metrics_architecture.html                      full pipeline architecture (interactive)
+metrics_architecture.html                      full pipeline architecture, and the chat feature deployment (interactive)
+program_views.html                             phases, security, delivery, keys, review (interactive, generated)
 docs/hardware/                                 hardware track: facility, network, rack, quotes
 docs/software/                                 software track: delivery plan, sandbox bring-up
 docs/cyber/                                    Cyber Security package: BOMs and decision register
