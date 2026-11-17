@@ -620,7 +620,8 @@ cv.append(dnode("fd", 706, 188, 226, "Ingress (Traefik)", "HTTPS 443 for the SI-
     ["Certificate", "Comes from the lab CA and is loaded at install."]]))
 cv.append(dnode("chat", 706, 252, 226, "Chat page (Open WebUI)", "Sign-in, chats, and uploads", "path", [
     ["What it is", "The web page general users open for SI-Chat and document uploads."],
-    ["Sign-in", "Local accounts that the admin creates. Users cannot sign themselves up."],
+    ["Sign-in", "Local accounts that the admin team creates to start. This is more to maintain because admins need to create, reset, update passwords for, and remove every account by hand. It can be tracked as a POAM item until Keycloak is in place."],
+    ["Single sign-on", "In future phases, we'd like to use Keycloak to connect to the lab's existing login."],
     ["Where it runs", "Kubernetes picks the node. Chats and uploads are stored on the chat page's own volume."]]))
 cv.append(dnode("gw", 706, 316, 226, "Gateway (LiteLLM)", "Inside the cluster only", "path", [
     ["What it is", "Every model request from the chat page goes through this gateway and is logged with the user."],
