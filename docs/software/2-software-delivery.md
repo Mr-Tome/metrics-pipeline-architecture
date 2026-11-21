@@ -1,4 +1,4 @@
-# 06. Software delivery: pulling, moving, and installing
+# 2. Software delivery: pulling, moving, and installing
 
 **Track:** Software (building, moving, and installing the SI service). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
@@ -6,7 +6,7 @@ This follows the **Delivery** view in [`program_views.html`](../../program_views
 
 1. A connected build environment pulls everything.
 2. It packs everything into one sealed release bundle.
-3. The build workstation rehearses the install from the bundle in an offline VM ([04](04-prototype-plan.md), P1).
+3. The build workstation rehearses the install from the bundle in an offline VM ([Prototype plan](1-prototype-plan.md), P1).
    There is no staging server.
 4. After the rehearsal passes, the same bundle moves to the lab by the approved media process.
 
@@ -155,7 +155,7 @@ disp(r.choices(1).message.content)
 |---|---|
 | Big Bang (Harbor, GitLab, Argo CD, Keycloak, monitoring) | Installs onto the same RKE2 cluster. Harbor replaces the Zarf registry as the long-term registry. LiteLLM and Open WebUI move to Keycloak sign-in. |
 | Iron Bank images | Swap image references in `versions.env` to `registry1.dso.mil/...` where Iron Bank has them. The scripts don't change. |
-| Better document search | Add a reranker (IBM `granite-embedding-reranker-english-r2`, M9 in [13](../cyber/13-model-bom.md)) and turn on hybrid search, and move the embedding model to a GPU slice if indexing is slow ([11](11-sandbox-bringup-plan.md), W20). PostgreSQL already has pgvector for when the chat page's vectors move there. |
+| Better document search | Add a reranker (IBM `granite-embedding-reranker-english-r2`, M9 in [13](../cyber/13-model-bom.md)) and turn on hybrid search, and move the embedding model to a GPU slice if indexing is slow ([Sandbox bring-up plan](3-sandbox-bringup-plan.md), W20). PostgreSQL already has pgvector for when the chat page's vectors move there. |
 | Renovate | Points at `delivery/versions.env` to open update merge requests. |
 | Metrics pipeline | Runs on the same platform. See `metrics_architecture.html`. |
 | Typed decision model (Cloudflare Clef, https://huggingface.co/Cloudflare/clef) | **Deferred to a future phase (decided 2026-10-30).** Its base model (Qwen, China) fails the USA-only rule (S22). The Tech stack names it for the typed decision API. It is a 27B model (about 55 GB, Apache 2.0) that needs its own GPU, so gpu01 would run 2 gpt-oss copies instead of 3 (`--llm-gpus 2`). Open before adding it: SGLang support for the RTX PRO 6000 (tested only on H200), routing `/v1/systemone` through the gateway with per-user keys and logging, ISSM review of the model's `joint_schema_model.py` code file, and model-origin approval (Qwen base). No hardware change. |

@@ -1,4 +1,4 @@
-# 03. Network and switch capacity
+# 3. Network and switch capacity
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
@@ -13,9 +13,6 @@
   and that uplink.
 - The only patch panels are in the middle rack of rows 2 and 3, for fiber back to the main building. Our
   racks have none. Our cords run directly between switches, so we choose the fiber type (section 3).
-- Older notes mention C9300-48S access switches, and on 2026-11-06 the team briefly pointed us at their
-  N93180YC-FX3 access switches. They then confirmed the direct C9500X-28C8D connection: the
-  N93180YC-FX3 answer came from taking our switch for a server.
 
 ## 2. Is 10G enough? For the SI phase, yes, by a wide margin
 
@@ -80,7 +77,7 @@ In plain words:
 5. Every optic is Cisco and listed in Cisco's compatibility matrix for the switch it goes in. We supply all
    optics and cords, both ends.
 
-**Parts** ([08b](08b-quote-network-and-rack.md), items 4, 5, 6a-6e):
+**Parts** ([Network and rack quote](records/quote-network-and-rack.md), items 4, 5, 6a-6e):
 
 - **sw01 (item 4):** Cisco Nexus N93180YC-FX3: 48 x 1/10/25G SFP28 (servers) and 6 x 40/100G QSFP28
   (uplinks). Port-side exhaust: NXA-PAC-650W-PE power supplies, NXA-FAN-35CFM-PE fans. Room for gpu02 at
@@ -103,21 +100,11 @@ In plain words:
 
 The lab runs IOS XE 17.15.06, so the C9500X side is covered.
 
-**Why not the Dell S5248F-ON.** Cisco lists no 100G multimode LC optic for the C9500X-28C8D that a Dell
-switch supports, and Dell's site would not confirm a single-mode alternative on the S5248F-ON. A Cisco
-switch at our end removes that cross-vendor guess.
-
-**"Rated for 25G."** The engineer noted the N93180YC-FX3 is rated for 25G. That is true of its 48 server
-ports. Its 6 uplink ports are 40/100G QSFP28, which is why Cisco lists 100G optics for it. In the lab's
-own network those uplinks are probably taken, so a device plugged into their N93180YC-FX3 would only get
-25G. Ours is our own switch, so its uplinks are ours.
+**Why a Cisco switch at our end, and the options we dropped:** [decision log](decision-log.md), D3 to D5.
 
 **Small checks left:** the servers' 25G cards (Intel E810, Broadcom N225P) take Cisco passive DACs. Passive
 DACs are standardized and these cards normally accept them; Thinkmate confirms in the quote. Rail fit at
-29 in is asked in 08b, question 1.
-
-**Not recommended:** plugging the GPU server straight into a lab switch port. The service nodes then
-reach the GPU over the lab network, and the network team has to support our east-west traffic.
+29 in is asked in the [network and rack quote](records/quote-network-and-rack.md), question 1.
 
 ## 4. InfiniBand (BOM tab, cell B21)
 

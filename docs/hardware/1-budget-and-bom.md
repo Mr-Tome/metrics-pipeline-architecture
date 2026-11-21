@@ -1,4 +1,4 @@
-# 02. Budget and BOM
+# 1. Budget and BOM
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
@@ -8,14 +8,14 @@ budget line on its Summary tab.
 
 ## 1. Which tier fits
 
-The BOM tiers include a staging environment (one GPU server with one GPU, $66,038). The lab decided
-not to have staging, so the lab-only figures are what count.
+The lab decided not to have staging, so the figures are lab only. The original BOM's figures with
+staging are in the [decision log](decision-log.md), D1 and D2.
 
-| Tier | Original BOM with staging | Original BOM, lab only | Workbook now (lab, Nexus switch, additions) | Fits $250k? |
-|---|---|---|---|---|
-| 20 users | $221,086 | $155,048 | $202,024.59 | Yes |
-| **50 users** | $257,578 | **$191,540** | **$238,516.59 + switch license** | **Yes, $11,483 left** |
-| 100 users | $382,869 | $316,831 | $391,586.42 (two Nexus switches) | No |
+| Tier | BOM hardware, lab only | Workbook now (lab, Nexus switch, additions) | Fits $250k? |
+|---|---|---|---|
+| 20 users | $155,048 | $202,024.59 | Yes |
+| **50 users** | **$191,540** | **$238,516.59 + switch license** | **Yes, $11,483 left** |
+| 100 users | $316,831 | $391,586.42 (two Nexus switches) | No |
 
 **Decision: buy the 50-user tier, no staging.** It fills all four GPU slots in gpu01 and keeps all three
 service nodes. The money that was staging pays for the two extra GPUs, the Cisco Nexus switch, and the install items,
@@ -27,7 +27,7 @@ language model plus 1 for speech-to-text and document search = 3 GPUs needed. Th
 third language model copy, which also gives headroom during updates (one copy at a time is replaced).
 
 **What dropping staging costs.** Every install and update now lands first on the production rack.
-[04-prototype-plan.md](../software/04-prototype-plan.md) covers how the build workstation rehearses each bundle
+[Prototype plan](../software/1-prototype-plan.md) covers how the build workstation rehearses each bundle
 instead, and how the four GPUs let an update roll out one copy at a time.
 
 ## 2. What the BOM leaves out
@@ -37,7 +37,7 @@ The site visit confirmed the lab supplies racks (Vertiv VR3300), rack PDUs (Vert
 and cooling (Liebert CRV). The items below are still on us. Without them the rack can't be connected
 or set up.
 
-Part numbers and links are in the quote request, [08a](08a-quote-servers-submitted.md) and [08b](08b-quote-network-and-rack.md).
+Part numbers and links are in the quote request, [Servers quote](records/quote-servers-and-gpus.md) and [Network and rack quote](records/quote-network-and-rack.md).
 
 | ID | Item | Qty | Est. total | Why |
 |---|---|---|---|---|
@@ -55,7 +55,7 @@ Only if needed, not in the total:
 |---|---|---|---|
 | C1 | Red Hat Enterprise Linux Server subscriptions, 4 servers (gpu01, svc01-svc03), 1 year | $5,600 per year | Only if the lab requires RHEL. Rocky Linux 9 is free. Not in the original BOM. |
 
-A1-A4 use CDW's advertised prices on 2026-11-06 (links in 08b); A5, A6, and the Cat6 cables are estimates.
+A1-A4 use CDW's advertised prices on 2026-11-06 (links in the network and rack quote); A5, A6, and the Cat6 cables are estimates.
 Get quotes before you finalize.
 
 **Terms used above:**
@@ -86,14 +86,14 @@ Get quotes before you finalize.
 | Left inside $250k, for the NX-OS license and contingency | $11,483.41 (4.6%) |
 | **Total** | **$250,000.00** |
 
-Same total another way: servers and GPUs (08a) $187,025 plus network, rack, and setup (08b) $51,491.59.
+Same total another way: servers and GPUs (servers quote) $187,025 plus network, rack, and setup (network and rack quote) $51,491.59.
 
 If RHEL (C1) is needed, the subtotal is $244,116.59 and $5,883.41 (2.4%) is left.
 
 **The margin is thin.** The switch (about $31,000 at CDW) is most of the change. Ask for NX-OS Essentials,
 not Advantage ($19,405 at CDW), or the license alone breaks the budget.
 
-A small single-GPU test machine ([04](../software/04-prototype-plan.md)) no longer fits unless the margin below comes through.
+A small single-GPU test machine ([Prototype plan](../software/1-prototype-plan.md)) no longer fits unless the margin below comes through.
 
 Three things can add margin:
 
@@ -120,11 +120,11 @@ These were corrections, not new scope:
    Cisco's compatibility matrix, and the lab already runs this model. Price by quote, including the NX-OS
    NX-OS Essentials license (shortest term). At CDW prices the switch with power supplies and fans is
    $30,993.93 plus the license, so the totals rise by about $27,479 plus the license. Its ports face the hot
-   aisle (see [05-rack-build-guide.md](05-rack-build-guide.md)); the wrong airflow pulls hot air in.
+   aisle (see [Rack build guide](5-rack-build-guide.md)); the wrong airflow pulls hot air in.
 4. **Power cord type** for the GPU server PSUs (C19/C20 vs C13/C14). Ask Thinkmate when you request the
    quote. The configurator's cord options are NEMA 5-15P wall plugs, which do not fit a 208V rack PDU.
 5. **Cell B21 on the BOM tab** ("Additional Research area under Cables and Optics: Infiniband"). It is
-   answered in [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md), section 4.
+   answered in [Network and switch capacity](3-network-and-switch-capacity.md), section 4.
    InfiniBand is not needed for this design.
 6. **Service node network card.** The RAX RE95-1104-01 base has a single 1GbE RJ45 port. Add the Broadcom
    N225P OCP 3.0 (2 x SFP28) in the configurator to match the BOM's "2 x 25 GbE".

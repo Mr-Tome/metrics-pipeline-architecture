@@ -1,4 +1,4 @@
-# 01. Facility requirements (send to the lab)
+# 2. Facility requirements (sent to the lab)
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
@@ -6,12 +6,8 @@ This is the answer to the lab's request in the README: power, cooling, connector
 It covers the 50-user build that fits the $250,000 budget (one GPU server with all four GPUs, no staging),
 and it is sized so the rack does not need new power when it grows to 100 users.
 
-**Changed 2026-10-30:** the build is now 50 users with no staging server. Rack 1 peak draw went from
-about 3.6 kW to about 4.8 kW, and heat from about 12,200 to about 16,400 BTU/hr. Nothing else changed.
-
-**Changed 2026-11-06:** our switch (sw01) is now a Cisco Nexus N93180YC-FX3 instead of the Dell S5248F-ON.
-It draws up to about 600 W instead of 250 W. Rack 1 peak draw goes from about 4.8 kW to about 5.1 kW, and
-heat from about 16,400 to about 17,500 BTU/hr. If facilities already has the earlier numbers, send them this.
+**Status: sent to the lab.** The numbers include the Cisco Nexus switch (sw01). How earlier figures
+changed: [decision log](decision-log.md), D2 and D3.
 
 Status of each number:
 
@@ -88,7 +84,7 @@ some throughput instead of tripping a breaker.
   PSU end, inside the glass).
 - The Geist PDUs are mounted at the front, inside the glass. Server power supplies are at the rear, so
   every power cord runs the depth of the rack along the side channel. See the cord length note in
-  [05](05-rack-build-guide.md), section 4.
+  [Rack build guide](5-rack-build-guide.md), section 4.
 - We will install blanking panels in every empty U, in both racks. Containment does not work without them:
   an open U lets cool air escape the contained aisle and lets warm room air in.
 - Approximate airflow: about 810 CFM at 50 users, about 1,370 CFM at 100 users.
@@ -96,7 +92,7 @@ some throughput instead of tripping a breaker.
 
 ## 5. Network ports needed from the lab network team
 
-See [03-network-and-switch-capacity.md](03-network-and-switch-capacity.md) for the reasoning.
+See [Network and switch capacity](3-network-and-switch-capacity.md) for the reasoning.
 
 | Need | Preferred | Fallback |
 |---|---|---|

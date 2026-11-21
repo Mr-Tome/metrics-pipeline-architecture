@@ -8,7 +8,7 @@ weak spots, with a fix or a proposal for each.
 **Phase 1 is the chat page only.** Analysts use SI through a browser. There is no API address and no analyst
 tools or keys; those are a later phase, and findings that apply only to them are marked *Later*.
 
-Many of these were already tracked as W items in the sandbox plan ([11](../software/11-sandbox-bringup-plan.md),
+Many of these were already tracked as W items in the sandbox plan ([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md),
 section 7). They are repeated here so that every security issue is in one list. New findings start with "New."
 
 ## How to read it

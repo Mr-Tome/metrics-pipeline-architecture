@@ -1,4 +1,4 @@
-# 09. Site visit: look and ask
+# 4. Site visit: look and ask
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
@@ -16,7 +16,7 @@ need approval for cameras and phones.
 | Where power arrives | Through those PDU strips. No separate receptacles needed. |
 | Ground | Green bonding wires on the rear split doors. No rack-to-ground-bar wire seen. |
 | Doors | Perforated front and rear. No blanking panels installed. |
-| Containment | Glass doors close off the front of the racks, where the PDUs are: **cold aisle containment**. (Corrected 2026-11-09: first recorded as hot aisle at the rear.) |
+| Containment | Glass doors close off the front of the racks, where the PDUs are: **cold aisle containment**. |
 | Floor | Raised floor, no perforated tiles. Cooling comes from the in-row CRV units. |
 | Row layout | One CRV cooler in a rack position, then three racks to its left |
 | Requested racks | Two racks next to ACE 15 |
@@ -42,7 +42,7 @@ What this changed:
       `RPP-2A CB 12,14,16`: ________
 - [ ] Where exactly each PDU is mounted: in front of the front rails, or in the side channel just behind
       them? Is there a gap down the side of the rack for cords to run front to rear? ________
-- [ ] Measure a cord route ([07](07-open-questions.md) F8): from the rear of U7 (svc03's PSUs) along the
+- [ ] Measure a cord route ([Hardware open questions](open-questions.md) F8): from the rear of U7 (svc03's PSUs) along the
       side to the top third of the PDU (circuit 1), and from the rear of U1-U2 (gpu01) to the middle
       third (circuit 2). Longest run: ____ in. 6 ft = 72 in.
 - [ ] Which way the PDU outlets face (toward the rear, the side, or into the aisle)? ________
@@ -76,7 +76,7 @@ What this changed:
 
 ### Network team
 
-Answered 2026-11-04 and 2026-11-05 (see [07](07-open-questions.md)): direct 100G to the C9500X-28C8D, we
+Answered 2026-11-04 and 2026-11-05 (see [Hardware open questions](open-questions.md)): direct 100G to the C9500X-28C8D, we
 supply the optics, IOS XE 17.15.06, a third port for management (2026-11-06). Still to confirm on site:
 
 1. Which route should our cords take to the C9500X-28C8D, and who runs them?

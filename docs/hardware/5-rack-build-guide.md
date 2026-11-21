@@ -1,11 +1,11 @@
-# 05. Rack build guide
+# 5. Rack build guide
 
 **Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
 
 Step-by-step for racking, powering, and cabling the lab rack (rack 1 of the two racks next to ACE 15).
 There is no staging server; this rack is the whole build (50 users).
 
-Site facts from visit 1 ([09](09-site-visit-checklist.md)):
+Site facts from visit 1 ([Site visit checklist](4-site-visit-checklist.md)):
 
 - Vertiv VR3300 racks: 42U, 1200 mm deep, square holes, adjustable rails
 - Vertiv Geist PDUs already mounted, left and right, at the **front** of the rack, inside the glass
@@ -48,7 +48,7 @@ work fine for the sliding-rail steps, which are the same on almost every 2U serv
 
 ## 1. Before you start
 
-**Tools:** the setup kit in the quote request ([08b](08b-quote-network-and-rack.md), item 12) and the rack
+**Tools:** the setup kit in the quote request ([Network and rack quote](records/quote-network-and-rack.md), item 12) and the rack
 console (item 11). Use velcro, not zip ties.
 
 **People:** two people for the GPU server. Never lift it alone.
@@ -67,7 +67,7 @@ console (item 11). Use velcro, not zip ties.
 - [ ] 100G data links: 4 x Cisco QSFP-40/100-SRBD (2 per end)
 - [ ] Management link: 1 x Cisco CVR-QSFP-SFP10G adapter, 2 x Cisco SFP-10G-SR-S
 - [ ] Fiber cords, LC-LC OM4 multimode (aqua): 3 x 8 m, 3 x 15 m (data and management; the unused length is the spare)
-- [ ] Cat6 patch cables, 10 ft (3 m), 2 ten-packs (BMC and oob01 uplink, rest spare)
+- [ ] Cat6 patch cables, 10 ft (3 m), 2 ten-packs (M01-M05: BMC ports and sw01 mgmt0, rest spare)
 - [ ] Blanking panels: 80 (about 30 for rack 1, 42 for rack 2, spares)
 
 ## 2. Rack prep
@@ -127,7 +127,7 @@ the right. Then if feed A fails, everything keeps running on B. Pictures of this
 - Austin Hughes, A and B PDUs in a rack: https://www.austin-hughes.com/solutions/infrapower/dual-feed-pdu/
 
 **How you know which is A and which is B.** The PDUs are not marked. Facilities knows which upstream
-panel and breaker feed each one. Ask them ([09](09-site-visit-checklist.md)), then label the PDUs.
+panel and breaker feed each one. Ask them ([Site visit checklist](4-site-visit-checklist.md)), then label the PDUs.
 
 **Circuits on each PDU.** Each PDU has circuits 1, 2, and 3. Each circuit has its own breaker on the PDU,
 mostly C13 outlets, and one C19. On a 3-phase PDU, each circuit is one phase pair.
@@ -137,7 +137,7 @@ gpu01.
 **Cord length.** The PDUs are at the front and every PSU is at the rear, so each cord first runs about
 29 in (the rail depth) along the side channel, then up or down to its circuit. The longest runs are svc03
 (U7) to circuit 1 and gpu01 (U1-U2) to circuit 2, and 6 ft cords probably don't reach them. Measure on the
-next visit ([09](09-site-visit-checklist.md)) and see [07](07-open-questions.md) F8. Route cords along the
+next visit ([Site visit checklist](4-site-visit-checklist.md)) and see [Hardware open questions](open-questions.md) F8. Route cords along the
 side channel, tied to the frame, clear of the server exhaust at the rear and of the intake at the front.
 
 0. **Before plugging anything in:** facilities confirms that the upstream feeds to both PDUs are off and

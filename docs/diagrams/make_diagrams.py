@@ -99,7 +99,7 @@ def power_svg():
     def uy(u): return RY + (42 - u) * PU  # top edge of U u
     b = [text(30, 34, "Power wiring: rack 1 rear view, where the PSUs are (50-user build)", 20, weight="bold"),
          text(30, 56, "Seen from the rear (room side). The PDUs are mounted at the FRONT, inside the glass; they are drawn at the sides, where the cords run. Odd PSUs to PDU-A, even to PDU-B.", 12, fill="#444"),
-         text(30, 74, "C1 is at the top of each PDU, C3 at the bottom. Every cord also runs about 29 in front to rear along the side channel: check 6 ft cords reach (07, F8).", 12, fill="#444")]
+         text(30, 74, "C1 is at the top of each PDU, C3 at the bottom. Every cord also runs about 29 in front to rear along the side channel: check 6 ft cords reach (open questions, F8).", 12, fill="#444")]
     # facility feeds and PDU input cords
     for x, p, col, fill, src in [(AX, "A", C["A"], "#ffebee", "existing"), (BX, "B", C["B"], "#e3f2fd", "separate source")]:
         bx = 40 if p == "A" else 740

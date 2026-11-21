@@ -1,24 +1,22 @@
-# 08b. Quote request: network, rack, and setup items (not yet sent)
+# Quote request: network, rack, and setup items (submitted)
 
-**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../cyber/README.md).
+**Track:** Hardware (facility, network, rack, purchasing). Security decisions are in the [Cyber Security package](../../cyber/README.md).
 
-**Status: ready to send (2026-11-06).** The network team confirmed a direct connection to the C9500X-28C8D:
-2 x 100G for data and a third port for a separate management link. Our switch (item 4) is now a Cisco
-Nexus N93180YC-FX3, so every optic is a Cisco part listed for the switch it goes in. Items 4, 5, and 6a-6e
-are final. The servers and
-GPUs were submitted separately ([08a](08a-quote-servers-submitted.md)).
+**Status: submitted to purchasing.** This is the record of what was asked for. Do not resend.
+The servers and GPUs were submitted separately ([Servers quote](quote-servers-and-gpus.md)). How the network
+choices were made: [Network team Q&A](lab-network-team-qa.md) and the [decision log](../decision-log.md).
 
 Item numbers are kept from the original single request so references in other docs still match.
 
 ## Settled with the lab network team
 
-| # | Question | Answer | 07 ID |
+| # | Question | Answer | Open question |
 |---|---|---|---|
-| P1 | Fiber and connector | Direct cords, no patch panel. Multimode LC for everything: QSFP-40/100-SRBD for 100G, SFP-10G-SR-S for management. Compatibility check: [03](03-network-and-switch-capacity.md), section 3. | N3 |
+| P1 | Fiber and connector | Direct cords, no patch panel. Multimode LC for everything: QSFP-40/100-SRBD for 100G, SFP-10G-SR-S for management. Compatibility check: [Network and switch capacity](../3-network-and-switch-capacity.md), section 3. | N3 |
 | P2 | Optic brand and version | Cisco-branded (our choice). IOS XE 17.15.06 (second-latest MD release). | N10 |
 | P3 | Racks and distance | Racks next to ACE 15. About 12 ft between racks (their estimate); cords bought in 8 m and 15 m to cover the unmeasured route. | F6 |
 | P4 | Management | Separate 10G link from oob01 to a third C9500X-28C8D port (QSA adapter). | N7 |
-| P5 | Our switch | Cisco Nexus N93180YC-FX3 (the lab's own access model). Confirming the lab is comfortable with it ([10](10-lab-network-team-email.md), last section). | N15 |
+| P5 | Our switch | Cisco Nexus N93180YC-FX3 (the lab's own access model). Confirming the lab is comfortable with it ([Network team Q&A](lab-network-team-qa.md), last section). | N15 |
 
 ---
 
@@ -52,7 +50,7 @@ lengths because the cable route is not measured yet; the unused length is the sp
 | 12 | Setup kit (list below) | see list | 1 lot | $500 | $500 | |
 
 **Total: $51,491.59 plus the item 4 license** (to be quoted). Prices are CDW's advertised prices on
-2026-11-06, except items 9, 11 and 12 (estimates); item 4 counts the 4 fan modules its install guide lists. With the servers and GPUs (08a,
+2026-11-06, except items 9, 11 and 12 (estimates); item 4 counts the 4 fan modules its install guide lists. With the servers and GPUs (servers quote,
 $187,025), the build comes to $238,516.59 plus the license, leaving **$11,483.41** under $250,000 for the
 license and contingency. Please flag it if your quote for items 4-12, license included, passes $62,975.
 

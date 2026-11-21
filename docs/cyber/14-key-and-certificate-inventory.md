@@ -40,7 +40,7 @@ and read the data**.
 | KC14 | Hardware and OS accounts: BMC passwords, switch admin, OS root and admin accounts | **Critical** | Installers | Devices | Lab policy |
 
 KC14 belongs to the hardware install. It is listed here so that the inventory is complete; the installers fill it
-in ([05](../hardware/05-rack-build-guide.md)).
+in ([Rack build guide](../hardware/5-rack-build-guide.md)).
 
 ## How the keys relate
 

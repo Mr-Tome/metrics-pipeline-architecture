@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs a verified release bundle in the lab (or a single-node test install). Run as root, from inside the bundle.
-# Run verify.sh first. Steps, in order (see docs/software/06-software-delivery.md):
+# Run verify.sh first. Steps, in order (see docs/software/2-software-delivery.md):
 #
 #   On svc01 (or the single node):          ./deploy.sh server-init
 #   On svc02 and svc03:                     ./deploy.sh server-join <svc01-ip>   (asks for the join token)

@@ -96,7 +96,7 @@ code. The difference is what is inside.
 | Built-in vector store (Chroma) for uploaded documents | Included, and our current settings use it | **Not included.** Document vectors must go to PostgreSQL with pgvector (A8). |
 | USA-only rule (S22) | Carries E1 to E3, which don't meet it (section 1a) | Meets it |
 | Effect on Cyber's review | Larger image, more packages for the scanner to report, model files that never pass the model intake | Smaller image, fewer packages, no hidden models |
-| Effect on our work | None. This is what the sandbox plan is built around. | New settings to point the chat page at PostgreSQL ([11](../software/11-sandbox-bringup-plan.md), W23). It also puts the vectors under the database's three copies, instead of a single volume. |
+| Effect on our work | None. This is what the sandbox plan is built around. | New settings to point the chat page at PostgreSQL ([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), W23). It also puts the vectors under the database's three copies, instead of a single volume. |
 
 The scan results from the first pull will show the size of the difference in packages and findings. That, plus a
 sandbox run on PostgreSQL vectors, is what the choice should rest on.
@@ -111,7 +111,7 @@ Commits are the current `main` on 2026-11-11. "Can loading run code?" refers to 
 | M6 | `openai/whisper-large-v3`, commit `06f233fe` | Same as M5, full-size model. These are the weights M2 was converted from. | OpenAI, Apache-2.0 | safetensors (1.55B parameters). The repository also has pickle copies; the pull leaves them out. | No |
 | ~~M7~~ | ~~`BAAI/bge-m3`~~ | **Removed 2026-11-13: not made in the USA (S22).** | | | |
 | ~~M8~~ | ~~`BAAI/bge-reranker-v2-m3`~~ | **Removed 2026-11-13: not made in the USA (S22).** Replaced by M9. | | | |
-| M9 | `ibm-granite/granite-embedding-reranker-english-r2`, commit `d09d3d69` | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20). Later, not the first bundle. **English only.** | IBM (USA), Apache-2.0. Lineage IBM. | safetensors, 0.6 GB | No |
+| M9 | `ibm-granite/granite-embedding-reranker-english-r2`, commit `d09d3d69` | Better document search ([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), W20). Later, not the first bundle. **English only.** | IBM (USA), Apache-2.0. Lineage IBM. | safetensors, 0.6 GB | No |
 | M10 | `ibm-granite/granite-embedding-278m-multilingual`, commit `a9cb5338` | Replaces M3 if S22 covers lineage. Covers English, German, Spanish, French, Japanese, Italian, and six more. | IBM (USA), Apache-2.0 | safetensors, 0.56 GB (the repository's pickle copy is left out) | No |
 | M11 | Our conversion of `openai/whisper-large-v3` (M6) or `-turbo` (M5) to faster-whisper's format | Replaces M2 if we keep faster-whisper (S12) and S22 rules out Systran's copy | Weights OpenAI (USA); conversion done by us with CTranslate2's converter, recorded with its version and the source commit | CTranslate2, about 3.1 GB (large-v3) | No |
 | | Cloudflare Clef (typed decision model, Qwen base) | Deferred ([decision register](README.md) S9). Ruled out by the USA-only rule: Qwen is from Alibaba (China). | Cloudflare, Apache-2.0 | Ships a Python file that runs at load time | **Yes** (Python code) |

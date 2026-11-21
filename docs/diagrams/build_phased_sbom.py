@@ -111,7 +111,7 @@ def cell(s):
     return re.sub(r"(https://[^\s;()]+)", r"<\1>", s)
 out = ["# 16. Phased software list with download links (for the ISSM)", "",
 "**Track:** Cyber Security ([package index and decision register](README.md)).",
-"**Status:** Draft, 2026-11-14. Every item we plan to bring into the lab, by phase, with the exact place it is",
+"**Status:** Phase 1 sent to the ISSM with the first email ([17](17-issm-intro-email.md)); phases 0 and 2 to 4 are still draft. Every item we plan to bring into the lab, by phase, with the exact place it is",
 "downloaded from. The same list as a spreadsheet: [16-phased-sbom.csv](16-phased-sbom.csv). Licenses and",
 "details: [12](12-software-bom.md) (software) and [13](13-model-bom.md) (models).", "",
 "Every link was checked on 2026-11-14 (container image tags against their registries). \"image\" means a",

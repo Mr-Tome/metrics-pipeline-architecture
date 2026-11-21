@@ -192,7 +192,7 @@ table.amps th:first-child,table.amps td:first-child{text-align:left}
 <header class="top">
   <div class="brand">
     <h1>Rack 1 Install Sim</h1>
-    <p>Two Vertiv VR3300 racks next to ACE 15 · 50-user build · follows <a href="../docs/hardware/05-rack-build-guide.md">05 Rack build guide</a></p>
+    <p>Two Vertiv VR3300 racks next to ACE 15 · 50-user build · follows <a href="../docs/hardware/5-rack-build-guide.md">Rack build guide</a></p>
   </div>
   <div class="stats" aria-live="polite">
     <div>Step<b id="st-step">1/1</b></div>
@@ -225,8 +225,9 @@ table.amps th:first-child,table.amps td:first-child{text-align:left}
 "use strict";
 /* ---------- data ---------- */
 const PHASES = ["Delivery","Rack prep","GPU install","Rack the gear","Power cords","Network","Power-on","First checks","Sign-off"];
-const DOC = { "01":"../docs/hardware/01-facility-requirements.md", "02":"../docs/hardware/02-budget-and-bom.md", "03":"../docs/hardware/03-network-and-switch-capacity.md",
-  "05":"../docs/hardware/05-rack-build-guide.md", "07":"../docs/hardware/07-open-questions.md", "08":"../docs/hardware/08b-quote-network-and-rack.md", "09":"../docs/hardware/09-site-visit-checklist.md" };
+const DOC = { "01":"../docs/hardware/2-facility-requirements.md", "02":"../docs/hardware/1-budget-and-bom.md", "03":"../docs/hardware/3-network-and-switch-capacity.md",
+  "05":"../docs/hardware/5-rack-build-guide.md", "07":"../docs/hardware/open-questions.md", "08":"../docs/hardware/records/quote-network-and-rack.md", "09":"../docs/hardware/4-site-visit-checklist.md" };
+const DOCNAME = { "01":"Facility requirements", "02":"Budget and BOM", "03":"Network and switch capacity", "05":"Rack build guide", "07":"Hardware open questions", "08":"Network and rack quote", "09":"Site visit checklist" };
 
 const DEVS = {
   gpu01:{u:[1,2], model:"Thinkmate GPX GE95-2206-41", short:"GPU server, 2U", psus:4, w:3300},
@@ -241,7 +242,7 @@ const CORDS = [];
 for (const d in DEVS){ const n = DEVS[d].psus;
   if (n === 1) CORDS.push({id:d+"-PWR", dev:d, n:0});
   else for (let i=1;i<=n;i++) CORDS.push({id:d+"-PSU"+i, dev:d, n:i}); }
-const C13_PER_CIRCUIT = 6; // sim value: count them on the real PDU (09, look list)
+const C13_PER_CIRCUIT = 6; // sim value: count them on the real PDU (site visit checklist, look list)
 const VOLTS = 208;
 
 const BIN = [
@@ -335,7 +336,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 function ss(){ return S.ss[S.step] || (S.ss[S.step] = {}); }
-function refLink(r){ if(!r) return ""; return `<a class="ref" href="${DOC[r[0]]}">doc ${r[0]} ${esc(r[1]||"")}</a>`; }
+function refLink(r){ if(!r) return ""; return `<a class="ref" href="${DOC[r[0]]}">${DOCNAME[r[0]]} ${esc(r[1]||"")}</a>`; }
 function miss(text){ S.mistakes.push({step:STEPS[S.step].title, text}); S.fb = {kind:"bad", text}; render(); }
 function good(text){ S.fb = text ? {kind:"ok", text} : null; }
 function next(){ S.fb = null; S.step++; const st = STEPS[S.step]; if (st && st.view) S.view = st.view; render(); window.scrollTo({top:0, behavior:"smooth"}); }
@@ -371,7 +372,7 @@ const STEPS = [
 
  {ph:0, type:"inspect", title:"Check every carton against the order", ref:["05","§1"],
   lead:"Everything ships to the lab. Open each carton, compare it with the quote, and accept it or flag it. Two cartons in this delivery have a problem.",
-  facts:["<b>Quote:</b> doc 08 lists every part number and quantity","<b>Rule:</b> a wrong-airflow switch is never installed. Stop and swap it.","<b>Genuine Cisco only:</b> optics and cables must be Cisco parts (the = suffix is Cisco's spare-part code). Third-party \"compatible\" parts are not what was checked against Cisco's matrix.","<b>Order links (CDW):</b> <a href=\"https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067\" target=\"_blank\" rel=\"noopener\">switch</a> · <a href=\"https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988\" target=\"_blank\" rel=\"noopener\">-PE power supply</a> · <a href=\"https://www.cdw.com/product/cisco-network-device-fan-module/5497378\" target=\"_blank\" rel=\"noopener\">-PE fan</a> · <a href=\"https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569\" target=\"_blank\" rel=\"noopener\">25G DAC</a> · <a href=\"https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042\" target=\"_blank\" rel=\"noopener\">SRBD optic</a> · <a href=\"https://www.cdw.com/product/cisco-network-adapter/4890545\" target=\"_blank\" rel=\"noopener\">QSA adapter</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521\" target=\"_blank\" rel=\"noopener\">OM4 8 m</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985\" target=\"_blank\" rel=\"noopener\">OM4 15 m</a>"]},
+  facts:["<b>Quote:</b> the quote requests list every part number and quantity","<b>Rule:</b> a wrong-airflow switch is never installed. Stop and swap it.","<b>Genuine Cisco only:</b> optics and cables must be Cisco parts (the = suffix is Cisco's spare-part code). Third-party \"compatible\" parts are not what was checked against Cisco's matrix.","<b>Order links (CDW):</b> <a href=\"https://www.cdw.com/product/cisco-nexus-93180yc-fx3-switch-48-ports-managed-rack-mountable/6462067\" target=\"_blank\" rel=\"noopener\">switch</a> · <a href=\"https://www.cdw.com/product/cisco-power-supply-hot-plug-redundant-650-watt/4236988\" target=\"_blank\" rel=\"noopener\">-PE power supply</a> · <a href=\"https://www.cdw.com/product/cisco-network-device-fan-module/5497378\" target=\"_blank\" rel=\"noopener\">-PE fan</a> · <a href=\"https://www.cdw.com/product/cisco-sfp28-passive-copper-cable-direct-attach-cable-10-ft-orange/4285569\" target=\"_blank\" rel=\"noopener\">25G DAC</a> · <a href=\"https://www.cdw.com/product/cisco-qsfp-transceiver-module-40gbe-100gbe/4899042\" target=\"_blank\" rel=\"noopener\">SRBD optic</a> · <a href=\"https://www.cdw.com/product/cisco-network-adapter/4890545\" target=\"_blank\" rel=\"noopener\">QSA adapter</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-8m-aqua-patch-cable-8-m-8-m/6067521\" target=\"_blank\" rel=\"noopener\">OM4 8 m</a> · <a href=\"https://www.cdw.com/product/axiom-lc-lc-multimode-duplex-om4-50-125-fiber-optic-cable-15m-aqua-patch-cable-15-m-15-m/5863985\" target=\"_blank\" rel=\"noopener\">OM4 15 m</a>"]},
 
  {ph:0, type:"choice", title:"Which airflow does sw01 need?", ref:["02","§4 item 3"],
   q:"sw01 is mounted with its ports at the rear, facing the room with the server exhaust. Its PSUs face the front, into the cold aisle containment. Which airflow option is right?",
@@ -413,7 +414,7 @@ const STEPS = [
   opts:[["Left: PDU-A. Right: PDU-B. Label both before any cord goes in.", true, "Now every cord label can name its PDU, for example gpu01-PSU1 / A-C3-C19."],
         ["Nothing, they're the same model", false, "Without labels nobody can tell which PDU a cord is on during a feed failure."],
         ["Guess A and B, then check with a meter later", false, "Only facilities knows which upstream panel feeds each PDU. Use their answer."]],
-  facts:["<b>Geist PDUs:</b> circuits 1, 2, 3 each. Mostly C13 (slots vertical), one C19 per circuit (slots horizontal). 208 V.","<b>Sim value:</b> 6 C13 per circuit. Count yours on the next visit (doc 09)."]},
+  facts:["<b>Geist PDUs:</b> circuits 1, 2, 3 each. Mostly C13 (slots vertical), one C19 per circuit (slots horizontal). 208 V.","<b>Sim value:</b> 6 C13 per circuit. Count yours on the next visit (site visit checklist)."]},
 
  {ph:2, type:"order", title:"Install the GPUs", ref:["05","§3 GPU install"], view:"front",
   lead:"If the GPUs come loose, install them before the server goes in the rack. Pick each action in order. Some actions are wrong.",
@@ -446,7 +447,7 @@ const STEPS = [
 
  {ph:4, type:"power", title:"Plug in every cord", ref:["05","§4 step 2–3"], view:"front",
   lead:"Pick a cord, then pick an outlet. Odd-numbered PSUs go to PDU-A, even to PDU-B. Spread the load across the three circuits.",
-  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 600 W · oob01 30 W · con01 13 W","<b>Cord route:</b> PSU at the rear, along the side channel about 29 in, then up or down to the circuit at the front. Check the length first (doc 07, F8)."]},
+  facts:["<b>Circuit plan, each PDU:</b> C1 (top) = svc03 + sw01 + oob01 or con01 · C2 = gpu01 PSU + svc02 · C3 (bottom) = gpu01 PSU + svc01","<b>C13/C14:</b> rated 10 A (15 A UL). <b>C19/C20:</b> rated 16 A (20 A UL).","<b>Max draw:</b> gpu01 3,300 W (4 PSUs) · svc 400 W each · sw01 600 W · oob01 30 W · con01 13 W","<b>Cord route:</b> PSU at the rear, along the side channel about 29 in, then up or down to the circuit at the front. Check the length first (hardware open questions, F8)."]},
 
  {ph:4, type:"choice", title:"What does one circuit carry?", ref:["01","§3"],
   q:"PDU-A circuit 3 has gpu01 PSU1 and svc01 PSU1. At max draw gpu01 splits 3,300 W over 4 PSUs and svc01 splits 400 W over 2. Then facilities loses feed B. What does A-C3 carry now?",
@@ -558,7 +559,7 @@ const R = {}, B = {};
 /* intro */
 R.intro = () => `<div class="eyebrow"><span>Briefing</span></div><h2>Build rack 1 next to ACE 15</h2>
   <p>You have room access only. Ordering is done by another group, and the lab treats this rack as production from day 1. Assume no internet.
-  Every step follows <a href="${DOC["05"]}">doc 05</a>. Wrong choices count as mistakes and tell you why.</p>
+  Every step follows <a href="${DOC["05"]}">the rack build guide</a>. Wrong choices count as mistakes and tell you why.</p>
   <div class="intro-grid">
     <div><b>Racks</b>2 × Vertiv VR3300, 42U, 600 × 1200 mm. Rack 1 now, rack 2 held for gpu02.</div>
     <div><b>Power</b>Existing Geist PDUs, left and right at the front, circuits 1–3, 208 V. About 5.1 kW at max.</div>
@@ -812,8 +813,8 @@ R.end = () => { const n = S.mistakes.length, t = elapsed();
   return `<div class="eyebrow"><span>Result</span></div><h2>Rack 1 signed off</h2>
     <p class="grade">${grade}</p><p class="mono">${n} mistake${n===1?"":"s"} · ${t}</p>
     ${S.from ? `<p class="lead">You jumped to <b>${esc(STEPS[S.from].title)}</b>, so only the steps from there on are graded.</p>` : ""}
-    ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring doc 05 on install day anyway.</p>"}
-    <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (doc 09), the cable route and the three port numbers on the lab C9500X-28C8D (doc 09).</p>
+    ${n ? `<p class="subh">What went wrong</p><ol class="misslog">${S.mistakes.map(m=>`<li><b>${esc(m.step)}:</b> ${m.text}</li>`).join("")}</ol>` : "<p>No mistakes. Bring the rack build guide on install day anyway.</p>"}
+    <p class="lead">Still open before the real install: GPU PSU inlet (quote question 1), rail kit fit at 29 in (question 4), PDU input rating and A/B feeds (site visit checklist), the cable route and the three port numbers on the lab C9500X-28C8D (site visit checklist).</p>
     <div class="row"><button class="primary" id="again">Run it again</button><a href="si-bringup-sim.html">Next: SI Bring-up Sim, from the transfer drive to hand-over</a></div>`; };
 B.end = () => { $("#again").onclick = () => { const inlet = S.inlet; S = fresh(inlet); render(); }; };
 

@@ -1,7 +1,7 @@
-# 17. First email to the ISSM (draft)
+# 17. First email to the ISSM (sent)
 
 **Track:** Cyber Security ([package index and decision register](README.md)).
-**Status:** Draft, 2026-11-14. Fill in the bracketed parts before sending. Attach the phased software list
+**Status:** Sent, with the phase 1 part of the phased software list. Record the ISSM's answers in the decision register. As drafted, it was to attach the phased software list
 ([16-phased-sbom.csv](16-phased-sbom.csv)) and the model list ([13](13-model-bom.md)).
 
 The email uses plain questions without our internal IDs. The table at the end maps each question to the

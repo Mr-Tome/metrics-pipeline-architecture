@@ -12,13 +12,13 @@ A1), so Cyber can rule on all of them. The decisions are in the [decision regist
 **Versions were checked against upstream on 2026-11-09** and match `delivery/versions.env`. The rule: the
 newest stable release, unless that line is only days old and still getting hotfixes (then the last patch of the
 previous line). The reason for each pin is written next to it in `versions.env`. The charts have not yet been
-rendered or rehearsed at these versions ([11](../software/11-sandbox-bringup-plan.md), F4), and `01-check-latest.sh` runs
+rendered or rehearsed at these versions ([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), F4), and `01-check-latest.sh` runs
 again before the real pull, so a patch version may move. Each sealed bundle carries its own exact,
 machine-generated record (section 9), and this document is reissued against it.
 
 ## 1. How software enters the lab
 
-Everything we bring arrives in **one signed release bundle** on approved transfer media ([06](../software/06-software-delivery.md)).
+Everything we bring arrives in **one signed release bundle** on approved transfer media ([Software delivery](../software/2-software-delivery.md)).
 Nothing is downloaded inside the lab, and the services are set to make no outbound calls (section 8).
 
 1. A connected build workstation (unclassified side) pulls every item from its upstream source and checks
@@ -56,7 +56,7 @@ the firmware on the hardware, and MATLAB (already in the lab).
 | OS5 | ipmitool, NVIDIA DCGM (optional) | lab mirror | BSD-3 / Apache-2.0 | all / gpu01 | Hardware checks and burn-in only |
 
 If the lab has no OS mirror, OS2 to OS4 must be added to the bundle as RPMs matched to the lab's kernel
-([11](../software/11-sandbox-bringup-plan.md), W3).
+([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), W3).
 
 ## 3. Kubernetes platform and air-gap tooling
 
@@ -196,7 +196,7 @@ Wheels only, no source builds, for Python 3.9 to 3.14 (3.15 gets the OpenAI clie
 
 The lab has no internet, but these components try to reach it by default. Each is turned off in the bundle.
 The sandbox rehearsal records every outbound attempt (tcpdump plus CoreDNS logging) and must show none
-([11](../software/11-sandbox-bringup-plan.md), C16).
+([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), C16).
 
 | Component | Default behavior | Setting in the bundle |
 |---|---|---|
@@ -251,5 +251,5 @@ Listed so the Cyber team can plan reviews. None of this is in the phase 1 bundle
 |---|---|
 | Big Bang (Platform One): Harbor, GitLab, Argo CD, Keycloak, Prometheus/Grafana | Iron Bank images; Harbor replaces the Zarf registry |
 | JupyterHub, Dagster, Evidence, metrics plugins | The metrics pipeline ([`metrics_architecture.html`](../../metrics_architecture.html)) |
-| Reranker model `ibm-granite/granite-embedding-reranker-english-r2` (M9) | Better document search ([11](../software/11-sandbox-bringup-plan.md), W20) |
+| Reranker model `ibm-granite/granite-embedding-reranker-english-r2` (M9) | Better document search ([Sandbox bring-up plan](../software/3-sandbox-bringup-plan.md), W20) |
 | Typed decision model (Cloudflare Clef) with SGLang | Deferred. Ships a Python code file that runs at load time; needs ISSM review (S9). Its Qwen base model is from China, so the USA-only rule (S22) rules it out. |

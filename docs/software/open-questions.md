@@ -1,10 +1,10 @@
-# 07. Open questions: software and Lab IT
+# Open questions: software and Lab IT
 
 **Track:** Software (SI service delivery). Questions for Lab IT. Each has an owner and a default. If the
 question is not answered, the plan proceeds with the default.
 
 L1 (server OS and accreditation baseline) is answered by the ISSM, so it is in the [Cyber Security package](../cyber/README.md) with the other security decisions. Hardware and
-site questions (F, N, V) are in [hardware/07](../hardware/07-open-questions.md).
+site questions (F, N, V) are in [Hardware open questions](../hardware/open-questions.md).
 
 ## Lab IT (L)
 
