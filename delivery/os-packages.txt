@@ -1,0 +1,22 @@
+# OS packages the nodes need that a minimal Rocky/RHEL 9 install may not have (phase 0 items OS2 to OS5 in
+# docs/cyber/16-phased-sbom.md). 35-pull-os-packages.sh downloads them with every dependency into the bundle,
+# because we assume the lab has no package mirror (L1, S11). deploy.sh os-packages installs them from the
+# bundle with every other repository turned off.
+#
+#   role  package           why
+#   all   = every node; gpu = GPU nodes only (deploy.sh os-packages --gpu)
+all  container-selinux      SELinux policy for containers (RKE2 needs it when SELinux is enforcing)
+all  rke2-selinux           RKE2's own SELinux policy (Rancher repository)
+all  rsync                  deploy.sh models copies the weights with it
+all  openssl                keys and certificates
+all  python3                deploy.sh reads gateway replies with it
+all  gnupg2                 bundle signature check (verify.sh)
+all  iperf3                 validate/net-test.sh
+all  ipmitool               validate/hw-check.sh (BMC checks)
+gpu  gcc                    NVIDIA driver build
+gpu  make                   NVIDIA driver build
+gpu  kernel-devel           NVIDIA driver build. Must match the running kernel: set OS_KERNEL at pull time.
+gpu  kernel-headers         NVIDIA driver build
+gpu  elfutils-libelf-devel  NVIDIA driver build
+gpu  dkms                   rebuilds the driver after a kernel update (EPEL)
+gpu  datacenter-gpu-manager GPU health checks and the burn-in run in validate/hw-check.sh (NVIDIA repository)

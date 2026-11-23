@@ -1,0 +1,30 @@
+# Staging add-on package. Rendered by staging/build-addon.sh. Never part of the sealed lab bundle.
+kind: ZarfPackageConfig
+metadata:
+  name: si-staging-addon
+  description: CPU stand-ins for the GPU services, for staging on VMs with no GPU
+  version: "${RELEASE_VERSION}"
+  architecture: amd64
+
+components:
+  - name: standin-llm
+    description: vLLM on CPU serving a small model under the name gpt-oss-120b
+    required: true
+    manifests:
+      - name: standin-llm
+        namespace: si
+        files:
+          - standin-llm.yaml
+    images:
+      ${IMAGES_STANDIN}
+
+  - name: whisper-cpu
+    description: speaches on CPU with the bundle's real Whisper model (si/faster-whisper-large-v3)
+    required: true
+    manifests:
+      - name: whisper-cpu
+        namespace: si
+        files:
+          - whisper-cpu.yaml
+    images:
+      ${IMAGES_WHISPER_CPU}

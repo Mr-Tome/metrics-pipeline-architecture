@@ -35,9 +35,12 @@ extra=$(comm -13 <(sed 's/^[0-9a-f]*  //' SHA256SUMS | sort) \
 [[ -z "${extra}" ]] || fail "files not in the sealed list:"$'\n'"${extra}"
 
 # Pickle-style weight files are refused (A17). The only exception is model.bin of a model listed as
-# format ct2 in MODELS.txt (CTranslate2, a flat binary), and only if it starts with the CTranslate2 header.
+# format ct2 or ct2-convert in MODELS.txt (CTranslate2, a flat binary), and only if it starts with the
+# CTranslate2 header.
 allowed=()
 while read -r name repo _rev layout format; do
+    # ct2-convert: our own conversion, stored as si/<name> (30-pull-models.sh)
+    [[ "${format:-}" == ct2-convert ]] && { allowed+=("models/hf-cache/models--si--${name}/snapshots/*/model.bin"); continue; }
     [[ "${format:-}" == ct2 ]] || continue
     if [[ "${layout}" == local ]]; then allowed+=("models/${name}/model.bin")
     else allowed+=("models/hf-cache/models--${repo/\//--}/snapshots/*/model.bin"); fi

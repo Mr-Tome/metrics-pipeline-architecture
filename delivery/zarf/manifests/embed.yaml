@@ -1,8 +1,9 @@
 # Embedding model for chat-page document upload (Text Embeddings Inference, CPU build).
 # The chat page cuts each uploaded file into pieces, this model turns each piece into a vector, and a question
-# pulls back the closest pieces. It is called through the gateway as model "arctic-embed".
+# pulls back the closest pieces. It is called through the gateway as model "doc-embed".
+# Model: IBM granite-embedding-278m-multilingual (M10, USA). 768 numbers per piece, 512-token input.
 #
-# It runs on CPU on the node that holds /var/lib/models (gpu01 in the lab, the only node in the rehearsal VM):
+# It runs on CPU on the node that holds /var/lib/models (gpu01 in the lab, the model node in staging):
 # all four GPUs are taken (three language model copies, one Whisper), and CPU lets the rehearsal test uploads.
 # Questions embed in well under a second; a 200-page PDF takes on the order of a minute to index.
 # If that is too slow, move it to a slice of the Whisper GPU (docs/11, W20).
@@ -29,12 +30,12 @@ spec:
         - name: embed
           image: ${EMBED_IMAGE}
           args:
-            - --model-id=/models/snowflake-arctic-embed-l-v2.0
-            - --served-model-name=arctic-embed
+            - --model-id=/models/granite-embedding-278m-multilingual
+            - --served-model-name=doc-embed
             - --port=8000
             # Kubernetes sets HOSTNAME to the pod name, and the server reads HOSTNAME as its listen address.
             - --hostname=0.0.0.0
-            # Over-long input is cut to the model's 8192 tokens (the server's default, --auto-truncate).
+            # Over-long input is cut to the model's 512 tokens (the server's default, --auto-truncate).
           env:
             - name: HF_HUB_OFFLINE
               value: "1"

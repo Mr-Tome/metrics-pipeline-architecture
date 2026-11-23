@@ -25,13 +25,16 @@ proxy_config:
         api_base: http://vllm.si.svc:8000/v1
     - model_name: whisper
       litellm_params:
-        model: openai/Systran/faster-whisper-large-v3
+        # Our own conversion of OpenAI's whisper-large-v3 (models.txt, M11), stored as si/faster-whisper-large-v3.
+        model: openai/si/faster-whisper-large-v3
         api_base: http://whisper.si.svc:8000/v1
       model_info:
         mode: audio_transcription
-    - model_name: arctic-embed
+    # Document-search embeddings (IBM granite-embedding-278m-multilingual, M10). The name stays generic so
+    # the chat page setting does not change when the model does.
+    - model_name: doc-embed
       litellm_params:
-        model: openai/arctic-embed
+        model: openai/doc-embed
         api_base: http://embed.si.svc:8000/v1
       model_info:
         mode: embedding

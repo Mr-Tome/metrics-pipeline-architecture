@@ -1,0 +1,27 @@
+# Build container for the release pull (build-in-container.sh). Every tool the pull scripts need, pinned in
+# versions.env, so the host only needs podman. Nothing from here goes into the bundle.
+ARG BUILD_IMAGE
+FROM ${BUILD_IMAGE}
+ARG HELM_VERSION
+ARG HF_HUB_VERSION
+
+RUN dnf -y install dnf-plugins-core \
+ && dnf config-manager --set-enabled crb \
+ && dnf -y install jq skopeo tar gzip zstd findutils diffutils which git rsync gnupg2 procps-ng \
+        python3 python3-pyyaml python3.12 python3.12-pip createrepo_c \
+ && dnf clean all
+
+# Helm, checked against the checksum Helm publishes
+RUN cd /tmp \
+ && curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" \
+ && curl -fsSLO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" \
+ && sha256sum -c "helm-${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" \
+ && tar xzf "helm-${HELM_VERSION}-linux-amd64.tar.gz" \
+ && install -m 755 linux-amd64/helm /usr/local/bin/helm \
+ && rm -rf /tmp/helm-* /tmp/linux-amd64
+
+# Hugging Face CLI (hf)
+RUN python3.12 -m pip install --no-cache-dir "huggingface_hub[cli]==${HF_HUB_VERSION}"
+
+# The repository is mounted from the host, owned by another user; let git read it (90-seal.sh records the commit).
+RUN git config --global --add safe.directory '*'

@@ -12,6 +12,8 @@ work happens in the server room.
 
 **No staging server** (decided 2026-10-30). The money it would have cost bought gpu01's third and
 fourth GPUs, so the lab starts at the 50-user size ([Budget and BOM](../hardware/1-budget-and-bom.md)).
+Since 2026-11-22 there is a **staging environment** that costs no hardware: three existing RHEL 9 VMs on our
+side, with internet. They build and rehearse each bundle as three nodes ([Staging runbook](4-staging-runbook.md)).
 
 **The lab has no internet.** All software arrives on transfer media. A connected **build workstation** on the unclassified side does the
 downloading. It runs the scripts in `delivery/`, which write one checked bundle to the transfer drive.

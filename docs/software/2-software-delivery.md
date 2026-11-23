@@ -19,7 +19,8 @@ The scripts are in [`delivery/`](../../delivery) and [`validate/`](../../validat
 | `rke2/` | RKE2 Kubernetes air-gap images, binaries, installer, and local-path storage (as image tarballs) | `10-pull-rke2.sh` |
 | `zarf/` | Zarf CLI and init package (in-cluster registry, image agent) | `15-pull-zarf.sh` |
 | `package/` | One Zarf package with every chart and image: GPU Operator, CloudNativePG + PostgreSQL, vLLM, LiteLLM, Open WebUI, Whisper, Text Embeddings Inference, Apache Tika (text extraction and OCR). Includes SBOMs and `IMAGES.txt`. | `20-build-zarf-package.sh` |
-| `models/` | gpt-oss-120b (safetensors only), faster-whisper-large-v3 (CTranslate2 `model.bin`, header-checked), snowflake-arctic-embed-l-v2.0 (document upload), the tiktoken vocabulary gpt-oss needs offline, with SHA256SUMS per model | `30-pull-models.sh` |
+| `models/` | gpt-oss-120b (safetensors only); `si/faster-whisper-large-v3`, our own CTranslate2 conversion of OpenAI's whisper-large-v3 (header-checked `model.bin`); IBM granite-embedding-278m-multilingual (document upload); the tiktoken vocabulary gpt-oss needs offline; SHA256SUMS per model. Models follow the USA-only rule read as the whole lineage (S22); `models.txt` keeps the earlier picks as comments. | `30-pull-models.sh` |
+| `os-packages/` | OS packages the nodes need (SELinux policies, rsync, the driver build tools, DCGM) with every dependency, as a local package repository, plus the four publishers' signing keys. We assume the lab has no mirror (L1, S11). | `35-pull-os-packages.sh` |
 | `scanner/` | Trivy and its vulnerability databases | `40-pull-vuln-db.sh` |
 | `scanner/reports/` | Vulnerability report for every packaged image, `SUMMARY.txt` (counts by severity), `IMAGE-DIGESTS.txt` | `45-scan-images.sh` |
 | `clients/` | **Later phase only, left out unless `WITH_CLIENTS=1`.** Python wheels (Linux and Windows, Python 3.9 to 3.15; see `clients/SUPPORT.txt`) for Jupyter AI and the OpenAI client; the Continue VS Code extension | `50-pull-client-tools.sh` |
@@ -43,6 +44,12 @@ Use a Linux x86_64 machine on the unclassified side with internet access and 500
 | cosign or gpg | signing (optional) | OS package or sigstore release |
 
 Zarf and Trivy are downloaded by the scripts.
+
+**Or skip the tool installs:** `build-in-container.sh` runs the whole pull inside a pinned Rocky 9.9 container
+(`build-container/Containerfile`), so the host needs only podman. Staging uses this
+([Staging runbook](4-staging-runbook.md)). Step 35 needs an EL9 system with `dnf`, so it only runs in the
+container or on a Rocky/RHEL 9 workstation. To pull the driver build tools for a known lab kernel, set
+`OS_KERNEL` (for example `OS_KERNEL=5.14.0-611.5.1.el9_7.x86_64`).
 
 Set credentials as environment variables. Never put them in files in this repo:
 
@@ -108,9 +115,12 @@ copy at a time, so two keep serving users.
 The rehearsal VM on the build workstation runs every step on one node, skips `driver`, and uses
 `apps --rehearsal`: one PostgreSQL instance, no Whisper, and 0 model copies, since the VM has no GPU. The embedding model runs on CPU, so document upload can be tested there.
 A single-GPU test machine, if one is added later, uses `apps --single-node` (one model copy).
+The three staging VMs (no GPU) use `apps --staging`: three PostgreSQL instances, 0 model copies, no Whisper,
+plus the separate staging add-on ([Staging runbook](4-staging-runbook.md)).
 
-What the host needs from the lab's own OS mirror (not in the bundle): gcc, make, kernel headers for the
-running kernel (to build the driver), rsync, openssl, iperf3, and optionally DCGM for burn-in.
+OS packages: run `./deploy.sh os-packages` on every node first (`--gpu` on gpu01). It installs from the
+bundle's `os-packages/` with every other repository off, so it works with no lab mirror. The driver build
+needs kernel-devel for the exact running kernel; the step stops if the bundle does not have it.
 
 ## 5. Connecting users
 

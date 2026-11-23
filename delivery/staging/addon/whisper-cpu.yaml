@@ -1,0 +1,68 @@
+# Speech-to-text on CPU for staging, with the bundle's real Whisper model (si/faster-whisper-large-v3, our
+# conversion). Same name and Service as the lab's whisper (left out of the lab package in staging), so the
+# gateway setting does not change. Proves the conversion loads and transcribes. Slow on CPU.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whisper
+  namespace: si
+  labels:
+    app: whisper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whisper
+  template:
+    metadata:
+      labels:
+        app: whisper
+    spec:
+      nodeSelector:
+        node-role.si/models: "true"
+      containers:
+        - name: whisper
+          image: ${WHISPER_CPU_IMAGE}
+          env:
+            - name: HF_HUB_CACHE
+              value: /models/hf-cache
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: DO_NOT_TRACK
+              value: "1"
+            - name: WHISPER__INFERENCE_DEVICE
+              value: cpu
+            - name: WHISPER__COMPUTE_TYPE
+              value: int8
+            - name: ENABLE_UI
+              value: "false"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "2"
+              memory: 6Gi
+            limits:
+              cpu: "4"
+              memory: 10Gi
+          volumeMounts:
+            - name: models
+              mountPath: /models
+              readOnly: true
+      volumes:
+        - name: models
+          hostPath:
+            path: /var/lib/models
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whisper
+  namespace: si
+spec:
+  selector:
+    app: whisper
+  ports:
+    - port: 8000
+      targetPort: 8000

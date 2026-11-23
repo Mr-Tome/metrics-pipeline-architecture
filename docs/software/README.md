@@ -14,6 +14,7 @@ to the one you need.
 | 1 | [Prototype plan](1-prototype-plan.md) | The approach: the lab rack is production from day 1, the build works without internet, and each release is rehearsed without a staging server | Ready |
 | 2 | [Software delivery](2-software-delivery.md) | Pull scripts, the release bundle, install, and connecting users | Ready. Versions bumped 2026-11-09, not yet rehearsed. |
 | 3 | [Sandbox bring-up plan](3-sandbox-bringup-plan.md) | Making the SI service start and work in an offline sandbox, and what must be fixed before the air gap | Draft |
+| 4 | [Staging runbook](4-staging-runbook.md) | Step-by-step for the person at the three staging VMs: build the bundle, cut off the internet, install, check, send back results | Draft, not yet run |
 | Practice | [SI bring-up sim](../../training/si-bringup-sim.html) | Continues from the rack sim: verify the bundle, build the cluster, deploy the SI service, issue keys, run the checks, connect analysts. Three random faults per run. Works offline. | Draft |
 
 ## Keep open while you work

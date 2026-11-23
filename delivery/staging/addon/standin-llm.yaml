@@ -1,0 +1,75 @@
+# Stand-in language model for staging (no GPU). The pods carry app: vllm, so the lab package's vllm Service
+# (which has 0 replicas behind it in staging) sends the gateway's requests here. Same model name as the lab,
+# so the gateway and chat page settings do not change. Answers are slow (a few words a second) and simple.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-standin
+  namespace: si
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      staging: vllm-standin
+  template:
+    metadata:
+      labels:
+        app: vllm
+        staging: vllm-standin
+    spec:
+      nodeSelector:
+        node-role.si/models: "true"
+      containers:
+        - name: vllm
+          image: ${VLLM_CPU_IMAGE}
+          args:
+            - --model=/models/staging/standin-llm
+            - --served-model-name=gpt-oss-120b
+            - --max-model-len=8192
+            - --dtype=bfloat16
+            - --port=8000
+          env:
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: VLLM_NO_USAGE_STATS
+              value: "1"
+            - name: DO_NOT_TRACK
+              value: "1"
+            # KV cache in GiB (the CPU default is 0). Threads are not pinned to cores inside the pod.
+            - name: VLLM_CPU_KVCACHE_SPACE
+              value: "4"
+            - name: VLLM_CPU_OMP_THREADS_BIND
+              value: nobind
+            - name: OMP_NUM_THREADS
+              value: "6"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "6"
+              memory: 12Gi
+            limits:
+              cpu: "8"
+              memory: 16Gi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          volumeMounts:
+            - name: models
+              mountPath: /models
+              readOnly: true
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: models
+          hostPath:
+            path: /var/lib/models
+            type: Directory
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi

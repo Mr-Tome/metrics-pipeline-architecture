@@ -2,13 +2,14 @@
 # Installs a verified release bundle in the lab (or a single-node test install). Run as root, from inside the bundle.
 # Run verify.sh first. Steps, in order (see docs/software/2-software-delivery.md):
 #
+#   On every node, first (no package mirror): ./deploy.sh os-packages        (add --gpu on gpu01)
 #   On svc01 (or the single node):          ./deploy.sh server-init
 #   On svc02 and svc03:                     ./deploy.sh server-join <svc01-ip>   (asks for the join token)
 #   On gpu01:                               ./deploy.sh agent-join <svc01-ip>    (or RKE2_TOKEN_FILE=<file>)
 #                                           ./deploy.sh driver
 #                                           ./deploy.sh models
 #   On svc01:                               ./deploy.sh platform
-#                                           ./deploy.sh apps --chat-host H [--api-host H] --tls-cert F --tls-key F [--llm-gpus N] [--single-node | --rehearsal]
+#                                           ./deploy.sh apps --chat-host H [--api-host H] --tls-cert F --tls-key F [--llm-gpus N] [--single-node | --rehearsal | --staging]
 #                                           ./deploy.sh gateway-key
 #   Any time on svc01:                      ./deploy.sh user-key <name>
 #                                           ./deploy.sh status
@@ -17,6 +18,9 @@
 # --llm-gpus sets the language model replicas (default 3: four GPUs, one for Whisper).
 # A rehearsal on the build workstation VM (no GPU) runs server-init, models, platform, apps --rehearsal:
 # like --single-node, but with 0 model replicas, so nothing waits for a GPU that isn't there.
+# Staging (three VMs, no GPU; docs/software/4-staging-runbook.md) runs the lab sequence without driver, with
+# SERVICE_NODES and MODEL_NODES set to the VM names for platform, and apps --staging: three PostgreSQL
+# instances, 0 model replicas, no GPU Whisper.
 set -euo pipefail
 
 BUNDLE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -29,6 +33,19 @@ die() { printf '[%s] ERROR: %s\n' "$(date +%H:%M:%S)" "$*" >&2; exit 1; }
 [[ ${EUID} -eq 0 ]] || die "run as root"
 
 install_rke2() {  # type (server|agent)
+    # RKE2's known issues for RHEL-family hosts: firewalld conflicts with its Canal network, NetworkManager
+    # must leave the network's interfaces alone, and nm-cloud-setup must be off.
+    if systemctl is-active --quiet firewalld && [[ "${ALLOW_FIREWALLD:-0}" != 1 ]]; then
+        die "firewalld is running. RKE2 says to turn it off (systemctl disable --now firewalld). If the lab requires it (S27), open RKE2's ports and set ALLOW_FIREWALLD=1."
+    fi
+    if systemctl is-active --quiet NetworkManager; then
+        cat > /etc/NetworkManager/conf.d/rke2-canal.conf <<'NM'
+[keyfile]
+unmanaged-devices=interface-name:flannel*;interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
+NM
+        systemctl reload NetworkManager
+    fi
+    systemctl disable --now nm-cloud-setup.service nm-cloud-setup.timer >/dev/null 2>&1 || true
     mkdir -p /var/lib/rancher/rke2/agent/images /etc/rancher/rke2
     cp "${BUNDLE}"/rke2/rke2-images.linux-${ARCH}.tar.zst "${BUNDLE}"/rke2/extra-image-*.tar \
         /var/lib/rancher/rke2/agent/images/
@@ -36,17 +53,47 @@ install_rke2() {  # type (server|agent)
         sh "${BUNDLE}/rke2/install.sh"
 }
 
+# selinux_config: RKE2 must be told when SELinux is enforcing, and then needs rke2-selinux (os-packages).
+selinux_config() {
+    if command -v getenforce >/dev/null 2>&1 && [[ "$(getenforce)" == Enforcing ]]; then
+        rpm -q rke2-selinux >/dev/null 2>&1 || die "SELinux is enforcing but rke2-selinux is not installed; run ./deploy.sh os-packages first"
+        echo "selinux: true"
+    fi
+}
+
 json_field() { python3 -c "import json,sys; print(json.load(sys.stdin)['$1'])"; }
 
 cmd="${1:-}"; shift || true
 case "${cmd}" in
+os-packages)
+    # Installs the OS packages from the bundle (35-pull-os-packages.sh) with every other repository off, so
+    # it works with no package mirror. --gpu adds the driver build tools and DCGM.
+    gpu=0; [[ "${1:-}" == --gpu ]] && gpu=1
+    repo="${BUNDLE}/os-packages"
+    [[ -f "${repo}/rpms/repodata/repomd.xml" ]] || die "no os-packages repository in the bundle"
+    for k in "${repo}"/keys/*; do rpm --import "${k}"; done
+    pkgs=$(awk -v gpu="${gpu}" '!/^#/ && NF && ($1 == "all" || (gpu && $1 == "gpu")) {print $2}' "${repo}/os-packages.txt")
+    if [[ ${gpu} -eq 1 ]]; then
+        # The driver build needs kernel-devel for the running kernel, not the newest one.
+        kver="$(uname -r)"
+        pkgs=$(sed -e "s/^kernel-devel$/kernel-devel-${kver}/" -e "s/^kernel-headers$/kernel-headers-${kver%.*}/" <<<"${pkgs}")
+        grep -q "^kernel-devel-${kver%.x86_64}" "${repo}/PACKAGES.txt" \
+            || die "the bundle has no kernel-devel for this kernel (${kver}); re-pull with OS_KERNEL=${kver}"
+    fi
+    # shellcheck disable=SC2086
+    dnf -y --disablerepo='*' --enablerepo=si-bundle \
+        --repofrompath="si-bundle,file://${repo}/rpms" --setopt=si-bundle.gpgcheck=1 install ${pkgs}
+    log "OS packages installed from the bundle"
+    ;;
 server-init)
+    sel=$(selinux_config) || exit 1
     install_rke2 server
     cat > /etc/rancher/rke2/config.yaml <<EOF
 tls-san:
   - $(hostname -f)
 write-kubeconfig-mode: "0600"
 ingress-controller: traefik
+${sel}
 EOF
     systemctl enable --now rke2-server
     log "RKE2 server up. Join token for the other nodes (also in /var/lib/rancher/rke2/server/node-token):"
@@ -68,6 +115,7 @@ server-join|agent-join)
         unset token
     fi
     type=server; [[ "${cmd}" == agent-join ]] && type=agent
+    sel=$(selinux_config) || exit 1
     install_rke2 "${type}"
     cat > /etc/rancher/rke2/config.yaml <<EOF
 server: https://${first}:9345
@@ -75,6 +123,7 @@ token-file: ${tokfile}
 EOF
     # Servers must agree on the ingress controller (Traefik is also the v1.37 default; this makes it explicit).
     [[ "${type}" == server ]] && echo "ingress-controller: traefik" >> /etc/rancher/rke2/config.yaml
+    [[ -n "${sel}" ]] && echo "${sel}" >> /etc/rancher/rke2/config.yaml
     systemctl enable --now "rke2-${type}"
     log "joined ${first} as ${type}"
     ;;
@@ -119,11 +168,15 @@ platform)
             kubectl label "node/${n}" node-role.si/models=true --overwrite
         done
     fi
+    for role in service models; do
+        [[ -n "$(kubectl get nodes -l "node-role.si/${role}=true" -o name)" ]] \
+            || die "no node labeled node-role.si/${role}; set SERVICE_NODES and MODEL_NODES to node names (kubectl get nodes)"
+    done
     log "zarf init (in-cluster registry and image agent)"
     ( cd "${BUNDLE}/zarf" && ./zarf init --confirm )
     ;;
 apps)
-    chat="" api="" cert="" key="" single=0 rehearse=0 llm=3
+    chat="" api="" cert="" key="" single=0 rehearse=0 staging=0 llm=3
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --chat-host) chat="$2"; shift 2 ;;
@@ -133,6 +186,7 @@ apps)
             --llm-gpus)  llm="$2";  shift 2 ;;
             --single-node) single=1; shift ;;
             --rehearsal) rehearse=1; shift ;;
+            --staging)   staging=1;  shift ;;
             *) die "unknown option $1" ;;
         esac
     done
@@ -148,6 +202,7 @@ apps)
     pg=3 components="transcription"
     if [[ ${single} -eq 1 ]]; then pg=1 llm=1 components=""; fi  # one GPU: no room for whisper
     if [[ ${rehearse} -eq 1 ]]; then pg=1 llm=0 components=""; fi  # no GPU: images load, nothing waits for one
+    if [[ ${staging} -eq 1 ]]; then pg=3 llm=0 components=""; fi   # three VMs, no GPU: real database failover
     ( cd "${BUNDLE}/zarf" && ./zarf package deploy "${pkg}" --confirm \
         --set CHAT_HOST="${chat}" --set API_HOST="${api}" --set API_INGRESS="${api_on}" --set PG_INSTANCES="${pg}" --set VLLM_REPLICAS="${llm}" \
         ${components:+--components="${components}"} )

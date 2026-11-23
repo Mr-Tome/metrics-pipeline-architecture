@@ -1,0 +1,13 @@
+# Tools for converting OpenAI's Whisper weights to faster-whisper's CTranslate2 format (models.txt, format
+# ct2-convert). Build side only; nothing here goes into the bundle.
+#
+# ctranslate2 is held at 4.5.0 because that is the version inside speaches 0.8.3 (its uv.lock), so the
+# converted model.bin is written by the same code that will read it. transformers and torch are the versions
+# that were current with it (October and November 2024). The source weights are safetensors only
+# (30-pull-models.sh leaves the pickle copies out), so the converter never loads a pickle file.
+--extra-index-url https://download.pytorch.org/whl/cpu
+ctranslate2==4.5.0
+transformers==4.46.3
+torch==2.5.1+cpu
+# numpy 1.x: works with all three of the above, which were built before numpy 2 was common.
+numpy==1.26.4

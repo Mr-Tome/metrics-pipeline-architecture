@@ -59,6 +59,11 @@ These would fail in the sandbox, or worse, pass the sandbox and fail in the lab.
 
 ## 2. Build the sandbox
 
+**Staging (2026-11-22).** The program now has three RHEL 9 VMs with internet access for this. They replace
+the single rehearsal VM: one builds the bundle inside a container, then all three are cut off from the
+internet and installed as svc01 to svc03 would be. Step by step: [Staging runbook](4-staging-runbook.md). The
+table below is the original single-VM design; its network, DNS, and certificate ideas carry over.
+
 The host must be the **x86_64** build workstation. The Zarf, Trivy, and RKE2 downloads are amd64. Rebuild the
 VMs from a script (kickstart or cloud-init) for every release so nothing carries over.
 
@@ -181,7 +186,7 @@ dataset, see the metric on the page" test.
 |---|---|---|---|
 | W1 | **The GPU path is first exercised in the lab.** The prototype plan accepts this, but it is now the largest single risk: a new GPU generation, a new driver branch, and a quantized model format, all untested together. | Before transfer | Decide now, not after a failure: (a) a single-GPU Blackwell test machine from the ~$48k left ([Prototype plan](1-prototype-plan.md), section 4), or (b) ask Thinkmate to run our vLLM image and model during factory burn-in. At minimum, find published evidence of the exact vLLM + driver + gpt-oss combination working on RTX PRO 6000. |
 | W2 | F1 to F8 above | Before transfer | Section 1 |
-| W3 | **OS packages come from a lab mirror that may not exist** ([security decisions](../cyber/README.md) L1 is open). The driver needs gcc, make, and kernel headers for the exact running kernel. SELinux needs `rke2-selinux` and `container-selinux`. Also rsync and openssl. | Before transfer | If there is no mirror, add these RPMs to the bundle, matched to the lab's kernel, and test them in the sandbox. Secure Boot (S4) adds module signing. |
+| W3 | **OS packages come from a lab mirror that may not exist** ([security decisions](../cyber/README.md) L1 is open). The driver needs gcc, make, and kernel headers for the exact running kernel. SELinux needs `rke2-selinux` and `container-selinux`. Also rsync and openssl. | Before transfer | If there is no mirror, add these RPMs to the bundle, matched to the lab's kernel, and test them in the sandbox. Secure Boot (S4) adds module signing. **2026-11-22:** done for the no-mirror case: `35-pull-os-packages.sh` and `deploy.sh os-packages`. The lab's kernel is still unknown (`OS_KERNEL`). |
 | W4 | **The sandbox OS must match the lab's hardening.** Otherwise the sandbox passes and the lab fails. | Before transfer | Section 2. If L1 is still open, rehearse with the strictest likely baseline (RHEL 9 STIG). |
 
 ### Security shortcuts
