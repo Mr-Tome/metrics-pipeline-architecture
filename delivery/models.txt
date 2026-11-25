@@ -14,7 +14,8 @@
 #   M2 Systran/faster-whisper-large-v3 (converted in France)        -> M11, our own conversion of OpenAI's weights
 #   M3 Snowflake/snowflake-arctic-embed-l-v2.0 (BAAI base, China)   -> M10, IBM granite-embedding (USA)
 # The earlier lines are kept here, commented out, in case the ISSM reads the rule as publisher only.
-gpt-oss-120b                          openai/gpt-oss-120b                             main                                      local  safetensors
+# M1. Commit b5c939de is the one listed for the ISSM (main on 2026-11-24).
+gpt-oss-120b                          openai/gpt-oss-120b                             b5c939de8f754692c1647ca79fbf85e8c1e70f8a  local  safetensors
 # M11. Commit 06f233fe is the one listed for the ISSM (M6).
 faster-whisper-large-v3               openai/whisper-large-v3                         06f233fe06e710322aca913c1bc4249a0d71fce1  cache  ct2-convert
 # M10. Embedding model for chat-page document upload. Apache 2.0, 278M parameters, 768 numbers per piece,

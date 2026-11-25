@@ -88,7 +88,7 @@ pickle-format copies. Which files are in the image will be confirmed from the im
 **Standard or slim image (decision S13, still open on our side).** Open WebUI publishes both, built from the same
 code. The difference is what is inside.
 
-| | Standard image (A3) | Slim image (A3s) |
+| | Standard image (A3) | Slim image (A3.1) |
 |---|---|---|
 | Built-in models E1 to E3 | Included, unused | Left out |
 | Libraries to run models inside the chat page (PyTorch, transformers, sentence-transformers, faster-whisper, ONNX runtime) | Included, unused: our models run on vLLM and Text Embeddings Inference | Left out |

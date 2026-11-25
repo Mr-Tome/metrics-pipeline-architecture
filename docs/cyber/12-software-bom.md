@@ -6,7 +6,7 @@
 software it depends on and the firmware that ships on the hardware.
 **Flat list:** [12-software-bom.csv](12-software-bom.csv), one row per component with the IDs used below.
 
-**This list includes the alternatives we are still choosing between** (A3s, and the vLLM speech option in
+**This list includes the alternatives we are still choosing between** (A3.1, and the vLLM speech option in
 A1), so Cyber can rule on all of them. The decisions are in the [decision register](README.md).
 
 **Versions were checked against upstream on 2026-11-09** and match `delivery/versions.env`. The rule: the
@@ -107,7 +107,7 @@ dcgm-exporter, operator-validator, and mig-manager. `package/IMAGES.txt` in the 
 | A1 | vLLM, model server | v0.32.0 (CUDA 13.0) | docker.io/vllm/vllm-openai | Apache-2.0; image includes the CUDA runtime (NVIDIA CUDA EULA) and PyTorch (BSD-3) | gpu01 |
 | A2 | LiteLLM, gateway (keys, logging, usage limits) | image v1.108.4-lts, chart 1.89.2 | ghcr.io/berriai/litellm | MIT core. The image also carries an `enterprise/` folder under BerriAI's commercial license; we don't enable it. | service nodes |
 | A3 | Open WebUI, chat page, standard image | image v0.12.5, chart 17.5.0 | ghcr.io/open-webui/open-webui | Open WebUI License (BSD-3 based, with a clause that keeps its branding) | service nodes |
-| A3s | **Alternative to A3:** Open WebUI `slim` image | v0.12.5-slim, same chart | ghcr.io/open-webui/open-webui | Same as A3 | service nodes |
+| A3.1 | **Alternative to A3:** Open WebUI `slim` image | v0.12.5-slim, same chart | ghcr.io/open-webui/open-webui | Same as A3 | service nodes |
 | A4 | speaches (faster-whisper server), speech-to-text. **Alternatives (S12):** a maintained server such as whisper-asr-webservice, our own small faster-whisper server, or vLLM (A1) serving Whisper. | 0.8.3-cuda | ghcr.io/speaches-ai/speaches | MIT | gpu01 |
 | A5 | Text Embeddings Inference, CPU | cpu-1.9.4 | ghcr.io/huggingface/text-embeddings-inference | Apache-2.0 | gpu01 (CPU) |
 | A6 | Apache Tika server, full image with Tesseract OCR | 3.3.3.0-full | docker.io/apache/tika | Apache-2.0 | service nodes |
@@ -119,7 +119,7 @@ release). Open WebUI 0.13.0 came out on 2026-11-03 and had three hotfix releases
 0.12.5, the last patch of 0.12. LiteLLM is on its LTS line. Its published Helm chart stops at 1.89.2, and that
 chart still takes every setting we use. Tika 3.3.3.0 is the newest 3.x; 4.2.0 is the current major (section 10).
 
-A3 or A3s is our open choice (S13). The standard image carries three small models we don't use
+A3 or A3.1 is our open choice (S13). The standard image carries three small models we don't use
 ([13](13-model-bom.md), section 2) and the libraries to run them locally. The `slim` image leaves those out, but
 it also has no built-in vector store, so the chat page's document vectors would move to PostgreSQL (A8). The Open WebUI chart also deploys a Redis 7.4 by default. **It is turned off.** One chat-page replica doesn't
 need it, and Redis 7.4 is under RSALv2/SSPLv1, which are not open-source licenses.
@@ -234,7 +234,7 @@ All decisions are in one place: the [decision register](README.md). Those raised
 | S10 | Bundle signing: cosign or GPG, key custody |
 | S4, L1, S11 | Secure Boot, OS and hardening baseline, OS packages for the driver build (dkms is in EPEL) |
 | S12 | Speech-to-text: speaches (A4) or vLLM (A1) |
-| S13 | Chat page image: standard (A3) or slim (A3s) |
+| S13 | Chat page image: standard (A3) or slim (A3.1) |
 | S14 | Licenses to note |
 | S15 | `rke2-security-responder` outbound reporting |
 | S16 | Known security shortcuts (W8 to W11) |

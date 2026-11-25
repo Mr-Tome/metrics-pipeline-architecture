@@ -547,10 +547,10 @@ cv.append(izone(958, 156, 240, 352, "gpu01", "si", "si-f"))
 cv.append(dnode("u_browser", 30, 120, 196, "User's browser", "User's workstation", "path", [
     ["What it is", "The user's normal lab browser. Nothing new is installed on the desk."],
     ["How it connects", "Over the lab network to https://chat.<lab-domain>. This is the only address that the cluster exposes for the chat feature."]]))
-cv.append(dnode("l_net", 30, 258, 196, "Lab network", "1G desks, 10G core uplink", "path", [
+cv.append(dnode("l_net", 30, 258, 196, "Lab network", " ", "path", [
     ["What it is", "The lab's existing network between general users' machines and the lab core."],
     ["Load", "IDT's iDSO team has 200 users chatting and using SI agents, and uses about 10% of a 10G uplink at nominal peak load."]]))
-cv.append(dnode("l_core", 30, 460, 196, "C9500X-28C8D", "Lab core, 3 ports for us", "path mgmt", [
+cv.append(dnode("l_core", 30, 460, 196, "C9500X-28C8D", "Lab core (3 ports for us)", "path mgmt", [
     ["What it is", "The lab's core switch above rows 2 and 3 of 3221A, running IOS XE 17.15.06 (per Mr. Watkins)."],
     ["Decided", "Three ports between the lab core and the metrics analysis pipeline cluster: 2 x 100G data to sw01 and 1 x 10G management to oob01 (Mr. Watkins)."]], h=64))
 cv.append(flow("M128,170 V258", marker="ca"))
@@ -564,11 +564,11 @@ cv.append(dnode("l_dns", 242, 120, 196, "DNS name", "chat.<lab-domain>", "lab as
     ["What it is", "The address users type in their browser to reach the chat page. The chat page's certificate must be issued for this address."],
     ["Questions", "What is the chat name, and which addresses does it point to? Which DNS servers should our servers use?"],
     ["Our default", "One name pointing at the three service nodes (svc01-03), so the chat page stays up if one node is down. Confirm in the rehearsal that the ingress answers on each node's address."]], dash="6 4"))
-cv.append(dnode("l_ip", 242, 182, 196, "Addresses and VLANs", "Servers /27, BMCs /28", "lab ask", [
+cv.append(dnode("l_ip", 242, 182, 196, "Addresses and VLANs", "Servers /27, BMCs /28 (Proposed)", "lab ask", [
     ["What it is", "The data addresses for the four servers (svc01-03 and gpu01), and separate management addresses for the BMCs, oob01, and sw01."],
     ["Why it matters", "RKE2 will not start without a default route on each node."],
     ["Questions", "Guidance on the server and BMC subnets, their default gateways, and the VLAN IDs. The VLANs are not decided yet."]], dash="6 4"))
-cv.append(dnode("l_ntp", 242, 244, 196, "Time (NTP)", "Same clock on every node", "lab ask", [
+cv.append(dnode("l_ntp", 242, 244, 196, "Time (NTP)", "Tick-Tock", "lab ask", [
     ["What it is", "The lab's time servers."],
     ["Why it matters", "The cluster database (etcd) and the certificates fail when the servers' clocks drift apart."],
     ["Question", "What are the NTP server addresses?"]], dash="6 4"))
@@ -620,9 +620,9 @@ cv.append(dnode("fd", 706, 188, 226, "Ingress (Traefik)", "HTTPS 443 for the SI-
     ["Certificate", "Comes from the lab CA and is loaded at install."]]))
 cv.append(dnode("chat", 706, 252, 226, "Chat page (Open WebUI)", "Sign-in, chats, and uploads", "path", [
     ["What it is", "The web page general users open for SI-Chat and document uploads."],
-    ["Sign-in", "Local accounts that the admin team creates to start. This is more to maintain because admins need to create, reset, update passwords for, and remove every account by hand. It can be tracked as a POAM item until Keycloak is in place."],
+    ["Sign-in", "To start, admins would create Local accounts. I know this is more to maintain in the short-term, but I'm hoping that it can be tracked as a POAM item until Keycloak is in place."],
     ["Single sign-on", "In future phases, we'd like to use Keycloak to connect to the lab's existing login."],
-    ["Where it runs", "Kubernetes picks the node. Chats and uploads are stored on the chat page's own volume."]]))
+    ["Where it runs", "Kubernetes picks the node and the chats and uploads are stored within the chat-pages own volume."]]))
 cv.append(dnode("gw", 706, 316, 226, "Gateway (LiteLLM)", "Inside the cluster only", "path", [
     ["What it is", "Every model request from the chat page goes through this gateway and is logged with the user."],
     ["Control", "LiteLLM has no address outside the cluster in the chat feature."]]))
@@ -665,6 +665,110 @@ for i, (k, ti, su, ask) in enumerate(QS):
 cv.append("</svg>")
 dchat_svg = "\n".join(cv)
 
+# ---------- 3d. Deployment view: analyst tools (phase 2, goes in metrics_architecture.html) ----------
+DASH = '<path d="{}" fill="none" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/>'
+tv = ['<svg id="dtools" viewBox="0 0 1240 732" role="img" aria-label="Deployment view, analyst tools: analysts reach the same SI service from their own tools through a second address">', defs("tva", "tvx")]
+tv.append(dfilt("path", 16, 296, "Analyst's request path", "Tool to the model and back"))
+tv.append(dfilt("key", 320, 296, "Keys and logging", "Who is asking, and the record"))
+tv.append(dfilt("new", 624, 296, "New in this phase", "Everything else is the chat feature"))
+tv.append(dfilt("ask", 928, 296, "Decisions for the ISSM", "Needed before this bundle is built"))
+tv.append(izone(16, 84, 436, 540, "Lab (existing)", "in", None, "9 6"))
+tv.append(izone(464, 84, 760, 540, "Our rack (3221A, next to ACE 15)", "pf", "pf-f"))
+tv.append(izone(680, 124, 530, 396, "Cluster (RKE2)", "k8", "k8-f"))
+tv.append(izone(694, 156, 250, 352, "svc01-03", "k8", None, "6 4"))
+tv.append(izone(958, 156, 240, 352, "gpu01", "si", "si-f"))
+tv.append(izone(24, 118, 212, 260, "Analyst workstations", "wb", "wb-f"))
+# analyst side
+tv.append(dnode("t_jup", 34, 150, 192, "Jupyter", "Jupyter AI chat and %%ai", "path new", [
+    ["What it is", "Jupyter AI adds an SI chat sidebar to JupyterLab 4, and a %%ai cell command that works in any notebook."],
+    ["Setup", "Installed from the bundle's clients/ folder with pip, with no internet. Anaconda users install into their own environment so their existing packages are not replaced."],
+    ["Settings", "Base URL https://api.<lab-domain>/v1, model gpt-oss-120b, and the analyst's own key."]], h=48))
+tv.append(dnode("t_vsc", 34, 206, 192, "VS Code", "Continue extension", "path new", [
+    ["What it is", "The Continue extension gives VS Code an SI chat panel and code help."],
+    ["Setup", "Installed from the .vsix file in the bundle's clients/ folder. Telemetry is turned off in its settings."]], h=48))
+tv.append(dnode("t_mat", 34, 262, 192, "MATLAB", "webwrite, no toolbox", "path new", [
+    ["What it is", "MATLAB calls SI with webwrite, which MATLAB already has. Nothing is installed."],
+    ["Lab IT", "MATLAB may make HTTPS calls to an internal service (L4)."],
+    ["Example", "In the software delivery doc, section 5."]], h=48))
+tv.append(dnode("t_py", 34, 318, 192, "Python scripts", "OpenAI client library", "path new", [
+    ["What it is", "Any Python script can call SI with the openai package, pointed at the lab address instead of the internet."],
+    ["Python versions", "Packages in the bundle cover Python 3.9 to 3.15 on Windows and Linux (L3)."]], h=48))
+tv.append(flow("M128,378 V396", marker="tva"))
+tv.append(dnode("t_net", 30, 396, 196, "Lab network", "Same links as the chat page", "path", [
+    ["What it is", "The lab's existing network. Requests from the tools use the same desk ports and uplink as the chat page."]]))
+tv.append(flow("M128,446 V460", marker="tva"))
+tv.append(dnode("t_core", 30, 460, 196, "C9500X-28C8D", "Lab core (3 ports for us)", "path", [
+    ["What it is", "The lab's core switch. No new ports or links for this phase."]], h=64))
+tv.append(dnode("t_dns", 242, 132, 196, "DNS name", "api.<lab-domain>", "ask new", [
+    ["What it is", "A second name for the tools to use. It points at the same three service nodes as the chat name."],
+    ["Question", "What should the name be?"]], dash="6 4"))
+tv.append(dnode("t_ca", 242, 194, 196, "Lab CA", "Signs the API certificate", "new", [
+    ["What it is", "The same lab CA as the chat feature, signing one more certificate for the API name."]], dash="6 4"))
+tv.append(dnode("t_pcs", 242, 256, 196, "Software on analyst PCs", "Who installs it, and how", "ask new", [
+    ["What it is", "The Python packages and the VS Code extension go on analysts' own machines. That is the first time this project puts anything on a desk."],
+    ["Size", "100 or more Python packages per platform, plus one extension."],
+    ["Scanning", "Container images are scanned today. The packages and extension would be scanned before transfer too (R4)."],
+    ["Question", "Who installs them: the analysts, or Lab IT?"]], dash="6 4"))
+tv.append(dnode("t_key", 242, 318, 196, "Personal key", "One per analyst", "key ask new", [
+    ["What it is", "Each analyst gets their own key (KC7), made by an admin with deploy.sh user-key. The tool sends it with every request."],
+    ["Where it lives", "In an environment variable or the tool's secret setting, never in a notebook or script that gets shared (R28)."],
+    ["If it leaks", "An admin revokes it and the next request is refused. Every request made with it is in the gateway's log."]], dash="6 4"))
+tv.append(DASH.format("M242,281 H236"))
+tv.append(DASH.format("M242,343 H236"))
+tv.append(flow("M226,479 H480", marker="tva"))
+tv.append(label(350, 471, "same 2 x 100G links", "middle"))
+tv.append(label(30, 600, "Dashed boxes are assumed to exist or are still open."))
+# rack
+tv.append(dnode("t_clients", 480, 150, 180, "clients/ folder", "In the signed bundle", "new", [
+    ["What it is", "The Python packages (wheels) and the VS Code extension, pulled on the build workstation and carried in the same signed bundle as everything else."],
+    ["Today", "Left out of the phase 1 bundle. It is added only when this phase is approved (WITH_CLIENTS=1)."]]))
+tv.append(DASH.format("M480,175 H458 V281 H438"))
+tv.append(label(470, 236, "carried to"))
+tv.append(label(470, 252, "analyst PCs"))
+tv.append(dnode("t_sw", 480, 454, 180, "sw01 data switch", "No change", "path", [
+    ["What it is", "Our rack's data switch. The tools' requests come in on the same bonded links as the chat page."]]))
+tv.append(flow("M570,454 V213 H706", marker="tva"))
+# cluster
+tv.append(dnode("t_fd", 706, 188, 226, "Ingress (Traefik)", "chat and api addresses, HTTPS 443", "path new", [
+    ["What it is", "The same ingress controller. It answers a second name, api.<lab-domain>, for the tools."],
+    ["Control", "Only the model paths are open on the API address. The gateway's admin page and admin API stay blocked (R19)."],
+    ["How", "deploy.sh apps --api-host. The phase 1 install leaves it out, so there is no API address today."]]))
+tv.append(dnode("t_gw", 706, 252, 226, "Gateway (LiteLLM)", "Checks the key, logs the request", "path key new", [
+    ["What it is", "The same gateway the chat page uses. Every request from a tool must carry a personal key."],
+    ["Control", "Each key can have its own limits and can be revoked at any time. The model has no other way in."]]))
+tv.append(dnode("t_db", 706, 316, 226, "Database (PostgreSQL)", "Every request, by key", "key", [
+    ["What it is", "The same PostgreSQL. The gateway records each request against the analyst's key, so every call can be traced to a person."]]))
+tv.append(dnode("t_chat", 706, 380, 226, "Chat page (Open WebUI)", "No change", "", [
+    ["What it is", "The chat feature keeps working as before. Analysts can use either one."]], dash="6 4"))
+tv.append(flow("M819,238 V252", marker="tva"))
+tv.append(flow("M819,302 V316", marker="tva"))
+tv.append(dnode("t_llm", 970, 188, 216, "Language model (vLLM)", "Same gpt-oss-120b copies", "path", [
+    ["What it is", "The same three copies of gpt-oss-120b serve the chat page and the tools."],
+    ["Load", "Tools can send longer and more frequent requests than people typing. The per-key limits keep one script from slowing everyone else down."]]))
+tv.append(dnode("t_stt", 970, 252, 216, "Speech-to-text", "Same Whisper", "", [
+    ["What it is", "Tools can send audio files through the same gateway address."]]))
+tv.append(dnode("t_emb", 970, 316, 216, "Embeddings", "Same model", "", [
+    ["What it is", "Tools can use the same embedding model for their own document search."]]))
+tv.append(flow("M932,277 H950 V213 H970", marker="tva"))
+tv.append(flow("M950,277 H970", marker="tva"))
+tv.append(flow("M950,277 V341 H970", marker="tva"))
+tv.append(label(972, 400, "4 x RTX PRO 6000"))
+tv.append(label(972, 416, "No new hardware"))
+# decisions for the ISSM
+tv.append(label(16, 652, "These need ISSM decisions before the analyst tools bundle is built."))
+TQS = [("tq1", "Open the API address", "api.<lab-domain>, model paths only",
+        "May we open a second address to the lab network, with only the model paths reachable and the gateway's admin paths blocked (R19)?"),
+       ("tq2", "Software on analyst PCs", "Python packages and one extension",
+        "May analysts install the Python packages and the VS Code extension from the bundle, after they are scanned (R4)? Who installs them?"),
+       ("tq3", "Keys on workstations", "One personal key per analyst",
+        "Is a personal key kept in an environment variable acceptable (R28), or must analyst access wait for single sign-on?"),
+       ("tq4", "Who gets access", "Which analysts, approved by whom",
+        "Which analysts or groups get a key, who approves each one, and how often are keys reviewed?")]
+for i, (k, ti, su, ask) in enumerate(TQS):
+    tv.append(dnode(k, 16 + i * 304, 664, 296, ti, su, "ask", [["Questions" if ask.count("?") != 1 else "Question", ask]], h=52, sev="high"))
+tv.append("</svg>")
+dtools_svg = "\n".join(tv)
+
 
 # ---------- 4. Shared CSS ----------
 VIEWS = ["phs", "sec", "del", "keys", "rev"]
@@ -694,7 +798,9 @@ css = """<!-- GEN:CSS START -->
 body:has(#m-deploy:checked) .dmodes { display: inline-flex; }
 html[data-deployment="off"] .dmodes { display: none !important; }
 body:has(#m-deploy:checked) #topo, body:has(#m-deploy:checked) label.toggle { display: none !important; }
-html:not([data-deployment="off"]) body:has(#m-deploy:checked) #dchat { display: block; }
+#dtools { display: none; }
+html:not([data-deployment="off"]) body:has(#m-deploy:checked):has(#d-chat:checked) #dchat { display: block; }
+html:not([data-deployment="off"]) body:has(#m-deploy:checked):has(#d-tools:checked) #dtools { display: block; }
 .dmodes label.todo { text-decoration: line-through; opacity: 0.55; pointer-events: none; cursor: not-allowed; }
 .dmodes label.todo::after { content: " (TODO)"; text-decoration: none; display: inline-block; margin-left: 4px; font-size: 0.8em; }
 </style>
@@ -703,46 +809,54 @@ t = t.replace("</head>", css + "</head>", 1)
 
 dswitch = ('<!-- GEN:DSWITCH START --><div class="modes dmodes" role="radiogroup" aria-label="Deployment view">'
            '<input type="radio" name="dview" id="d-chat" checked><label for="d-chat">Chat feature (Proposed)</label>'
+           '<input type="radio" name="dview" id="d-tools"><label for="d-tools">Analyst tools (Proposed)</label>'
            + "".join(f'<input type="radio" name="dview" id="d-{k}" disabled><label for="d-{k}" class="todo">{n}</label>'
-                     for k, n in [("tools", "Analyst tools"), ("plat", "Platform services"), ("pipe", "Metrics pipeline")]) +
+                     for k, n in [("plat", "Platform services"), ("pipe", "Metrics pipeline")]) +
            '</div><!-- GEN:DSWITCH END -->')
 anchor = '<div class="diagram"><svg id="svg"'
 assert anchor in t
 t = t.replace(anchor, dswitch + anchor, 1)
 
 topo_end = t.index("</svg>", t.index("<svg id=\"topo\""))
-t = t[:topo_end + len("</svg>")] + "<!-- GEN:SVG START -->\n" + dchat_svg + "\n<!-- GEN:SVG END -->" + t[topo_end + len("</svg>"):]
+t = t[:topo_end + len("</svg>")] + "<!-- GEN:SVG START -->\n" + dchat_svg + "\n" + dtools_svg + "\n<!-- GEN:SVG END -->" + t[topo_end + len("</svg>"):]
 
 main_js = """<!-- GEN:JS START -->
 <script>
 (() => {
 const INFO = %s;
 const panel = document.getElementById("panel");
-const svg = document.getElementById("dchat");
 const e = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
-const OVER = `<h2>Deployment: chat feature (Proposed)</h2><p class="kind">Proposed connection between our rack and the existing lab infrastructure</p>
+const OVER = {dchat: `<h2>Deployment: chat feature (Proposed)</h2><p class="kind">Proposed connection between our rack and the existing lab infrastructure</p>
   <p>Users reach the chat page from their browser. The traffic goes through the lab network and the lab core identified by Mr. Watkins, then into sw01 and the cluster. The chat page is intended to be the only thing users can reach.</p>
   <p>Management has its own link through oob01, the small out-of-band management switch in our rack, so the BMCs can still be reached if the data side goes down. Mr. Watkins asked us to keep the data and management links separate. In this setup, admin work is done at the rack console on svc01.</p>
-  <p>The amber boxes at the bottom are items to work through with the RF Network and Admin teams, so our setup fits their existing schemes. Dashed boxes are assumed to exist.</p>
-  <p>Use the buttons at the top to highlight a path or a group of boxes. Select any box for details.</p>`;
-function select(g) { svg.querySelectorAll(".tnode.sel").forEach(x => x.classList.remove("sel")); if (g) g.classList.add("sel"); }
-function focus(p) { svg.querySelectorAll(".vi").forEach(x => x.classList.toggle("sdim", !!p && !(x.dataset.p || "").split(" ").includes(p))); }
+  <p>The amber boxes at the bottom are items to work through with the RF Network and Admin teams, so our setup fits their existing schemes. Dashed boxes are assumed to exist.</p>`,
+  dtools: `<h2>Deployment: analyst tools (Proposed)</h2><p class="kind">Phase 2: the same SI service, reached from analysts' own tools</p>
+  <p>Analysts call SI from Jupyter, VS Code, MATLAB, and Python scripts. Each request goes over the lab network to a second address, api.&lt;lab-domain&gt;, and into the same gateway the chat page uses. The model, the GPUs, and the rack do not change.</p>
+  <p>Each analyst gets a personal key. The gateway checks it on every request, logs the request against it, and an admin can revoke it at any time.</p>
+  <p>The tools come in the same signed bundle, in a clients/ folder. The amber boxes at the bottom are the decisions the ISSM needs to make before this phase. Dashed boxes are assumed to exist or are still open.</p>`};
+const SVGS = ["dchat", "dtools"].map(id => document.getElementById(id));
+const current = () => document.getElementById("d-tools").checked ? "dtools" : "dchat";
+function select(svg, g) { svg.querySelectorAll(".tnode.sel").forEach(x => x.classList.remove("sel")); if (g) g.classList.add("sel"); }
+function focus(svg, p) { svg.querySelectorAll(".vi").forEach(x => x.classList.toggle("sdim", !!p && !(x.dataset.p || "").split(" ").includes(p))); }
 function bind(g, go) {
   g.addEventListener("click", ev => { ev.stopPropagation(); go(); });
   g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
 }
-svg.querySelectorAll(".tnode[data-did]").forEach(g => bind(g, () => {
-  focus(null); select(g); const d = INFO[g.dataset.did];
-  panel.innerHTML = `<h2>${e(d.title)}</h2><dl class="facts">${d.rows.map(([a, b]) => `<dt>${e(a)}</dt><dd>${e(b)}</dd>`).join("")}</dl>`;
-}));
-svg.querySelectorAll(".filt").forEach(g => bind(g, () => {
-  const on = !g.classList.contains("sel"); select(on ? g : null); focus(on ? g.dataset.df : null);
-  panel.innerHTML = OVER;
-}));
+SVGS.forEach(svg => {
+  svg.querySelectorAll(".tnode[data-did]").forEach(g => bind(g, () => {
+    focus(svg, null); select(svg, g); const d = INFO[g.dataset.did];
+    panel.innerHTML = `<h2>${e(d.title)}</h2><dl class="facts">${d.rows.map(([a, b]) => `<dt>${e(a)}</dt><dd>${e(b)}</dd>`).join("")}</dl>`;
+  }));
+  svg.querySelectorAll(".filt").forEach(g => bind(g, () => {
+    const on = !g.classList.contains("sel"); select(svg, on ? g : null); focus(svg, on ? g.dataset.df : null);
+    panel.innerHTML = OVER[svg.id];
+  }));
+});
 function sync() {
   if (!document.getElementById("m-deploy").checked) return;
-  focus(null); select(null); panel.innerHTML = OVER;
+  SVGS.forEach(svg => { focus(svg, null); select(svg, null); }); panel.innerHTML = OVER[current()];
 }
+document.querySelectorAll('input[name="dview"]').forEach(r => r.addEventListener("change", sync));
 document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", sync));
 })();
 </script>

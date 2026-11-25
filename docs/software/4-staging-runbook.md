@@ -274,6 +274,7 @@ pull a new bundle, first turn the block off on VM1 (`egress-block.sh off`), then
 
 Staging runs the lab's install steps, but these things are different on purpose. Each is a staging-only
 choice, not a change to the lab plan. If a result depends on one of them, say so when you send it back.
+Every artifact the scripts fetch, and which of them never leave staging: [Staging artifact list](5-staging-artifacts.md).
 
 | | Staging (these VMs) | Lab (production) |
 |---|---|---|
